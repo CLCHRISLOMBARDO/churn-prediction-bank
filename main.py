@@ -17,7 +17,6 @@ from src.optimizacion_rf import optim_hiperp_binaria
 from src.random_forests import  entrenamiento_rf,distanceMatrix
 from src.embedding import embedding_umap
 from src.cluster import clustering_kmeans ,cluster_distribution,score_cluster
-print("ya cargo todo")
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 ## PATH
 path_input_data = PATH_INPUT_DATA
