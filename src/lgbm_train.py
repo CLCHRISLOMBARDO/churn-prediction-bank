@@ -10,10 +10,9 @@ import datetime
 import pickle
 import json
 
-from src.config import PATH_OUTPUT_RF ,N_ESTIMATORS, SEMILLA
+from src.config import PATH_OUTPUT_RF , SEMILLA
 
 output_path = PATH_OUTPUT_RF
-n_estimators = N_ESTIMATORS
 
 logger = logging.getLogger(__name__)
 
