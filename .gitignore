@@ -1,6 +1,7 @@
 /data
-/env_comp1
+/env_bank
 __pycache__/
 logss/
 outputs/
 logs/
+z601_gbtd.ipynb

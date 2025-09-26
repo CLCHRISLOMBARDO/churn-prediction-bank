@@ -10,38 +10,36 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:int) ->Tuple[pd.DataFrame|np.ndarray , pd.Series|np.ndarray]:
+def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_test:int) ->Tuple[pd.DataFrame, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series]:
     logger.info("Creacion label binario")
-    f = df["foto_mes"] == mes_train
-    df = df.loc[f]
-    X_train=df.drop(columns="clase_ternaria")
-    y_train_ternaria = df["clase_ternaria"].copy()
-    y_train=y_train_ternaria.map(lambda x : 0 if x =="Continua" else 1)
-    logger.info(f"X_train shape : {X_train.shape} / y_train shape : {y_train.shape}")
-    logger.info(f"cantidad de baja y continua:{np.unique(y_train,return_counts=True)}")
+
+    df['clase_peso'] = 1.0
+
+    df.loc[df['clase_ternaria'] == 'BAJA+2', 'clase_peso'] = 1.00002
+    df.loc[df['clase_ternaria'] == 'BAJA+1', 'clase_peso'] = 1.00001
+
+    df['clase_binaria'] = 0
+    df['clase_binaria'] = np.where(df['clase_ternaria'] == 'Continua', 0, 1)
+    train_data = df[df['foto_mes'].isin(mes_train)]
+    test_data = df[df['foto_mes'] == mes_test]
+
+    X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria'], axis=1)
+    y_train_binaria = train_data['clase_binaria']
+    w_train = train_data['clase_peso']
+
+    X_test = test_data.drop(['clase_ternaria', 'clase_peso','clase_binaria'], axis=1)
+    y_test_binaria = test_data['clase_binaria']
+    y_test_class = test_data['clase_ternaria']
+    w_test = test_data['clase_peso']
+
+    logger.info(f"X_train shape : {X_train.shape} / y_train shape : {y_train_binaria.shape} de los meses : {X_train['foto_mes'].unique()}")
+    logger.info(f"X_test shape : {X_test.shape} / y_test shape : {y_test_binaria.shape}  del mes : {X_test['foto_mes'].unique()}")
+
+    logger.info(f"cantidad de baja y continua en train:{np.unique(y_train_binaria,return_counts=True)}")
+    logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
     logger.info("Finalizacion label binario")
-    return X_train , y_train
+    return X_train, y_train_binaria, w_train, X_test, y_test_binaria, y_test_class, w_test
 
-def imputacion(X: pd.DataFrame|np.ndarray , strategy:str="median") -> pd.DataFrame:
-    logger.info("Comienzo la imputacion en X_train")
 
-    imputer=SimpleImputer(missing_values=np.nan , strategy=strategy)
-    X_imp = imputer.fit_transform(X)
-    X_imp=pd.DataFrame(X_imp , columns=X.columns , index=X.index)
 
-    logger.info(f"nan en X_train : {X_imp.isna().sum().sum()}")
-    logger.info("Finalizacion de la imputacion en X_train")
-    return X_imp
-
-def submuestreo(X_train:pd.DataFrame|np.ndarray , y_train:pd.DataFrame|np.ndarray , n_sample_continua:int) ->Tuple[pd.DataFrame|np.ndarray ,  pd.Series|np.ndarray]:
-    logger.info("Comienzo de Submuestreo continua")
-    np.random.seed(SEMILLA)
-    continua_sample = y_train[y_train ==0].sample(n_sample_continua).index
-    bajas_1_2 = y_train[y_train ==1].index
-    rf_index = continua_sample.union(bajas_1_2)
-    X_train_sample = X_train.loc[rf_index]
-    y_train_sample = y_train.loc[rf_index]
-    logger.info(f"X_train_sample shape : {X_train_sample.shape} / y_train_sample shape : {y_train_sample.shape}")
-    logger.info("Finalizacion de Submuestreo continua")
-    return X_train_sample , y_train_sample
 
