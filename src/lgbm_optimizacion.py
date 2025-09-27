@@ -64,7 +64,7 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
             'verbose': -1
         }
         train_data = lgb.Dataset(X_train,
-                                label=y_train_binaria, # eligir la clase
+                                label=y_train_binaria,
                                 weight=w_train)
         cv_results = lgb.cv(
             params,
