@@ -38,47 +38,54 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
     logger.info("Comienzo optimizacion hiperp binario")
     name ="binaria"+name
 
+
     def objective(trial):
-        # Hiperparametros
-        num_leaves = trial.suggest_int('num_leaves', 8, 100),
-        learning_rate = trial.suggest_float('learning_rate', 0.005, 0.3), # mas bajo, más iteraciones necesita
-        min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 1, 1000),
-        feature_fraction = trial.suggest_float('feature_fraction', 0.1, 1.0),
-        bagging_fraction = trial.suggest_float('bagging_fraction', 0.1, 1.0),
+
+        num_leaves = trial.suggest_int('num_leaves', 8, 100)
+        learning_rate = trial.suggest_float('learning_rate', 0.005, 0.3) # mas bajo, más iteraciones necesita
+        min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 1, 1000)
+        feature_fraction = trial.suggest_float('feature_fraction', 0.1, 1.0)
+        bagging_fraction = trial.suggest_float('bagging_fraction', 0.1, 1.0)
 
         params = {
-        'objective': 'binary',
-        'metric': 'custom',
-        'boosting_type': 'gbdt',
-        'first_metric_only': True,
-        'boost_from_average': True,
-        'feature_pre_filter': False,
-        'max_bin': 31,
-        'num_leaves': num_leaves,
-        'learning_rate': learning_rate,
-        'min_data_in_leaf': min_data_in_leaf,
-        'feature_fraction': feature_fraction,
-        'bagging_fraction': bagging_fraction,
-        'seed': SEMILLA,
-        'verbose': 0
+            'objective': 'binary',
+            'metric': 'custom',
+            'boosting_type': 'gbdt',
+            'first_metric_only': True,
+            'boost_from_average': True,
+            'feature_pre_filter': False,
+            'max_bin': 31,
+            'num_leaves': num_leaves,
+            'learning_rate': learning_rate,
+            'min_data_in_leaf': min_data_in_leaf,
+            'feature_fraction': feature_fraction,
+            'bagging_fraction': bagging_fraction,
+            'seed': SEMILLA,
+            'verbose': -1
         }
-        
         train_data = lgb.Dataset(X_train,
-                              label=y_train_binaria,
-                              weight=w_train)
+                                label=y_train_binaria, # eligir la clase
+                                weight=w_train)
         cv_results = lgb.cv(
-        params,
-        train_data,
-        num_boost_round=N_BOOSTS, # modificar, subit y subir... y descomentar la línea inferior
-        early_stopping_rounds= int(50 + 5 / learning_rate),
-        feval=lgb_gan_eval,
-        stratified=True,
-        nfold=N_FOLDS,
-        seed=SEMILLA
+            params,
+            train_data,
+            num_boost_round=N_BOOSTS, # modificar, subit y subir... y descomentar la línea inferior
+            #early_stopping_rounds= int(50 + 5 / learning_rate),
+            feval=lgb_gan_eval,
+            stratified=True,
+            nfold=N_FOLDS,
+            seed=SEMILLA,
+            callbacks=[
+                lgb.early_stopping(stopping_rounds=int(50 + 5/learning_rate), verbose=False),
+                lgb.log_evaluation(period=200),
+                ]
         )
         max_gan = max(cv_results['valid gan_eval-mean'])
         best_iter = cv_results['valid gan_eval-mean'].index(max_gan) + 1
+
+        # Guardamos cual es la mejor iteración del modelo
         trial.set_user_attr("best_iter", best_iter)
+
         return max_gan * N_FOLDS
     
     storage_name = "sqlite:///" + db_path + "optimization_lgbm.db"
