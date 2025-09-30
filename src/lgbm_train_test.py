@@ -64,7 +64,7 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:p
     
 
 def ganancia_prob(y_pred:pd.Series, y_true:pd.Series ,prop=1,threshold:int=0.025)->float:
-    logger.info("comienzo funcion ganancia con threhold = 0.025")
+    logger.info("comienzo funcion ganancia con threshold = 0.025")
     ganancia = np.where(y_true == 1, ganancia_acierto, 0) - np.where(y_true == 0, costo_estimulo, 0)
     return ganancia[y_pred >= threshold].sum() / prop
 

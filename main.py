@@ -69,7 +69,7 @@ def main():
 
 
 # # ----------------------------------------------------------------------------------------------------------
-    ## 2. Preprocesamiento para entrenamiento
+    ## 3. Preprocesamiento para entrenamiento
 
     # split X_train, y_train
     X_train, y_train_binaria, w_train, X_test, y_test_binaria, y_test_class, w_test = split_train_binario(df,MES_TRAIN,MES_TEST)
@@ -83,10 +83,10 @@ def main():
     #     raise
 
 
-    ## 3. Optimizacion Hiperparametros
+    ## 4. Optimizacion Hiperparametros
     name_lgbm=f"_{fecha}"
     study = optim_hiperp_binaria(X_train , y_train_binaria,w_train ,n_trials , name=name_lgbm)
-    ## 4. Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros
+    ## 5. Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros
     best_iter = study.best_trial.user_attrs["best_iter"]
     best_params = study.best_trial.params
     model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter,best_params , name=name_lgbm)
