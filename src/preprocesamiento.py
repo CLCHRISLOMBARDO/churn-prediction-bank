@@ -4,10 +4,7 @@ import numpy as np
 from sklearn.impute import SimpleImputer
 from typing import Tuple
 from src.config import SEMILLA
-
 import logging
-
-
 logger = logging.getLogger(__name__)
 
 def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_test:int) ->Tuple[pd.DataFrame, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series]:
@@ -39,7 +36,6 @@ def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_tes
     logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
     logger.info("Finalizacion label binario")
     return X_train, y_train_binaria, w_train, X_test, y_test_binaria, y_test_class, w_test
-
 
 
 
