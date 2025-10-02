@@ -75,8 +75,6 @@ def main():
     MES_TRAIN.append(MES_TEST)
     X_train, y_train_binaria, w_train, X_apred, y_apred, y_apred_class, w_apred = split_train_binario(df,MES_TRAIN,MES_A_PREDECIR)
 
-
-
     ## 4. Carga de mejores Hiperparametros
     name_lgbm=f"_{fecha}"
     name_best_params_file=f"best_paramsbinaria_{fecha_name}.json"
