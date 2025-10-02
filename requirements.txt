@@ -29,6 +29,7 @@ jupysql-plugin==0.4.5
 jupyter_client==8.6.3
 jupyter_core==5.8.1
 kiwisolver==1.4.9
+lightgbm==4.6.0
 llvmlite==0.44.0
 Mako==1.3.10
 MarkupSafe==3.0.2
@@ -44,11 +45,13 @@ parso==0.8.5
 pillow==11.3.0
 platformdirs==4.4.0
 ploomber-core==0.2.27
+polars==1.33.1
 posthog==6.7.4
 prettytable==3.16.0
 prompt_toolkit==3.0.52
 psutil==7.0.0
 pure_eval==0.2.3
+pyarrow==21.0.0
 Pygments==2.19.2
 pynndescent==0.5.13
 pyparsing==3.2.4
