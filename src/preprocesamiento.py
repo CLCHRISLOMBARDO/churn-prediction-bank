@@ -7,7 +7,7 @@ from src.config import SEMILLA
 import logging
 logger = logging.getLogger(__name__)
 
-def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_test:int,mes_apred:int) ->Tuple[pd.DataFrame, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
+def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_test:int,mes_apred:int) ->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
     logger.info("Creacion label binario")
 
     df['clase_peso'] = 1.0
@@ -24,6 +24,7 @@ def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_tes
     # TRAIN
     X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria'], axis=1)
     y_train_binaria = train_data['clase_binaria']
+    y_train_class=train_data["clase_ternaria"]
     w_train = train_data['clase_peso']
 
     # TEST
@@ -35,6 +36,7 @@ def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_tes
     # A PREDECIR
     X_apred = apred_data.drop(['clase_ternaria', 'clase_peso','clase_binaria'], axis=1)
     y_apred=X_apred[["numero_de_cliente"]] # DF
+  
 
     logger.info(f"X_train shape : {X_train.shape} / y_train shape : {y_train_binaria.shape} de los meses : {X_train['foto_mes'].unique()}")
     logger.info(f"X_test shape : {X_test.shape} / y_test shape : {y_test_binaria.shape}  del mes : {X_test['foto_mes'].unique()}")
@@ -43,7 +45,7 @@ def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_tes
     logger.info(f"cantidad de baja y continua en train:{np.unique(y_train_binaria,return_counts=True)}")
     logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
     logger.info("Finalizacion label binario")
-    return X_train, y_train_binaria, w_train, X_test, y_test_binaria, y_test_class, w_test ,X_apred , y_apred
+    return X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test ,X_apred , y_apred 
 
 
 
