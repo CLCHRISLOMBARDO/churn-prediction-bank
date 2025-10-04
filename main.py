@@ -21,6 +21,7 @@ from src.lgbm_train_test import  entrenamiento_lgbm , evaluacion_lgbm
 
 db_path = PATH_OUTPUT_OPTIMIZACION + 'db/'
 bestparams_path = PATH_OUTPUT_OPTIMIZACION+'best_params/'
+best_iter_path = PATH_OUTPUT_OPTIMIZACION+'best_iters/'
 graf_bayesiana_path = PATH_OUTPUT_OPTIMIZACION+'grafico_bayesiana/'
 
 
@@ -32,6 +33,7 @@ os.makedirs("logs",exist_ok=True)
 os.makedirs(PATH_OUTPUT_OPTIMIZACION,exist_ok=True)
 os.makedirs(db_path,exist_ok=True)
 os.makedirs(bestparams_path,exist_ok=True)
+os.makedirs(best_iter_path,exist_ok=True)
 os.makedirs(graf_bayesiana_path,exist_ok=True)
 os.makedirs(PATH_OUTPUT_LGBM,exist_ok=True)
 # os.makedirs(PATH_NOTAS,exist_ok=True ) No me gusto, ya suficiente con los logs
@@ -44,10 +46,10 @@ while respuesta_correcta ==0:
     pedido = input(f"Ingrese si quiere:\na) Optimizacion Bayesiana\nb) Entrenamiento directo\n")
     pedido=pedido.lower()
     if pedido=="a":
-        nombre_log = f"log_opt_hp_{fecha}.log"
+        nombre_log = f"log_{fecha}_opt_hp.log"
         respuesta_correcta=1
     elif pedido =="b":
-        nombre_log = f"log_entrenamiento_directo_{fecha}.log"
+        nombre_log = f"log_{fecha}_entrenamiento_directo.log"
         respuesta_correcta=1
     else:
         print("Ingrese una opcion valida 'a' o 'b'\n")
@@ -77,13 +79,13 @@ def main():
     cols_lag_delta_max_min_regl=columnas[0]
     cols_ratios=columnas[1]
 
-
-    # ## 2. Feature Engineering
-    df=feature_engineering_lag(df,cols_lag_delta_max_min_regl,2)
-    df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
-    # # df=feature_engineering_max_min(df,cols_lag_delta_max_min_regl)
-    df=feature_engineering_ratio(df,cols_ratios)
-    # # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
+# DESCOMENTAR ESTOOOOOOOOOOOOOOOOOOOOOOOOO §§§§§§§§!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # # ## 2. Feature Engineering
+    # df=feature_engineering_lag(df,cols_lag_delta_max_min_regl,2)
+    # df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
+    # # # df=feature_engineering_max_min(df,cols_lag_delta_max_min_regl)
+    # df=feature_engineering_ratio(df,cols_ratios)
+    # # # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
 
 
 
@@ -91,7 +93,7 @@ def main():
 # # ----------------------------------------------------------------------------------------------------------
     ## 3. Preprocesamiento para entrenamiento
     # split X_train, y_train
-    X_train, y_train_binaria, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST)
+    X_train, y_train_binaria, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
                 # Guardo df
     # try:
     #     X_train.to_csv(path_output_data + "X_train_sample_imp.csv") 
@@ -122,34 +124,38 @@ def main():
         respuesta_correcta=0
         while respuesta_correcta==0:
             modo_incrustacion_hiperparametros=input("""Ingrese forma de obtener los hiperparametros:\n
-                                               a) A partir de una optimizacion Bayesiana\n
-                                               b) Manualmente """)
+                a) A partir de una optimizacion Bayesiana\n
+                b) Manualmente\n """)
             try:
                 modo_incrustacion_hiperparametros=modo_incrustacion_hiperparametros.lower()
             except Exception as e:
                 logger.error(f"Error porque se incrusto un modo_incrustacion_hiperparametros que no es string :{e}")
             if modo_incrustacion_hiperparametros == "a":
                 
-                bayesiana_fecha=input("Ingrese fecha de la bayesiana yyyy-mm-dd")
-                bayesiana_hora=input("Ingrese fecha de la bayesiana hhhh-mm-ss")
+                bayesiana_fecha=input("Ingrese fecha de la bayesiana yyyy-mm-dd: ")
+                bayesiana_hora=input("Ingrese fecha de la bayesiana hh-mm-ss: ")
                 bayesiana_fecha_hora= bayesiana_fecha +'_'+bayesiana_hora
 
                 name_best_params_file=f"best_paramsbinaria_{bayesiana_fecha_hora}.json"
                 name_best_iter_file=f"best_iter_binaria_{bayesiana_fecha_hora}.json"
 
-                with open(bestparams_path+name_best_params_file, "r") as f:
-                    best_params = json.load(f)
-                    logger.info(f"Correcta carga de los best params : {name_best_params_file}")
+                try:
+                    with open(bestparams_path+name_best_params_file, "r") as f:
+                        best_params = json.load(f)
+                        logger.info(f"Correcta carga de los best params : {best_params}")
 
-                with open(bestparams_path+name_best_iter_file, "r") as f:
-                    best_iter = json.load(f)
-                    logger.info(f"Correcta carga de la best iter : {name_best_iter_file}")
-                respuesta_correcta=1
+                    with open(best_iter_path+name_best_iter_file, "r") as f:
+                        best_iter = json.load(f)
+                        logger.info(f"Correcta carga de la best iter : {best_iter}")
+                    respuesta_correcta=1
+                except Exception as e:
+                    logger.error(f"No se pudo encontrar los best params ni best iter por el error {e}")
+                    raise
             elif modo_incrustacion_hiperparametros == "b":
                 logger.info("Aun no se realizo la construccion manual de los hiperparametros. PRONTO")
                 return
-            
-
+# ELIMINAR RETURN ----------------------------------------------§§§§§§§§§§§§!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!S
+    return 
     ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04    
     model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter,best_params , name=name_lgbm)
     y_pred=evaluacion_lgbm(X_test , y_test_binaria ,model_lgbm)
