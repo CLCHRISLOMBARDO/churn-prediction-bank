@@ -20,7 +20,9 @@ from src.config import PATH_OUTPUT_OPTIMIZACION, GANANCIA,ESTIMULO,SEMILLA ,N_BO
 output_path = PATH_OUTPUT_OPTIMIZACION
 db_path = output_path + 'db/'
 bestparams_path = output_path+'best_params/'
+best_iter_path = output_path+'best_iters/'
 graf_bayesiana_path = output_path+'grafico_bayesiana/'
+
 
 ganancia_acierto = GANANCIA
 costo_estimulo = ESTIMULO
@@ -109,9 +111,9 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
     
     # Guardo best iter
     try:
-        with open(bestparams_path + f"best_iter_{name}.json","w") as f:
+        with open(best_iter_path + f"best_iter_{name}.json","w") as f:
             json.dump(best_iter , f ,indent=4)
-        logger.info(f"best_iter_{name}.json guardado en {bestparams_path} ")
+        logger.info(f"best_iter_{name}.json guardado en {best_iter_path} ")
     except Exception as e:
         logger.error(f"Error al tratar de guardar el json de best iter por el error :{e}")
 
@@ -129,19 +131,19 @@ def graficos_bayesiana(study:Study, name: str):
     logger.info("Comienzo de la creacion de graficos")
     try:
         fig1 = plot_optimization_history(study)
-        fig1.write_image(graf_bayesiana_path+f"graficos_opt_history_{name}.png")
+        fig1.write_image(graf_bayesiana_path+f"{name}_graficos_opt_history.png")
 
         fig2 = plot_param_importances(study)
-        fig2.write_image(graf_bayesiana_path+f"graficos_param_importances_{name}.png")
+        fig2.write_image(graf_bayesiana_path+f"{name}_graficos_param_importances.png")
 
         fig3 = plot_slice(study)
-        fig3.write_image(graf_bayesiana_path+f"graficos_slice_{name}.png")
+        fig3.write_image(graf_bayesiana_path+f"{name}_graficos_slice.png")
 
         fig4 = plot_contour(study)
-        fig4.write_image(graf_bayesiana_path+f"graficos_contour_all_{name}.png")
+        fig4.write_image(graf_bayesiana_path+f"{name}_graficos_contour_all.png")
 
         fig5 = plot_contour(study, params=["num_leaves", "learning_rate"])
-        fig5.write_image(graf_bayesiana_path+f"graficos_contour_specific_{name}.png")
+        fig5.write_image(graf_bayesiana_path+f"{name}_graficos_contour_specific.png")
 
         logger.info(f" Gráficos guardados en {output_path}")
     except Exception as e:
