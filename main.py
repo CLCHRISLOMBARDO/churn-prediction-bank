@@ -6,20 +6,22 @@ import datetime
 import logging
 import json
 import lightgbm as lgb
-
+import optuna
+import sys # Eliminar despues
 
 from src.config import *
 from src.loader import cargar_datos
 from src.constr_lista_cols import contruccion_cols
 from src.feature_engineering import feature_engineering_delta, feature_engineering_lag , feature_engineering_ratio,feature_engineering_linreg,feature_engineering_max_min
 from src.preprocesamiento import split_train_binario
-from src.lgbm_optimizacion import optim_hiperp_binaria 
+from src.lgbm_optimizacion import optim_hiperp_binaria , graficos_bayesiana
 from src.lgbm_train_test import  entrenamiento_lgbm , evaluacion_lgbm
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 ## PATH
 
 db_path = PATH_OUTPUT_OPTIMIZACION + 'db/'
 bestparams_path = PATH_OUTPUT_OPTIMIZACION+'best_params/'
+graf_bayesiana_path = PATH_OUTPUT_OPTIMIZACION+'grafico_bayesiana/'
 
 
 ## Carga de variables
@@ -30,11 +32,27 @@ os.makedirs("logs",exist_ok=True)
 os.makedirs(PATH_OUTPUT_OPTIMIZACION,exist_ok=True)
 os.makedirs(db_path,exist_ok=True)
 os.makedirs(bestparams_path,exist_ok=True)
+os.makedirs(graf_bayesiana_path,exist_ok=True)
 os.makedirs(PATH_OUTPUT_LGBM,exist_ok=True)
+# os.makedirs(PATH_NOTAS,exist_ok=True ) No me gusto, ya suficiente con los logs
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-nombre_log = f"log_{fecha}.log"
 
+# DEFINIR EL NOMBRE DE LOG DEL FLUJO BAYESIANA O ENTRENAMIENTO DIRECTO
+respuesta_correcta=0
+while respuesta_correcta ==0:
+    pedido = input(f"Ingrese si quiere:\na) Optimizacion Bayesiana\nb) Entrenamiento directo\n")
+    pedido=pedido.lower()
+    if pedido=="a":
+        nombre_log = f"log_opt_hp_{fecha}.log"
+        respuesta_correcta=1
+    elif pedido =="b":
+        nombre_log = f"log_entrenamiento_directo_{fecha}.log"
+        respuesta_correcta=1
+    else:
+        print("Ingrese una opcion valida 'a' o 'b'\n")
+
+# CONFIGURACION LOG
 logging.basicConfig(
     level=logging.INFO, #Puede ser INFO o ERROR
     format='%(asctime)s - %(levelname)s - %(name)s %(lineno)d - %(message)s',
@@ -48,7 +66,7 @@ logger = logging.getLogger(__name__)
 ## --------------------------------------------------------Funcion main ------------------------------------------
 
 def main():
-    logger.info("Inicio de ejecucion.")
+    logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
 
     ## 0. load datos
     df=cargar_datos(PATH_INPUT_DATA)
@@ -68,11 +86,12 @@ def main():
     # # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
 
 
+
+
 # # ----------------------------------------------------------------------------------------------------------
     ## 3. Preprocesamiento para entrenamiento
-
     # split X_train, y_train
-    X_train, y_train_binaria, w_train, X_test, y_test_binaria, y_test_class, w_test = split_train_binario(df,MES_TRAIN,MES_TEST)
+    X_train, y_train_binaria, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST)
                 # Guardo df
     # try:
     #     X_train.to_csv(path_output_data + "X_train_sample_imp.csv") 
@@ -81,18 +100,59 @@ def main():
     # except Exception as e:
     #     logger.error(f"Error al guardar el df : {e}")
     #     raise
-
-
-    ## 4. Optimizacion Hiperparametros
     name_lgbm=f"_{fecha}"
-    study = optim_hiperp_binaria(X_train , y_train_binaria,w_train ,n_trials , name=name_lgbm)
-    ## 5. Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros
-    best_iter = study.best_trial.user_attrs["best_iter"]
-    best_params = study.best_trial.params
+
+    
+    
+    ## 4. Carga de mejores Hiperparametros
+
+    ## 4.a. Optimizacion Hiperparametros
+    if pedido =="a":
+        study = optim_hiperp_binaria(X_train , y_train_binaria,w_train ,n_trials , name=name_lgbm)
+        graficos_bayesiana(study , name_lgbm)
+        best_iter = study.best_trial.user_attrs["best_iter"]
+        best_params = study.best_trial.params
+        logger.info("Best params y best iter cargados")
+
+
+    ## 4.b. Ingreso de hiperparametros
+    elif pedido =="b":
+        logger.info("Ingreso de hiperparametros de una Bayesiana ya realizada")
+         
+        respuesta_correcta=0
+        while respuesta_correcta==0:
+            modo_incrustacion_hiperparametros=input("""Ingrese forma de obtener los hiperparametros:\n
+                                               a) A partir de una optimizacion Bayesiana\n
+                                               b) Manualmente """)
+            try:
+                modo_incrustacion_hiperparametros=modo_incrustacion_hiperparametros.lower()
+            except Exception as e:
+                logger.error(f"Error porque se incrusto un modo_incrustacion_hiperparametros que no es string :{e}")
+            if modo_incrustacion_hiperparametros == "a":
+                
+                bayesiana_fecha=input("Ingrese fecha de la bayesiana yyyy-mm-dd")
+                bayesiana_hora=input("Ingrese fecha de la bayesiana hhhh-mm-ss")
+                bayesiana_fecha_hora= bayesiana_fecha +'_'+bayesiana_hora
+
+                name_best_params_file=f"best_paramsbinaria_{bayesiana_fecha_hora}.json"
+                name_best_iter_file=f"best_iter_binaria_{bayesiana_fecha_hora}.json"
+
+                with open(bestparams_path+name_best_params_file, "r") as f:
+                    best_params = json.load(f)
+                    logger.info(f"Correcta carga de los best params : {name_best_params_file}")
+
+                with open(bestparams_path+name_best_iter_file, "r") as f:
+                    best_iter = json.load(f)
+                    logger.info(f"Correcta carga de la best iter : {name_best_iter_file}")
+                respuesta_correcta=1
+            elif modo_incrustacion_hiperparametros == "b":
+                logger.info("Aun no se realizo la construccion manual de los hiperparametros. PRONTO")
+                return
+            
+
+    ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04    
     model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter,best_params , name=name_lgbm)
     y_pred=evaluacion_lgbm(X_test , y_test_binaria ,model_lgbm)
-
-
 
 
     

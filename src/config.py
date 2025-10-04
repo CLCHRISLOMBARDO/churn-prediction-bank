@@ -9,6 +9,7 @@ PATH_INPUT_DATA="data/competencia_01.csv"
 PATH_OUTPUT_DATA="outputs/data_outputs/"
 PATH_OUTPUT_OPTIMIZACION="outputs/lgbm_optimizacion/"
 PATH_OUTPUT_LGBM="outputs/lgbm_model/"
+PATH_NOTAS="notas/"
 
 ## Submuestra - solo uso por el momento el de segmentacion
 MES_TRAIN =[202101,202102,202103]

@@ -13,12 +13,14 @@ import pickle
 import json
 import logging
 from optuna.samplers import TPESampler # Para eliminar el componente estocastico de optuna
+from optuna.visualization import plot_param_importances, plot_contour,  plot_slice, plot_optimization_history
 
 from src.config import PATH_OUTPUT_OPTIMIZACION, GANANCIA,ESTIMULO,SEMILLA ,N_BOOSTS ,N_FOLDS
 
 output_path = PATH_OUTPUT_OPTIMIZACION
 db_path = output_path + 'db/'
-bestparms_path = output_path+'best_params/'
+bestparams_path = output_path+'best_params/'
+graf_bayesiana_path = output_path+'grafico_bayesiana/'
 
 ganancia_acierto = GANANCIA
 costo_estimulo = ESTIMULO
@@ -103,16 +105,48 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
     study.optimize(objective, n_trials=n_trials)
 
     best_params = study.best_trial.params
+    best_iter=study.best_trial.user_attrs["best_iter"]
     
-    # Mejor guardarlo en el main ?
+    # Guardo best iter
     try:
-        with open(bestparms_path+f"best_params{name}.json", "w") as f:
+        with open(bestparams_path + f"best_iter_{name}.json","w") as f:
+            json.dump(best_iter , f ,indent=4)
+        logger.info(f"best_iter_{name}.json guardado en {bestparams_path} ")
+    except Exception as e:
+        logger.error(f"Error al tratar de guardar el json de best iter por el error :{e}")
+
+    # Guardo best params
+    try:
+        with open(bestparams_path+f"best_params{name}.json", "w") as f:
             json.dump(best_params, f, indent=4) 
-        logger.info(f"best_params{name}.json guardado en {bestparms_path}")
-        logger.info("Finalizacion de optimizacion hiperp binario.")
+        logger.info(f"best_params{name}.json guardado en {bestparams_path}")
+        logger.info(f"Finalizacion de optimizacion hiperp binario con study name {study_name}.")
     except Exception as e:
         logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
     return study
+
+def graficos_bayesiana(study:Study, name: str):
+    logger.info("Comienzo de la creacion de graficos")
+    try:
+        fig1 = plot_optimization_history(study)
+        fig1.write_image(graf_bayesiana_path+f"graficos_opt_history_{name}.png")
+
+        fig2 = plot_param_importances(study)
+        fig2.write_image(graf_bayesiana_path+f"graficos_param_importances_{name}.png")
+
+        fig3 = plot_slice(study)
+        fig3.write_image(graf_bayesiana_path+f"graficos_slice_{name}.png")
+
+        fig4 = plot_contour(study)
+        fig4.write_image(graf_bayesiana_path+f"graficos_contour_all_{name}.png")
+
+        fig5 = plot_contour(study, params=["num_leaves", "learning_rate"])
+        fig5.write_image(graf_bayesiana_path+f"graficos_contour_specific_{name}.png")
+
+        logger.info(f" Gráficos guardados en {output_path}")
+    except Exception as e:
+        logger.error(f"Error al generar las gráficas: {e}")
+
 
 
 
