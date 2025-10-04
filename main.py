@@ -1,5 +1,6 @@
 #main.py
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import datetime 
@@ -15,7 +16,7 @@ from src.constr_lista_cols import contruccion_cols
 from src.feature_engineering import feature_engineering_delta, feature_engineering_lag , feature_engineering_ratio,feature_engineering_linreg,feature_engineering_max_min
 from src.preprocesamiento import split_train_binario
 from src.lgbm_optimizacion import optim_hiperp_binaria , graficos_bayesiana
-from src.lgbm_train_test import  entrenamiento_lgbm , evaluacion_lgbm
+from src.lgbm_train_test import  entrenamiento_lgbm , prediccion_test_lgbm,ganancia_prob_umbral_fijo,grafico_feature_importance ,evaluacion_public_private,prediccion_lgbm_umbral_movil,prediccion_apred
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 ## PATH
 
@@ -24,6 +25,10 @@ bestparams_path = PATH_OUTPUT_OPTIMIZACION+'best_params/'
 best_iter_path = PATH_OUTPUT_OPTIMIZACION+'best_iters/'
 graf_bayesiana_path = PATH_OUTPUT_OPTIMIZACION+'grafico_bayesiana/'
 
+model_path=PATH_OUTPUT_LGBM + 'model/'
+prediccion_final_path = PATH_OUTPUT_LGBM + 'final_prediction/'
+graf_train_path=PATH_OUTPUT_LGBM +'grafico_train/'
+umbrales_path=PATH_OUTPUT_LGBM +'umbrales/'
 
 ## Carga de variables
 n_trials=N_TRIALS
@@ -35,7 +40,15 @@ os.makedirs(db_path,exist_ok=True)
 os.makedirs(bestparams_path,exist_ok=True)
 os.makedirs(best_iter_path,exist_ok=True)
 os.makedirs(graf_bayesiana_path,exist_ok=True)
+
 os.makedirs(PATH_OUTPUT_LGBM,exist_ok=True)
+os.makedirs(model_path,exist_ok=True)
+os.makedirs(prediccion_final_path,exist_ok=True)
+os.makedirs(graf_train_path,exist_ok=True)
+os.makedirs(umbrales_path,exist_ok=True)
+
+
+
 # os.makedirs(PATH_NOTAS,exist_ok=True ) No me gusto, ya suficiente con los logs
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -78,14 +91,12 @@ def main():
     columnas=contruccion_cols(df)
     cols_lag_delta_max_min_regl=columnas[0]
     cols_ratios=columnas[1]
-
-# DESCOMENTAR ESTOOOOOOOOOOOOOOOOOOOOOOOOO §§§§§§§§!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # # ## 2. Feature Engineering
-    # df=feature_engineering_lag(df,cols_lag_delta_max_min_regl,2)
-    # df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
-    # # # df=feature_engineering_max_min(df,cols_lag_delta_max_min_regl)
-    # df=feature_engineering_ratio(df,cols_ratios)
-    # # # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
+    # ## 2. Feature Engineering
+    df=feature_engineering_lag(df,cols_lag_delta_max_min_regl,2)
+    df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
+    # # df=feature_engineering_max_min(df,cols_lag_delta_max_min_regl)
+    df=feature_engineering_ratio(df,cols_ratios)
+    # # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
 
 
 
@@ -93,7 +104,7 @@ def main():
 # # ----------------------------------------------------------------------------------------------------------
     ## 3. Preprocesamiento para entrenamiento
     # split X_train, y_train
-    X_train, y_train_binaria, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
+    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
                 # Guardo df
     # try:
     #     X_train.to_csv(path_output_data + "X_train_sample_imp.csv") 
@@ -102,7 +113,7 @@ def main():
     # except Exception as e:
     #     logger.error(f"Error al guardar el df : {e}")
     #     raise
-    name_lgbm=f"_{fecha}"
+    # name_lgbm=f"{fecha}"
 
     
     
@@ -110,8 +121,8 @@ def main():
 
     ## 4.a. Optimizacion Hiperparametros
     if pedido =="a":
-        study = optim_hiperp_binaria(X_train , y_train_binaria,w_train ,n_trials , name=name_lgbm)
-        graficos_bayesiana(study , name_lgbm)
+        study = optim_hiperp_binaria(X_train , y_train_binaria,w_train ,n_trials , name=fecha)
+        graficos_bayesiana(study , fecha)
         best_iter = study.best_trial.user_attrs["best_iter"]
         best_params = study.best_trial.params
         logger.info("Best params y best iter cargados")
@@ -154,14 +165,35 @@ def main():
             elif modo_incrustacion_hiperparametros == "b":
                 logger.info("Aun no se realizo la construccion manual de los hiperparametros. PRONTO")
                 return
-# ELIMINAR RETURN ----------------------------------------------§§§§§§§§§§§§!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!S
-    return 
+
     ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04    
-    model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter,best_params , name=name_lgbm)
-    y_pred=evaluacion_lgbm(X_test , y_test_binaria ,model_lgbm)
+    name_1rst_train="1rst_train"
+    model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter,best_params , fecha,name_1rst_train)
+    grafico_feature_importance(model_lgbm,name_1rst_train,fecha)
+    y_pred_lgbm=prediccion_test_lgbm(X_test , y_test_binaria ,model_lgbm) 
 
+    #Evaluacion umbral fijo
+    name_umbral_fijo = name_1rst_train + "_umbral_fijo"
+    umbral_fijo=UMBRAL
+    ganancia = ganancia_prob_umbral_fijo(y_pred_lgbm , y_test_binaria)
+    evaluacion_public_private(X_test , y_test_binaria,y_pred_lgbm ,umbral_fijo, name_umbral_fijo,fecha)
 
-    
+    #Evaluacion umbral movil
+    name_umbral_movil=name_1rst_train + "_umbral_movil"
+    umbrales= prediccion_lgbm_umbral_movil(X_test , y_test_binaria , y_test_class,model_lgbm,name_umbral_movil,fecha)
+    umbral_optimo= umbrales["umbral_optimo"]
+    ganancia = ganancia_prob_umbral_fijo(y_pred_lgbm , y_test_binaria,1,umbral_optimo)
+    evaluacion_public_private(X_test , y_test_binaria,y_pred_lgbm ,umbral_optimo, name_umbral_movil,fecha)
+
+    ## 6. FINAL TRAIN con mejores hiperp, mejor iter y mejor umbral
+    name_final_train="final_train"
+    X_train_final= pd.concat([X_train , X_test],axis=0)
+    y_train_binaria_final = pd.concat([y_train_binaria , y_test_binaria],axis=0)
+    w_train_final=pd.concat([w_train,w_test],axis=0)
+    model_lgbm_final = entrenamiento_lgbm(X_train_final , y_train_binaria_final,w_train_final ,best_iter,best_params , fecha,name_final_train)
+    grafico_feature_importance(model_lgbm_final,name_final_train,fecha)
+    y_apred_final=prediccion_apred(X_apred ,y_apred,model_lgbm_final,umbral_optimo,fecha)
+
     logger.info(f">>> Ejecucion finalizada. Revisar logs para mas detalles. {nombre_log}")
 
 
