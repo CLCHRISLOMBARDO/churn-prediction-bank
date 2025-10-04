@@ -38,6 +38,8 @@ def contruccion_cols(df:pd.DataFrame|np.ndarray)->list[list]:
             i+=1
         if i < len(lista_m):
             cols_ratios.append([lista_m[i],c ])
+    logger.info(f"columnas para lags y deltas : {cols_lag_delta_max_min_regl}")
+    logger.info(f"columnas para ratios : {cols_ratios}")
     logger.info("Finalizacion de la construccion de las columnas")
 
     return [cols_lag_delta_max_min_regl ,cols_ratios ]
