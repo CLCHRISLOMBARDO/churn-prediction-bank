@@ -98,7 +98,7 @@ def main():
     y_apred["prediction"]=y_apred["prediction"].apply(lambda x : 1 if x >=0.025 else 0)
     logger.info(f"cantidad de bajas predichas : {(y_apred==1).sum()}")
     y_apred=y_apred.set_index("numero_de_cliente")
-    y_apred.to_csv(f"outputs/lgbm_model/prediccion_{fecha}.csv")
+    y_apred.to_csv(f"outputs/lgbm_model/final_prediction/prediccion_main2_{fecha}.csv")
 
 
 

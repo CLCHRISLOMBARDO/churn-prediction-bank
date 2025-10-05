@@ -121,7 +121,7 @@ def main():
 
     ## 4.a. Optimizacion Hiperparametros
     if pedido =="a":
-        study = optim_hiperp_binaria(X_train , y_train_binaria,w_train ,n_trials , name=fecha)
+        study = optim_hiperp_binaria(X_train , y_train_binaria,w_train ,n_trials , fecha)
         graficos_bayesiana(study , fecha)
         best_iter = study.best_trial.user_attrs["best_iter"]
         best_params = study.best_trial.params
@@ -147,7 +147,7 @@ def main():
                 bayesiana_hora=input("Ingrese fecha de la bayesiana hh-mm-ss: ")
                 bayesiana_fecha_hora= bayesiana_fecha +'_'+bayesiana_hora
 
-                name_best_params_file=f"best_paramsbinaria_{bayesiana_fecha_hora}.json"
+                name_best_params_file=f"best_params_binaria_{bayesiana_fecha_hora}.json"
                 name_best_iter_file=f"best_iter_binaria_{bayesiana_fecha_hora}.json"
 
                 try:
@@ -187,12 +187,27 @@ def main():
 
     ## 6. FINAL TRAIN con mejores hiperp, mejor iter y mejor umbral
     name_final_train="final_train"
-    X_train_final= pd.concat([X_train , X_test],axis=0)
-    y_train_binaria_final = pd.concat([y_train_binaria , y_test_binaria],axis=0)
-    w_train_final=pd.concat([w_train,w_test],axis=0)
+    # X_train_final= pd.concat([X_train , X_test],axis=0)
+    # logger.info(f"meses en train {X_train_final['foto_mes'].unique()}")
+    # logger.info(f"train shape {X_train_final.shape}")
+    # y_train_binaria_final = pd.concat([y_train_binaria , y_test_binaria],axis=0)
+    # w_train_final=pd.concat([w_train,w_test],axis=0)
+
+
+    MES_TRAIN.append(MES_TEST)
+    X_train_final, y_train_binaria_final,y_train_class, w_train_final, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
+
     model_lgbm_final = entrenamiento_lgbm(X_train_final , y_train_binaria_final,w_train_final ,best_iter,best_params , fecha,name_final_train)
     grafico_feature_importance(model_lgbm_final,name_final_train,fecha)
-    y_apred_final=prediccion_apred(X_apred ,y_apred,model_lgbm_final,umbral_optimo,fecha)
+    # y_apred_final=prediccion_apred(X_apred ,y_apred,model_lgbm_final,umbral_optimo,fecha)
+    # y_apred_final=prediccion_apred(X_apred ,y_apred,model_lgbm_final,UMBRAL,fecha)
+    y_apred=X_apred[["numero_de_cliente"]]
+    y_pred=model_lgbm_final.predict(X_apred)
+    y_apred["prediction"] = y_pred
+    y_apred["prediction"]=y_apred["prediction"].apply(lambda x : 1 if x >=0.025 else 0)
+    logger.info(f"cantidad de bajas predichas : {(y_apred==1).sum()}")
+    y_apred=y_apred.set_index("numero_de_cliente")
+    y_apred.to_csv(f"outputs/lgbm_model/final_prediction/{fecha}_predicciones.csv")
 
     logger.info(f">>> Ejecucion finalizada. Revisar logs para mas detalles. {nombre_log}")
 

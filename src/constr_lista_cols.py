@@ -25,7 +25,7 @@ def contruccion_cols(df:pd.DataFrame|np.ndarray)->list[list]:
 
 
     # # Columnas lags y delta
-    cols_lag_delta_max_min_regl=lista_m + lista_c+ lista_r+lista_r
+    cols_lag_delta_max_min_regl=lista_m + lista_c+ lista_r
 
     # # Columnas para regresion lineal y max-min
     # lista_regl_max_min = lista_m + lista_c+ lista_r+lista_r
