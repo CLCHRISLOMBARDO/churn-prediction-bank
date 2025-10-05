@@ -12,8 +12,8 @@ import sys # Eliminar despues
 
 from src.config import *
 from src.loader import cargar_datos
-from src.constr_lista_cols import contruccion_cols
-from src.feature_engineering import feature_engineering_delta, feature_engineering_lag , feature_engineering_ratio,feature_engineering_linreg,feature_engineering_max_min
+from src.constr_lista_cols import contruccion_cols , contrs_cols_dropear_feat_imp
+from src.feature_engineering import feature_engineering_delta, feature_engineering_lag , feature_engineering_ratio,feature_engineering_linreg,feature_engineering_max_min ,feature_engineering_normalizacion,feature_engineering_drop_cols
 from src.preprocesamiento import split_train_binario
 from src.lgbm_optimizacion import optim_hiperp_binaria , graficos_bayesiana
 from src.lgbm_train_test import  entrenamiento_lgbm , prediccion_test_lgbm,ganancia_prob_umbral_fijo,grafico_feature_importance ,evaluacion_public_private,prediccion_lgbm_umbral_movil,prediccion_apred
@@ -29,6 +29,7 @@ model_path=PATH_OUTPUT_LGBM + 'model/'
 prediccion_final_path = PATH_OUTPUT_LGBM + 'final_prediction/'
 graf_train_path=PATH_OUTPUT_LGBM +'grafico_train/'
 umbrales_path=PATH_OUTPUT_LGBM +'umbrales/'
+feat_imp_path=PATH_OUTPUT_LGBM +'feature_importances/'
 
 ## Carga de variables
 n_trials=N_TRIALS
@@ -46,12 +47,13 @@ os.makedirs(model_path,exist_ok=True)
 os.makedirs(prediccion_final_path,exist_ok=True)
 os.makedirs(graf_train_path,exist_ok=True)
 os.makedirs(umbrales_path,exist_ok=True)
-
+os.makedirs(feat_imp_path,exist_ok=True)
 
 
 # os.makedirs(PATH_NOTAS,exist_ok=True ) No me gusto, ya suficiente con los logs
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+comentario=input(f"Ingrese un comentario")
 
 # DEFINIR EL NOMBRE DE LOG DEL FLUJO BAYESIANA O ENTRENAMIENTO DIRECTO
 respuesta_correcta=0
@@ -86,6 +88,7 @@ def main():
     ## 0. load datos
     df=cargar_datos(PATH_INPUT_DATA)
     print(df.head())
+                                ## A - AGREGADO DE FEATURES
 
     ## 1. Contruccion de las columnas
     columnas=contruccion_cols(df)
@@ -96,7 +99,18 @@ def main():
     df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
     # # df=feature_engineering_max_min(df,cols_lag_delta_max_min_regl)
     df=feature_engineering_ratio(df,cols_ratios)
-    # # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
+    df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
+    # df=feature_engineering_normalizacion(df,["mcuentas_saldo","ccallcenter_transacciones"])
+
+                                ## B - ELIMINACION DE FEATURES
+    ## 1. Contruccion de las columnas
+    feat_imp_file_name='2025-10-05_11-38-34_final_train_lgbm_data_frame_feat_imp.xlsx'
+    feat_imp_file=feat_imp_path+feat_imp_file_name
+    cols_dropear=contrs_cols_dropear_feat_imp(df,feat_imp_file,0.02)
+    ## 2. Feat engin
+    df=feature_engineering_drop_cols(df,cols_dropear)
+
+
 
 
 
@@ -169,7 +183,7 @@ def main():
     ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04    
     name_1rst_train="1rst_train"
     model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter,best_params , fecha,name_1rst_train)
-    grafico_feature_importance(model_lgbm,name_1rst_train,fecha)
+    grafico_feature_importance(model_lgbm,X_train,name_1rst_train,fecha)
     y_pred_lgbm=prediccion_test_lgbm(X_test , y_test_binaria ,model_lgbm) 
 
     #Evaluacion umbral fijo
@@ -193,22 +207,16 @@ def main():
     # y_train_binaria_final = pd.concat([y_train_binaria , y_test_binaria],axis=0)
     # w_train_final=pd.concat([w_train,w_test],axis=0)
 
-
     MES_TRAIN.append(MES_TEST)
-    X_train_final, y_train_binaria_final,y_train_class, w_train_final, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
-
+    X_train_final, y_train_binaria_final,y_train_class_final, w_train_final, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
+    # umbral_optimo=0.03083123681364618 
+    umbral_optimo =0.052
     model_lgbm_final = entrenamiento_lgbm(X_train_final , y_train_binaria_final,w_train_final ,best_iter,best_params , fecha,name_final_train)
-    grafico_feature_importance(model_lgbm_final,name_final_train,fecha)
-    # y_apred_final=prediccion_apred(X_apred ,y_apred,model_lgbm_final,umbral_optimo,fecha)
-    # y_apred_final=prediccion_apred(X_apred ,y_apred,model_lgbm_final,UMBRAL,fecha)
+    grafico_feature_importance(model_lgbm_final,X_train_final,name_final_train,fecha)
     y_apred=X_apred[["numero_de_cliente"]]
-    y_pred=model_lgbm_final.predict(X_apred)
-    y_apred["prediction"] = y_pred
-    y_apred["prediction"]=y_apred["prediction"].apply(lambda x : 1 if x >=0.025 else 0)
-    logger.info(f"cantidad de bajas predichas : {(y_apred==1).sum()}")
-    y_apred=y_apred.set_index("numero_de_cliente")
-    y_apred.to_csv(f"outputs/lgbm_model/final_prediction/{fecha}_predicciones.csv")
-
+    
+    y_apred_final=prediccion_apred(X_apred ,y_apred,model_lgbm_final,umbral_optimo,fecha,comentario)
+    
     logger.info(f">>> Ejecucion finalizada. Revisar logs para mas detalles. {nombre_log}")
 
 

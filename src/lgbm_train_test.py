@@ -24,6 +24,7 @@ model_path=PATH_OUTPUT_LGBM + 'model/'
 prediccion_final_path = PATH_OUTPUT_LGBM + 'final_prediction/'
 graf_train_path=PATH_OUTPUT_LGBM +'grafico_train/'
 umbrales_path=PATH_OUTPUT_LGBM +'umbrales/'
+feat_imp_path=PATH_OUTPUT_LGBM +'feature_importances/'
 
 
 
@@ -152,7 +153,8 @@ def prediccion_lgbm_umbral_movil(X_test:pd.DataFrame , y_test_binaria:pd.Series,
     umbrales = {
     "umbral_optimo": float(umbral_optimo),
     "cliente": int(indx_max_ganancia_acumulada),
-    "ganancia_max": float(max_ganancia_acumulada)
+    "ganancia_max": float(max_ganancia_acumulada),
+    "SEMILLA":SEMILLA
     }
     try:
         with open(umbrales_path+f"{name}_umbral.json", "w") as f:
@@ -180,7 +182,7 @@ def evaluacion_public_private(X_test:pd.DataFrame , y_test_binaria:pd.Series , y
             y_pred_public = y_pred[public_index]
 
             row[model_id+"_public"] = ganancia_prob_umbral_fijo(y_pred_public, y_true_public, 0.3,umbral)
-            row[model_id+"_private"] =ganancia_prob_umbral_fijo(y_pred_private, y_true_private, 0.3,umbral)
+            row[model_id+"_private"] =ganancia_prob_umbral_fijo(y_pred_private, y_true_private, 0.7,umbral)
 
         rows.append(row)
 
@@ -200,19 +202,33 @@ def evaluacion_public_private(X_test:pd.DataFrame , y_test_binaria:pd.Series , y
     logger.info("Fin de los histogramas de public and private")
 
 
-def grafico_feature_importance(model_lgbm:lgb.Booster,name:str,fecha:str,threshold:int=0.025):
+def grafico_feature_importance(model_lgbm:lgb.Booster,X_train:pd.DataFrame,name:str,fecha:str,threshold:int=0.025):
     logger.info("Comienzo del grafico de feature importance")
     name=f"{fecha}_{name}_lgbm"
     try:
         lgb.plot_importance(model_lgbm, figsize=(10, 20))
-        plt.savefig(graf_train_path+f"{name}_grafico_feature_importance_plot.png", bbox_inches='tight')
+        plt.savefig(feat_imp_path+f"{name}_grafico_feature_importance_plot.png", bbox_inches='tight')
     except Exception as e:
         logger.error(f"Error al intentar graficar los feat importances: {e}")
     logger.info("Fin del grafico de feature importance")
 
+    importances = model_lgbm.feature_importance()
+    feature_names = X_train.columns.tolist()
+    importance_df = pd.DataFrame({'feature': feature_names, 'importance': importances})
+    importance_df = importance_df.sort_values('importance', ascending=False)
+    importance_df["importance_%"] = (importance_df["importance"] /importance_df["importance"].sum())*100
+    # importance_df[importance_df['importance'] > 0]
+    logger.info("Guardado de feat import en excel")
+    try :
+        importance_df.to_excel(feat_imp_path+f"{name}_data_frame_feat_imp.xlsx" ,index=False)
+        logger.info("Guardado feat imp en excel con EXITO")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar los feat imp en excel por {e}")
 
 
-def prediccion_apred(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lgbm:lgb.Booster, umbral:float,fecha:str)->pd.DataFrame:
+
+
+def prediccion_apred(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lgbm:lgb.Booster, umbral:float,fecha:str,comentario:str)->pd.DataFrame:
     name=fecha+"_predicciones"
     logger.info(f"Comienzo de las predicciones del mes {X_apred['foto_mes'].unique()} ")
     y_pred=model_lgbm.predict(X_apred)
@@ -220,7 +236,7 @@ def prediccion_apred(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lgbm:lg
     y_apred["prediction"]=y_apred["prediction"].apply(lambda x : 1 if x >= umbral else 0)
     logger.info(f"cantidad de bajas predichas : {(y_apred['prediction']==1).sum()}")
     y_apred=y_apred.set_index("numero_de_cliente")
-    file_name=prediccion_final_path+name+".csv"
+    file_name=prediccion_final_path+name+"_"+comentario+".csv"
     try:
         y_apred.to_csv(file_name)
         logger.info(f"predicciones guardadas en {file_name}")

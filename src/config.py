@@ -1,6 +1,7 @@
 #config.py
 ## Configuracion General
-SEMILLA= 14
+SEMILLA= 773767#14
+SEMILLAS=[259621, 282917, 413417, 773767, 290827]
 
 ## INPUT FILES
 PATH_INPUT_DATA="data/competencia_01.csv"
