@@ -1,4 +1,4 @@
-#random_forest.py
+#lgbm_train_test.py
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -173,14 +173,14 @@ def evaluacion_public_private(X_test:pd.DataFrame , y_test_binaria:pd.Series , y
     rows=[]
     for private_index , public_index in sss.split(X_test , y_test_binaria):
         row={}
-        for name , y_pred in modelos.items():
+        for model_id , y_pred in modelos.items():
             y_true_private = y_test_binaria.iloc[private_index]
             y_pred_private = y_pred[private_index]
             y_true_public = y_test_binaria.iloc[public_index]
             y_pred_public = y_pred[public_index]
 
-            row[name+"_public"] = ganancia_prob_umbral_fijo(y_pred_public, y_true_public, 0.3,umbral)
-            row[name+"_private"] =ganancia_prob_umbral_fijo(y_pred_private, y_true_private, 0.3,umbral)
+            row[model_id+"_public"] = ganancia_prob_umbral_fijo(y_pred_public, y_true_public, 0.3,umbral)
+            row[model_id+"_private"] =ganancia_prob_umbral_fijo(y_pred_private, y_true_private, 0.3,umbral)
 
         rows.append(row)
 
@@ -193,7 +193,7 @@ def evaluacion_public_private(X_test:pd.DataFrame , y_test_binaria:pd.Series , y
     try:
         g = sns.FacetGrid(df_lb_long, col="tipo", row="modelo", aspect=2)
         g.map(sns.histplot, "ganancia", kde=True)
-        plt.savefig(graf_train_path+f"{fecha}_grafico_ganancia_hist.png", bbox_inches='tight')
+        plt.savefig(graf_train_path+f"{name}_grafico_ganancia_hist.png", bbox_inches='tight')
     except Exception as e:
         logger.error(f"Error al intentar hacer el grafico de los histogramas {e}")
 
@@ -218,7 +218,7 @@ def prediccion_apred(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lgbm:lg
     y_pred=model_lgbm.predict(X_apred)
     y_apred["prediction"] = y_pred
     y_apred["prediction"]=y_apred["prediction"].apply(lambda x : 1 if x >= umbral else 0)
-    logger.info(f"cantidad de bajas predichas : {(y_apred["prediction"]==1).sum()}")
+    logger.info(f"cantidad de bajas predichas : {(y_apred['prediction']==1).sum()}")
     y_apred=y_apred.set_index("numero_de_cliente")
     file_name=prediccion_final_path+name+".csv"
     try:
@@ -227,7 +227,6 @@ def prediccion_apred(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lgbm:lg
     except Exception as e:
         logger.error(f"Error al intentar guardar las predicciones --> {e}")
         raise
-
     return y_apred
 
     
