@@ -2,8 +2,10 @@
 import pandas as pd
 import numpy as np
 import logging
+from src.config import PATH_OUTPUT_LGBM
 
 logger=logging.getLogger(__name__)
+feat_imp_path=PATH_OUTPUT_LGBM +'feature_importances/'
 
 def contruccion_cols(df:pd.DataFrame|np.ndarray)->list[list]:
     logger.info("Comienzo de la extraccion de la seleccion de las columnas")
@@ -38,10 +40,26 @@ def contruccion_cols(df:pd.DataFrame|np.ndarray)->list[list]:
             i+=1
         if i < len(lista_m):
             cols_ratios.append([lista_m[i],c ])
+
+
+
+
     logger.info(f"columnas para lags y deltas : {cols_lag_delta_max_min_regl}")
     logger.info(f"columnas para ratios : {cols_ratios}")
     logger.info("Finalizacion de la construccion de las columnas")
 
     return [cols_lag_delta_max_min_regl ,cols_ratios ]
 
+
+def contrs_cols_dropear_feat_imp(df:pd.DataFrame , file:str , threshold:float)->list[str]:
+    logger.info(f"Comienzo de la seleccion de columnas a dropear")
+    importance_df=pd.read_excel(file)
+    f = importance_df["importance_%"]<=threshold
+    cols_menos_importantes=list(importance_df.loc[f,'feature'].unique())
+    cols_no_dropear=["foto_mes","numero_de_cliente"]
+    cols_dropear=[c for c in  cols_menos_importantes if c not in cols_no_dropear]
+    logger.info(f"Fin de la seleccion de columnas a dropear. Se eliminaran {len(cols_dropear)} columnas")
+
+    return cols_dropear
+    
 

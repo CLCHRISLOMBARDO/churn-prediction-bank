@@ -175,3 +175,23 @@ def feature_engineering_linreg(df : pd.DataFrame|np.ndarray , columnas:list[str]
     con.close()
     logger.info(f"ejecucion reg lineal finalizada. df shape: {df.shape}")
     return df
+
+def feature_engineering_normalizacion(df:pd.DataFrame , columnas:list[str]) -> pd.DataFrame:
+    logger.info(f"Comienzo de la normalizacion de las cols seleccionadas , df shape {df.shape}")
+    for attr in columnas:
+        max_attr = df[attr].max()
+        min_attr = df[attr].min()
+        dif_max_min = max_attr - min_attr
+        df[attr]= (df[attr] - min_attr) / dif_max_min
+    logger.info(f"Finalizaion de la normalizacion df shape : {df.shape}")
+    return df
+
+def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) -> pd.DataFrame:
+    logger.info(f"Comienzo dropeo de {len(columnas)} columnas. df shape --> {df.shape} ")
+    try:
+        df=df.drop(columns=columnas)
+        logger.info(f"Fin del dropeo de {len(columnas)} columnas. df shape --> {df.shape}")
+    except Exception as e:
+        logger.error(f"Error al intentar borrar las colunas --> {e}")
+        raise
+    return df
