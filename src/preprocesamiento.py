@@ -8,15 +8,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_test:int,mes_apred:int) ->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
-    logger.info("Creacion label binario")
+    logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
+    logger.info(f"mes train={mes_train}  -  mes test={mes_test} - mes apred={mes_apred} ")
 
-    df['clase_peso'] = 1.0
-
-    df.loc[df['clase_ternaria'] == 'BAJA+2', 'clase_peso'] = 1.00002
-    df.loc[df['clase_ternaria'] == 'BAJA+1', 'clase_peso'] = 1.00001
-
-    df['clase_binaria'] = 0
-    df['clase_binaria'] = np.where(df['clase_ternaria'] == 'Continua', 0, 1)
     train_data = df[df['foto_mes'].isin(mes_train)]
     test_data = df[df['foto_mes'] == mes_test]
     apred_data = df[df['foto_mes'] == mes_apred]
@@ -47,5 +41,23 @@ def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_tes
     logger.info("Finalizacion label binario")
     return X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test ,X_apred , y_apred 
 
+
+
+def conversion_binario(df:pd.DataFrame|np.ndarray) ->pd.DataFrame:
+    logger.info("Creacion label binario")
+
+    df['clase_peso'] = 1.0
+
+    df.loc[df['clase_ternaria'] == 'BAJA+2', 'clase_peso'] = 1.00002
+    df.loc[df['clase_ternaria'] == 'BAJA+1', 'clase_peso'] = 1.00001
+
+    df['clase_binaria'] = 0
+    df['clase_binaria'] = np.where(df['clase_ternaria'] == 'Continua', 0, 1)
+
+
+    logger.info(f"Total de y=1 : {(df['clase_binaria']==1).sum()}")
+    logger.info(f"Total de y=0 : {(df['clase_binaria']==0).sum()}")
+    logger.info(f"Finalizacion de la binarizacion")
+    return df
 
 
