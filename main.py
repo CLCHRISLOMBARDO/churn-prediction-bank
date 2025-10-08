@@ -210,7 +210,7 @@ def main():
     MES_TRAIN.append(MES_TEST)
     X_train_final, y_train_binaria_final,y_train_class_final, w_train_final, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
     # umbral_optimo=0.03083123681364618 
-    umbral_optimo =0.052
+    umbral_optimo =0.025
     model_lgbm_final = entrenamiento_lgbm(X_train_final , y_train_binaria_final,w_train_final ,best_iter,best_params , fecha,name_final_train)
     grafico_feature_importance(model_lgbm_final,X_train_final,name_final_train,fecha)
     y_apred=X_apred[["numero_de_cliente"]]

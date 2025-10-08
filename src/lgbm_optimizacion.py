@@ -47,8 +47,8 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
     def objective(trial):
 
         num_leaves = trial.suggest_int('num_leaves', 8, 100)
-        learning_rate = trial.suggest_float('learning_rate', 0.005, 0.3) # mas bajo, más iteraciones necesita
-        min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 1, 1000)
+        learning_rate = trial.suggest_float('learning_rate', 0.003, 0.1) 
+        min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 600, 1600)
         feature_fraction = trial.suggest_float('feature_fraction', 0.1, 1.0)
         bagging_fraction = trial.suggest_float('bagging_fraction', 0.1, 1.0)
 
@@ -74,7 +74,7 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
         cv_results = lgb.cv(
             params,
             train_data,
-            num_boost_round=N_BOOSTS, # modificar, subit y subir... y descomentar la línea inferior
+            num_boost_round=N_BOOSTS, 
             #early_stopping_rounds= int(50 + 5 / learning_rate),
             feval=lgb_gan_eval,
             stratified=True,
