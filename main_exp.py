@@ -8,10 +8,9 @@ import logging
 import json
 import lightgbm as lgb
 import optuna
-import sys # Eliminar despues
 
 from src.config import *
-from src.experimentos.experimento1 import lanzar_experimento_1
+from src_experimentos.experimento1 import lanzar_experimento_1
 from src.lgbm_train_test import  entrenamiento_lgbm , prediccion_test_lgbm,ganancia_prob_umbral_fijo,grafico_feature_importance ,evaluacion_public_private,prediccion_lgbm_umbral_movil,prediccion_apred
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 
@@ -20,8 +19,11 @@ from src.lgbm_train_test import  entrenamiento_lgbm , prediccion_test_lgbm,ganan
 n_trials=N_TRIALS
 
 ## Creacion de las carpetas
-        #LOGS
+        #LOGS PATHS
 os.makedirs(PATH_LOGS,exist_ok=True)
+        #OUTPUT PATHS
+os.makedirs(PATH_OUTPUT_FINALES,exist_ok=True)
+os.makedirs(PATH_OUTPUT_EXPERIMENTOS,exist_ok=True)
         #BAYESIANA
 os.makedirs(PATH_OUTPUT_OPTIMIZACION,exist_ok=True)
 os.makedirs(db_path,exist_ok=True)
@@ -32,16 +34,19 @@ os.makedirs(graf_bayesiana_path,exist_ok=True)
 os.makedirs(PATH_OUTPUT_LGBM,exist_ok=True)
 os.makedirs(model_path,exist_ok=True)
 os.makedirs(prediccion_final_path,exist_ok=True)
-os.makedirs(graf_train_path,exist_ok=True)
+os.makedirs(graf_curva_ganancia_path,exist_ok=True)
+os.makedirs(graf_hist_ganancia_path,exist_ok=True)
+os.makedirs(ganancia_total_path,exist_ok=True)
 os.makedirs(umbrales_path,exist_ok=True)
 os.makedirs(feat_imp_path,exist_ok=True)
         #EXPERIMENTOS
-os.makedirs(PATH_OUTPUT_EXP,exist_ok=True)
-os.makedirs(path_output_exp_feat_imp,exist_ok=True)
-os.makedirs(path_output_exp_graf_ganancias_hist,exist_ok=True)
-os.makedirs(path_output_exp_umbral,exist_ok=True)
-os.makedirs(path_output_exp_graf_curva_ganancia,exist_ok=True)
 os.makedirs(path_output_exp_model,exist_ok=True)
+os.makedirs(path_output_exp_feat_imp,exist_ok=True)
+os.makedirs(path_output_exp_graf_gan_hist,exist_ok=True)
+os.makedirs(path_output_exp_ganancia_total,exist_ok=True)
+os.makedirs(path_output_exp_graf_curva_ganancia,exist_ok=True)
+os.makedirs(path_output_exp_umbral,exist_ok=True)
+
 
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -61,10 +66,11 @@ logger = logging.getLogger(__name__)
 ## --------------------------------------------------------Funcion main ------------------------------------------
 
 def main():
+    
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
 
 
-    lanzar_experimento_1(fecha , SEMILLA)
+    lanzar_experimento_1(fecha , [SEMILLA],)
 
     return
 

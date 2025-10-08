@@ -2,7 +2,7 @@
 ## Configuracion General
 SEMILLA= 773767#14
 SEMILLAS=[259621, 282917, 413417, 773767, 290827]
-N_SEMILLAS= 50
+N_SEMILLAS= 49
 ## INPUT PATHS
 PATH_INPUT_DATA="data/competencia_01.csv"
 
@@ -11,21 +11,35 @@ PATH_LOGS= "logs/"
 
 ## OUTPUTS PATHS
 PATH_OUTPUT_DATA="outputs/data_outputs/"
-PATH_OUTPUT_LGBM="outputs/lgbm_model/"
+PATH_OUTPUT_FINALES = "outputs/finales_outputs/"
+PATH_OUTPUT_EXPERIMENTOS = "outputs/experimentos_outputs/"
 
+    # PATH_OUTPUT_FINALES
 ## BAYESIANA PATHS
-PATH_OUTPUT_OPTIMIZACION="outputs/lgbm_optimizacion/"
+PATH_OUTPUT_OPTIMIZACION=PATH_OUTPUT_FINALES+"lgbm_optimizacion/"
 db_path = PATH_OUTPUT_OPTIMIZACION + 'db/'
 bestparams_path = PATH_OUTPUT_OPTIMIZACION+'best_params/'
 best_iter_path = PATH_OUTPUT_OPTIMIZACION+'best_iters/'
 graf_bayesiana_path = PATH_OUTPUT_OPTIMIZACION+'grafico_bayesiana/'
-
 ## MODEL PATHS
+PATH_OUTPUT_LGBM=PATH_OUTPUT_FINALES+"lgbm_model/"
 model_path=PATH_OUTPUT_LGBM + 'model/'
 prediccion_final_path = PATH_OUTPUT_LGBM + 'final_prediction/'
-graf_train_path=PATH_OUTPUT_LGBM +'grafico_train/'
+graf_curva_ganancia_path=PATH_OUTPUT_LGBM +'graf_curva_ganancia/'
+graf_hist_ganancia_path=PATH_OUTPUT_LGBM +'graf_ganancias_hist/'
+ganancia_total_path=PATH_OUTPUT_LGBM + "ganancias_total/"
 umbrales_path=PATH_OUTPUT_LGBM +'umbrales/'
 feat_imp_path=PATH_OUTPUT_LGBM +'feature_importances/'
+
+    # PATH_OUTPUT_EXPERIMENTOS
+## EXPERIMENTS PATHS
+path_output_exp_model=PATH_OUTPUT_EXPERIMENTOS + "exp_model/"
+path_output_exp_feat_imp=PATH_OUTPUT_EXPERIMENTOS + "exp_feat_importances/"
+path_output_exp_graf_gan_hist=PATH_OUTPUT_EXPERIMENTOS + "exp_graf_ganancias_hist/"
+path_output_exp_ganancia_total=PATH_OUTPUT_EXPERIMENTOS + "exp_ganancias_total/"
+path_output_exp_graf_curva_ganancia=PATH_OUTPUT_EXPERIMENTOS + "exp_graf_curva_ganancia/"
+path_output_exp_umbral=PATH_OUTPUT_EXPERIMENTOS + "exp_umbrales/"
+
 
 ## Submuestra - solo uso por el momento el de segmentacion
 MES_TRAIN =[202101,202102,202103]
@@ -44,17 +58,6 @@ ESTIMULO = 20000
 N_TRIALS= 150
 N_BOOSTS=1000
 N_FOLDS=5
-
-## CONFIG EXPERIMENTOS
-    # PATHS
-PATH_OUTPUT_EXP="outputs/experimentos/"
-path_output_exp_model=PATH_OUTPUT_EXP + "exp_model/"
-path_output_exp_feat_imp=PATH_OUTPUT_EXP + "exp_feat_importances/"
-path_output_exp_graf_ganancias_hist=PATH_OUTPUT_EXP + "exp_graf_ganancias_hist/"
-path_output_exp_umbral=PATH_OUTPUT_EXP + "exp_umbrales/"
-path_output_exp_graf_curva_ganancia=PATH_OUTPUT_EXP + "exp_graf_curva_ganancia/"
-
-
 
 
 
