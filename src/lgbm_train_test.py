@@ -14,27 +14,17 @@ import datetime
 import pickle
 import json
 
-from src.config import PATH_OUTPUT_LGBM , SEMILLA ,GANANCIA , ESTIMULO
+from src.config import SEMILLA,GANANCIA,ESTIMULO,PATH_OUTPUT_LGBM,model_path,prediccion_final_path,graf_curva_ganancia_path,graf_hist_ganancia_path,umbrales_path,feat_imp_path 
+from src.config import PATH_OUTPUT_EXPERIMENTOS ,path_output_exp_model,path_output_exp_feat_imp,path_output_exp_graf_gan_hist,path_output_exp_umbral,path_output_exp_graf_curva_ganancia
 
 ganancia_acierto = GANANCIA
 costo_estimulo=ESTIMULO
 
-output_path = PATH_OUTPUT_LGBM
-model_path=PATH_OUTPUT_LGBM + 'model/'
-prediccion_final_path = PATH_OUTPUT_LGBM + 'final_prediction/'
-graf_train_path=PATH_OUTPUT_LGBM +'grafico_train/'
-umbrales_path=PATH_OUTPUT_LGBM +'umbrales/'
-feat_imp_path=PATH_OUTPUT_LGBM +'feature_importances/'
-
-
-
 logger = logging.getLogger(__name__)
 
-
-
-def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, best_iter:int, best_parameters:dict[str, object], fecha:str,name:str)->lgb.Booster:
+def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, best_iter:int, best_parameters:dict[str, object],name:str,output_path:str,semilla:int)->lgb.Booster:
     # name es para identificar 1rt_train o final_train
-    name=f"{fecha}_{name}_lgbm"
+    name=f"{name}_model_lgbm"
     logger.info(f"Comienzo del entrenamiento del lgbm : {name}")
         
     best_iter = best_iter
@@ -51,7 +41,7 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:p
         'min_data_in_leaf': best_parameters['min_data_in_leaf'],
         'feature_fraction': best_parameters['feature_fraction'],
         'bagging_fraction': best_parameters['bagging_fraction'],
-        'seed': SEMILLA,
+        'seed': semilla,
         'verbose': 0
     }
 
@@ -63,9 +53,9 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:p
                     train_data,
                     num_boost_round=best_iter)
 
-
+    logger.info(f"comienzo del guardado en {output_path}")
     try:
-        filename=model_path+f'{name}.txt'
+        filename=output_path+f'{name}.txt'
         model_lgbm.save_model(filename )                         
         logger.info(f"Modelo {name} guardado en {filename}")
         logger.info("Fin del entrenamiento del LGBM")
@@ -73,7 +63,30 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:p
         logger.error(f"Error al intentar guardar el modelo {name}, por el error {e}")
         return
     return model_lgbm
-    
+
+def grafico_feature_importance(model_lgbm:lgb.Booster,X_train:pd.DataFrame,name:str,fecha:str,output_path:str):
+    logger.info("Comienzo del grafico de feature importance")
+    name=f"{fecha}_{name}_lgbm"
+    try:
+        lgb.plot_importance(model_lgbm, figsize=(10, 20))
+        plt.savefig(feat_imp_path+f"{name}_grafico_feature_importance_plot.png", bbox_inches='tight')
+    except Exception as e:
+        logger.error(f"Error al intentar graficar los feat importances: {e}")
+    logger.info("Fin del grafico de feature importance")
+
+    importances = model_lgbm.feature_importance()
+    feature_names = X_train.columns.tolist()
+    importance_df = pd.DataFrame({'feature': feature_names, 'importance': importances})
+    importance_df = importance_df.sort_values('importance', ascending=False)
+    importance_df["importance_%"] = (importance_df["importance"] /importance_df["importance"].sum())*100
+    # importance_df[importance_df['importance'] > 0]
+    logger.info("Guardado de feat import en excel")
+    try :
+        importance_df.to_excel(feat_imp_path+f"{name}_data_frame_feat_imp.xlsx" ,index=False)
+        logger.info("Guardado feat imp en excel con EXITO")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar los feat imp en excel por {e}")
+
 
 def ganancia_prob_umbral_fijo(y_pred:pd.Series, y_true:pd.Series ,prop=1,threshold:int=0.025)->float:
     # logger.info(f"comienzo funcion ganancia con threshold = {threshold}")
@@ -202,28 +215,6 @@ def evaluacion_public_private(X_test:pd.DataFrame , y_test_binaria:pd.Series , y
     logger.info("Fin de los histogramas de public and private")
 
 
-def grafico_feature_importance(model_lgbm:lgb.Booster,X_train:pd.DataFrame,name:str,fecha:str,threshold:int=0.025):
-    logger.info("Comienzo del grafico de feature importance")
-    name=f"{fecha}_{name}_lgbm"
-    try:
-        lgb.plot_importance(model_lgbm, figsize=(10, 20))
-        plt.savefig(feat_imp_path+f"{name}_grafico_feature_importance_plot.png", bbox_inches='tight')
-    except Exception as e:
-        logger.error(f"Error al intentar graficar los feat importances: {e}")
-    logger.info("Fin del grafico de feature importance")
-
-    importances = model_lgbm.feature_importance()
-    feature_names = X_train.columns.tolist()
-    importance_df = pd.DataFrame({'feature': feature_names, 'importance': importances})
-    importance_df = importance_df.sort_values('importance', ascending=False)
-    importance_df["importance_%"] = (importance_df["importance"] /importance_df["importance"].sum())*100
-    # importance_df[importance_df['importance'] > 0]
-    logger.info("Guardado de feat import en excel")
-    try :
-        importance_df.to_excel(feat_imp_path+f"{name}_data_frame_feat_imp.xlsx" ,index=False)
-        logger.info("Guardado feat imp en excel con EXITO")
-    except Exception as e:
-        logger.error(f"Error al intentar guardar los feat imp en excel por {e}")
 
 
 
