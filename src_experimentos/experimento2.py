@@ -49,7 +49,6 @@ def lanzar_experimento_2(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
     df=cargar_datos(PATH_INPUT_DATA)
     print(df.head())
 
-    ## 1. PREPROCESAMIENTO
     
 
                             ## A - AGREGADO DE FEATURES
@@ -127,10 +126,12 @@ def lanzar_experimento_2(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
         name_1rst_train=f"{name}_SEMILLA_{semilla}_1rst_train_01"
         model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter,best_params ,name_1rst_train,output_path_models,semilla)
         # Grafico features importances
+        
         grafico_feature_importance(model_lgbm,X_train,name_1rst_train,output_path_feat_imp)
 
         # Predicciones en test 04 para cada modelo
         y_pred_lgbm=prediccion_test_lgbm(X_test ,model_lgbm)
+        
 
         # Umbral optimo
         if proceso_ppal == "experimento":
