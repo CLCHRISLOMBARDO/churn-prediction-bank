@@ -20,7 +20,7 @@ logger=logging.getLogger(__name__)
 
 def lanzar_experimento_2(fecha:str ,semillas:list[int],proceso_ppal:str ="experimento"): #semillas, si queremos hacer una prediccion final, poner solo una semilla en una lista
     n_semillas = len(semillas)
-    name=f"{fecha}_EXPERIMENTO_1"
+    name=f"{fecha}_EXPERIMENTO_2"
     logger.info(f"Comienzo del experimento 1 : {name} con {n_semillas} semillas")
 
     # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import
@@ -131,7 +131,7 @@ def lanzar_experimento_2(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
 
         # Predicciones en test 04 para cada modelo
         y_pred_lgbm=prediccion_test_lgbm(X_test ,model_lgbm)
-        
+
 
         # Umbral optimo
         if proceso_ppal == "experimento":
