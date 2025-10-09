@@ -44,8 +44,8 @@ def contruccion_cols(df:pd.DataFrame|np.ndarray)->list[list]:
 
 
 
-    logger.info(f"columnas para lags y deltas : {cols_lag_delta_max_min_regl}")
-    logger.info(f"columnas para ratios : {cols_ratios}")
+    logger.info(f"columnas para lags y deltas ")
+    logger.info(f"columnas para ratios :")
     logger.info("Finalizacion de la construccion de las columnas")
 
     return [cols_lag_delta_max_min_regl ,cols_ratios ]

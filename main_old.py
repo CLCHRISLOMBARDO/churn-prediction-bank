@@ -14,9 +14,9 @@ from src.config import *
 from src.loader import cargar_datos
 from src.constr_lista_cols import contruccion_cols , contrs_cols_dropear_feat_imp
 from src.feature_engineering import feature_engineering_delta, feature_engineering_lag , feature_engineering_ratio,feature_engineering_linreg,feature_engineering_max_min ,feature_engineering_normalizacion,feature_engineering_drop_cols
-from src.preprocesamiento import split_train_binario
+from src.preprocesamiento import split_train_binario,conversion_binario
 from src.lgbm_optimizacion import optim_hiperp_binaria , graficos_bayesiana
-from src.lgbm_train_test import  entrenamiento_lgbm , prediccion_test_lgbm,ganancia_prob_umbral_fijo,grafico_feature_importance ,evaluacion_public_private,prediccion_lgbm_umbral_movil,prediccion_apred
+from src.lgbm_train_test import  entrenamiento_lgbm , prediccion_test_lgbm,grafico_feature_importance ,evaluacion_public_private,prediccion_apred
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 
 
@@ -25,27 +25,27 @@ n_trials=N_TRIALS
 
 ## Creacion de las carpetas
         #LOGS
-os.makedirs(PATH_LOGS,exist_ok=True)
-        #BAYESIANA
-os.makedirs(PATH_OUTPUT_OPTIMIZACION,exist_ok=True)
-os.makedirs(db_path,exist_ok=True)
-os.makedirs(bestparams_path,exist_ok=True)
-os.makedirs(best_iter_path,exist_ok=True)
-os.makedirs(graf_bayesiana_path,exist_ok=True)
-        #MODELS
-os.makedirs(PATH_OUTPUT_LGBM,exist_ok=True)
-os.makedirs(model_path,exist_ok=True)
-os.makedirs(prediccion_final_path,exist_ok=True)
-os.makedirs(graf_train_path,exist_ok=True)
-os.makedirs(umbrales_path,exist_ok=True)
-os.makedirs(feat_imp_path,exist_ok=True)
-        #EXPERIMENTOS
-os.makedirs(PATH_OUTPUT_EXP,exist_ok=True)
-os.makedirs(path_output_exp_feat_imp,exist_ok=True)
-os.makedirs(path_output_exp_graf_ganancias_hist,exist_ok=True)
-os.makedirs(path_output_exp_umbral,exist_ok=True)
-os.makedirs(path_output_exp_graf_curva_ganancia,exist_ok=True)
-os.makedirs(path_output_exp_model,exist_ok=True)
+# os.makedirs(PATH_LOGS,exist_ok=True)
+#         #BAYESIANA
+# os.makedirs(PATH_OUTPUT_OPTIMIZACION,exist_ok=True)
+# os.makedirs(db_path,exist_ok=True)
+# os.makedirs(bestparams_path,exist_ok=True)
+# os.makedirs(best_iter_path,exist_ok=True)
+# os.makedirs(graf_bayesiana_path,exist_ok=True)
+#         #MODELS
+# os.makedirs(PATH_OUTPUT_LGBM,exist_ok=True)
+# os.makedirs(model_path,exist_ok=True)
+# os.makedirs(prediccion_final_path,exist_ok=True)
+# os.makedirs(graf_train_path,exist_ok=True)
+# os.makedirs(umbrales_path,exist_ok=True)
+# os.makedirs(feat_imp_path,exist_ok=True)
+#         #EXPERIMENTOS
+# os.makedirs(PATH_OUTPUT_EXP,exist_ok=True)
+# os.makedirs(path_output_exp_feat_imp,exist_ok=True)
+# os.makedirs(path_output_exp_graf_ganancias_hist,exist_ok=True)
+# os.makedirs(path_output_exp_umbral,exist_ok=True)
+# os.makedirs(path_output_exp_graf_curva_ganancia,exist_ok=True)
+# os.makedirs(path_output_exp_model,exist_ok=True)
 
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -114,6 +114,7 @@ def main():
 # # ----------------------------------------------------------------------------------------------------------
     ## 3. Preprocesamiento para entrenamiento
     # split X_train, y_train
+    df = conversion_binario(df)
     X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
                 # Guardo df
     # try:
