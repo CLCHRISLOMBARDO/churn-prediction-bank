@@ -1,5 +1,5 @@
 #experimento1.py
-# EXPERIMENTO 1 : Se entrena 3 modelos distintos apra 01 02 03 con sus feat eng respectivos, y luego se hace ensamble
+# EXPERIMENTO 2 : Se entrena 1 modelos  apra 01 02 03 con sus feat eng respectivos
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,13 +12,13 @@ from src.loader import cargar_datos
 from src.preprocesamiento import conversion_binario,split_train_binario
 from src.constr_lista_cols import contruccion_cols
 from src.feature_engineering import feature_engineering_lag,feature_engineering_delta,feature_engineering_max_min,feature_engineering_ratio,feature_engineering_linreg,feature_engineering_normalizacion,feature_engineering_drop_cols
-from src.lgbm_train_test import entrenamiento_lgbm,grafico_feature_importance,prediccion_test_lgbm ,umbral_optimo_calc,grafico_curvas_ganancia,evaluacion_public_private
+from src.lgbm_train_test import entrenamiento_lgbm,grafico_feature_importance,prediccion_test_lgbm ,umbral_optimo_calc,grafico_curvas_ganancia,evaluacion_public_private , graf_hist_ganancias
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 ## Carga de variables
 
 logger=logging.getLogger(__name__)
 
-def lanzar_experimento_1(fecha:str ,semillas:list[int],proceso_ppal:str ="experimento"): #semillas, si queremos hacer una prediccion final, poner solo una semilla en una lista
+def lanzar_experimento_2(fecha:str ,semillas:list[int],proceso_ppal:str ="experimento"): #semillas, si queremos hacer una prediccion final, poner solo una semilla en una lista
     n_semillas = len(semillas)
     name=f"{fecha}_EXPERIMENTO_1"
     logger.info(f"Comienzo del experimento 1 : {name} con {n_semillas} semillas")
@@ -27,8 +27,9 @@ def lanzar_experimento_1(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
     if proceso_ppal =="experimento" :
         output_path_models = path_output_exp_model
         output_path_feat_imp = path_output_exp_feat_imp
-        # output_path_ganancias_total = 
-        output_path_graf_ganancia_hist=path_output_exp_graf_gan_hist
+        output_path_graf_ganancia_hist_semillas=path_output_exp_graf_gan_hist_semillas
+        output_path_graf_ganancia_hist_total =path_output_exp_graf_gan_hist_total
+        output_path_graf_ganancia_hist_grilla =path_output_exp_graf_gan_hist_grilla
         output_path_graf_curva_ganancia = path_output_exp_graf_curva_ganancia
         output_path_umbrales=path_output_exp_umbral
         logger.info(f"LANZAMIENTO PARA EXPERIMENTO CON {n_semillas} SEMILLAS")
@@ -37,8 +38,9 @@ def lanzar_experimento_1(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
         logger.info(f"LANZAMIENTO PARA PREDICCION FINAL CON {n_semillas} SEMILLAS")
         output_path_models = model_path
         output_path_feat_imp =feat_imp_path
-        # output_path_ganancias_total=
-        output_path_graf_ganancia_hist=graf_hist_ganancia_path
+        output_path_graf_ganancia_hist_semillas=graf_hist_ganancia_semillas_path
+        output_path_graf_ganancia_hist_total=graf_hist_ganancia_total_path
+        output_path_graf_ganancia_hist_grilla=graf_hist_ganancia_grilla_path
         output_path_graf_curva_ganancia = graf_curva_ganancia_path
         output_path_umbrales=umbrales_path
         # output_path_prediccion_final=
@@ -48,14 +50,8 @@ def lanzar_experimento_1(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
     print(df.head())
 
     ## 1. PREPROCESAMIENTO
-        #a. Binarizacion
-    df = conversion_binario(df)
+    
 
-        #b. Separacion 
-
-    df_01 = df[~df["foto_mes"].isin( [MES_02 , MES_03])]
-    df_02 = df[~df["foto_mes"].isin([MES_01 , MES_03])]
-    df_03 = df[~df["foto_mes"].isin([MES_01 , MES_02])]
                             ## A - AGREGADO DE FEATURES
 
     ## 1. Contruccion de las columnas
@@ -65,16 +61,13 @@ def lanzar_experimento_1(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
 #############################################################################-----  DESCOMENTAR  ------############################################
     # ## 2. Feature Engineering
     #             #01
-    df_01=feature_engineering_ratio(df_01,cols_ratios)
-                #02
-    df_02=feature_engineering_lag(df_02,cols_lag_delta_max_min_regl,1)
-    df_02=feature_engineering_delta(df_02,cols_lag_delta_max_min_regl,1)
-    # df_02=feature_engineering_ratio(df_02,cols_ratios)
+  
                 #03
-    df_03=feature_engineering_lag(df_03,cols_lag_delta_max_min_regl,2)
-    df_03=feature_engineering_delta(df_03,cols_lag_delta_max_min_regl,2)
-    # df_03=feature_engineering_ratio(df_03,cols_ratios)
-    df_03=feature_engineering_linreg(df_03,cols_lag_delta_max_min_regl)
+    
+    df=feature_engineering_lag(df,cols_lag_delta_max_min_regl,2)
+    df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
+    df=feature_engineering_ratio(df,cols_ratios)
+    df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
 
 
 
@@ -89,10 +82,9 @@ def lanzar_experimento_1(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
 
 
     #3. spliteo train - test - apred
-    X_train_01, y_train_binaria_01,y_train_class_01, w_train_01, X_test_para_01, y_test_binaria, y_test_class, w_test,X_apred_para_01, y_apred = split_train_binario(df_01,[MES_01],MES_TEST,MES_A_PREDECIR)
-    X_train_02, y_train_binaria_02,y_train_class_02, w_train_02,X_test_para_02, _, _, _,X_apred_para_02, _= split_train_binario(df_02,[MES_02],MES_TEST,MES_A_PREDECIR)
-    X_train_03, y_train_binaria_03,y_train_class_03, w_train_03, X_test_para_03, _, _, _,X_apred_para_03, _ = split_train_binario(df_03,[MES_03],MES_TEST,MES_A_PREDECIR)
-
+    df = conversion_binario(df)
+    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
+   
 
 ## 4. Carga de mejores Hiperparametros
 
@@ -102,6 +94,7 @@ def lanzar_experimento_1(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
             
  
     bayesiana_fecha_hora= '2025-10-05_23-29-49'
+    # bayesiana_fecha_hora='2025-09-26_17-37-58'
 
     name_best_params_file=f"best_params_binaria_{bayesiana_fecha_hora}.json"
     name_best_iter_file=f"best_iter_binaria_{bayesiana_fecha_hora}.json"
@@ -118,37 +111,26 @@ def lanzar_experimento_1(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
         logger.error(f"No se pudo encontrar los best params ni best iter por el error {e}")
         raise
 
-    best_params = {
-    "num_leaves": 127,
-    "learning_rate": 0.03564895,
-    "min_data_in_leaf": 400,
-    "feature_fraction": 0.8,
-    "bagging_fraction": 0.9}
 
 ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04 
     y_pred_sorted_dict={}
     ganancia_acumulada_dict={}
     umbrales_dict={}
+
+    lista_df_ganancias_clientes_por_semilla_n_split_50=[]
+    lista_df_ganancias_prob_por_semilla_n_split_50=[]
+
+    lista_df_ganancias_clientes_por_semilla_n_split_1=[]
+    lista_df_ganancias_prob_por_semilla_n_split_1=[]
     for i,semilla in enumerate(semillas):
         # Entrenamiento de los modelos
-        name_1rst_train_01=f"{name}_SEMILLA_{semilla}_1rst_train_01"
-        model_lgbm_01 = entrenamiento_lgbm(X_train_01 , y_train_binaria_01,w_train_01 ,best_iter,best_params ,name_1rst_train_01,output_path_models,semilla)
-        name_1rst_train_02=f"{name}_SEMILLA_{semilla}_1rst_train_02"
-        model_lgbm_02 = entrenamiento_lgbm(X_train_02 , y_train_binaria_02,w_train_02 ,best_iter,best_params ,name_1rst_train_02,output_path_models,semilla)
-        name_1rst_train_03=f"{name}_SEMILLA_{semilla}_1rst_train_03"
-        model_lgbm_03 = entrenamiento_lgbm(X_train_03 , y_train_binaria_03,w_train_03 ,best_iter,best_params ,name_1rst_train_03,output_path_models,semilla)
+        name_1rst_train=f"{name}_SEMILLA_{semilla}_1rst_train_01"
+        model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter,best_params ,name_1rst_train,output_path_models,semilla)
         # Grafico features importances
-        grafico_feature_importance(model_lgbm_01,X_train_01,name_1rst_train_01,output_path_feat_imp)
-        grafico_feature_importance(model_lgbm_02,X_train_02,name_1rst_train_02,output_path_feat_imp)
-        grafico_feature_importance(model_lgbm_03,X_train_03,name_1rst_train_03,output_path_feat_imp)
+        grafico_feature_importance(model_lgbm,X_train,name_1rst_train,output_path_feat_imp)
 
         # Predicciones en test 04 para cada modelo
-        y_pred_lgbm_01=prediccion_test_lgbm(X_test_para_01 ,model_lgbm_01)
-        y_pred_lgbm_02=prediccion_test_lgbm(X_test_para_02  ,model_lgbm_02)
-        y_pred_lgbm_03=prediccion_test_lgbm(X_test_para_03  ,model_lgbm_03)
-
-        y_pred_lgbm = (y_pred_lgbm_01 + y_pred_lgbm_02+y_pred_lgbm_03)/3
-        name_1rst_train=f"{name}_SEMILLA_{semilla}_1rst_train_ensamble"
+        y_pred_lgbm=prediccion_test_lgbm(X_test ,model_lgbm)
 
         # Umbral optimo
         if proceso_ppal == "experimento":
@@ -167,37 +149,51 @@ def lanzar_experimento_1(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
         ganancia_acumulada_dict[semilla] = ganancia_acumulada
 
 
-        # Evaluacion public private
-        if i==0:
-            evaluacion_public_private(X_test_para_01 ,y_test_binaria,y_pred_lgbm,"n_cliente",umbrales["cliente"],name_1rst_train,output_path_graf_ganancia_hist,semilla)
+        # Evaluacion public private con n_split = 1 
+        df_long_cliente_semilla_i_n_split_1=evaluacion_public_private(X_test ,y_test_class,y_pred_lgbm,"n_cliente",umbrales["cliente"],semilla,1)
+        df_long_prob_semilla_i_n_split_1 = evaluacion_public_private(X_test ,y_test_class,y_pred_lgbm,"prob",umbrales["umbral_optimo"],semilla,1)
 
-        # 
+        lista_df_ganancias_clientes_por_semilla_n_split_1.append(df_long_cliente_semilla_i_n_split_1)
+        lista_df_ganancias_prob_por_semilla_n_split_1.append(df_long_prob_semilla_i_n_split_1)
 
-        # # Evaluacion umbral fijo
-        
-        # name_umbral_fijo = name_1rst_train + "_umbral_fijo"
-        # umbral_fijo=UMBRAL
-        # ganancia = ganancia_prob_umbral_fijo(y_pred_lgbm , y_test_binaria)
-        # evaluacion_public_private(X_test , y_test_binaria,y_pred_lgbm ,umbral_fijo, name_umbral_fijo,fecha)
 
-        # # Evaluacion umbral movil
-        # name_umbral_movil=name_1rst_train + "_umbral_movil"
-        # umbrales= prediccion_lgbm_umbral_movil(X_test , y_test_binaria , y_test_class,model_lgbm,name_umbral_movil,fecha)
-        # umbral_optimo= umbrales["umbral_optimo"]
-        # ganancia = ganancia_prob_umbral_fijo(y_pred_lgbm , y_test_binaria,1,umbral_optimo)
-        # evaluacion_public_private(X_test , y_test_binaria,y_pred_lgbm ,umbral_optimo, name_umbral_movil,fecha)
-    
-    # Guardo los umbrales
+        # Evaluacion public private con n_split = 50
+        df_long_cliente_semilla_i_n_split_50=evaluacion_public_private(X_test ,y_test_class,y_pred_lgbm,"n_cliente",umbrales["cliente"],semilla,50)
+        df_long_prob_semilla_i_n_split_50 = evaluacion_public_private(X_test ,y_test_class,y_pred_lgbm,"prob",umbrales["umbral_optimo"],semilla,50)
+
+        lista_df_ganancias_clientes_por_semilla_n_split_50.append(df_long_cliente_semilla_i_n_split_50)
+        lista_df_ganancias_prob_por_semilla_n_split_50.append(df_long_prob_semilla_i_n_split_50)
+
+
+    name=f"{fecha}_EXPERIMENTO_1"
     if guardar_umbral == False:
         try:
             with open(output_path_umbrales+f"{name}.json", "w") as f:
-                json.dump(umbrales, f, indent=4)
+                json.dump(umbrales_dict, f, indent=4)
         except Exception as e:
             logger.error(f"Error al intentar guardar el dict de umbral como json --> {e}")
         logger.info(f"Los datos de umbrales moviles son : {umbrales}")
         logger.info("Fin de la prediccion de umbral movil")
 
     grafico_curvas_ganancia(y_pred_sorted_dict ,ganancia_acumulada_dict,umbrales_dict,semillas,name_1rst_train,output_path_graf_curva_ganancia)
+
+    # Graficos de histogramas con las semillas juntas con 1 split
+    df_long_cliente_n_split_1 = pd.concat(lista_df_ganancias_clientes_por_semilla_n_split_1,axis=0)
+    df_long_prob_n_split_1 = pd.concat(lista_df_ganancias_prob_por_semilla_n_split_1,axis=0)
+    graf_hist_ganancias(df_long_cliente_n_split_1,name+"_cliente_nsplits_1", output_path_graf_ganancia_hist_semillas , semillas)
+    graf_hist_ganancias(df_long_prob_n_split_1,name+"_prob_nsplits_1", output_path_graf_ganancia_hist_semillas ,semillas)
+
+    # Graficos en un histogramas con todas las semillas y los splits juntos
+    df_long_cliente_n_split_50 = pd.concat(lista_df_ganancias_clientes_por_semilla_n_split_50,axis=0)
+    df_long_prob_n_split_50 = pd.concat(lista_df_ganancias_prob_por_semilla_n_split_50,axis=0)
+    graf_hist_ganancias(df_long_cliente_n_split_50,name+"_cliente_nsplits_50", output_path_graf_ganancia_hist_total , semillas)
+    graf_hist_ganancias(df_long_prob_n_split_50,name+"_prob_nsplits_50", output_path_graf_ganancia_hist_total, semillas)
+
+    # Graficos en grillas de histograma, una por cada semilla con sus N particiones
+    graf_hist_ganancias(lista_df_ganancias_clientes_por_semilla_n_split_50,name+"_cliente_nsplits_50", output_path_graf_ganancia_hist_grilla , semillas)
+    graf_hist_ganancias(lista_df_ganancias_prob_por_semilla_n_split_50,name+"_prob_nsplits_50", output_path_graf_ganancia_hist_grilla,semillas)
+
+
 
 
 

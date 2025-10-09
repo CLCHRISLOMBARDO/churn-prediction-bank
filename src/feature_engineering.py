@@ -65,7 +65,6 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
     pd.DataFrame
         DataFrame con las variables de lag agregadas
     """
-    # Armado de la consulta SQL
     logger.info(f"Comienzo feature de delta.  df shape: {df.shape}")
     sql="SELECT *"
     for attr in columnas:
@@ -76,7 +75,6 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
             print(f"No se encontro el atributo {attr} en df")
     sql+=" FROM df"
 
-    # Ejecucion de la consulta SQL
     con = duckdb.connect(database=":memory:")
     con.register("df", df)
     df=con.execute(sql).df()
@@ -113,7 +111,6 @@ def feature_engineering_max_min(df:pd.DataFrame|np.ndarray , columnas:list[str])
     
     sql+=" FROM df"
 
-    # Ejecucion de la consulta SQL
     con = duckdb.connect(database=":memory:")
     con.register("df", df)
     df=con.execute(sql).df()

@@ -10,8 +10,7 @@ import lightgbm as lgb
 import optuna
 
 from src.config import *
-from src_experimentos.experimento1 import lanzar_experimento_1
-from src.lgbm_train_test import  entrenamiento_lgbm , prediccion_test_lgbm,ganancia_prob_umbral_fijo,grafico_feature_importance ,evaluacion_public_private,prediccion_lgbm_umbral_movil,prediccion_apred
+from src_experimentos.experimento2 import lanzar_experimento_2
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 
 
@@ -35,15 +34,17 @@ os.makedirs(PATH_OUTPUT_LGBM,exist_ok=True)
 os.makedirs(model_path,exist_ok=True)
 os.makedirs(prediccion_final_path,exist_ok=True)
 os.makedirs(graf_curva_ganancia_path,exist_ok=True)
-os.makedirs(graf_hist_ganancia_path,exist_ok=True)
-os.makedirs(ganancia_total_path,exist_ok=True)
+os.makedirs(graf_hist_ganancia_grilla_path,exist_ok=True)
+os.makedirs(graf_hist_ganancia_total_path,exist_ok=True)
+os.makedirs(graf_hist_ganancia_semillas_path,exist_ok=True)
 os.makedirs(umbrales_path,exist_ok=True)
 os.makedirs(feat_imp_path,exist_ok=True)
         #EXPERIMENTOS
 os.makedirs(path_output_exp_model,exist_ok=True)
 os.makedirs(path_output_exp_feat_imp,exist_ok=True)
-os.makedirs(path_output_exp_graf_gan_hist,exist_ok=True)
-os.makedirs(path_output_exp_ganancia_total,exist_ok=True)
+os.makedirs(path_output_exp_graf_gan_hist_grilla,exist_ok=True)
+os.makedirs(path_output_exp_graf_gan_hist_total,exist_ok=True)
+os.makedirs(path_output_exp_graf_gan_hist_semillas,exist_ok=True)
 os.makedirs(path_output_exp_graf_curva_ganancia,exist_ok=True)
 os.makedirs(path_output_exp_umbral,exist_ok=True)
 
@@ -68,9 +69,11 @@ logger = logging.getLogger(__name__)
 def main():
     
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
+    lanzar_experimento_2(fecha , SEMILLAS[:3],"experimento")
 
 
-    lanzar_experimento_1(fecha , [SEMILLA],)
+
+#     lanzar_experimento_1(fecha , [SEMILLA],"experimento")
 
     return
 
