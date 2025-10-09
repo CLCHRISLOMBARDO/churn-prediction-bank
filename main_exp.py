@@ -10,6 +10,7 @@ import lightgbm as lgb
 import optuna
 
 from src.config import *
+from src.generadora_semillas import create_semilla
 from src_experimentos.experimento2 import lanzar_experimento_2
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 
@@ -69,7 +70,10 @@ logger = logging.getLogger(__name__)
 def main():
     
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
-    lanzar_experimento_2(fecha , SEMILLAS[:3],"experimento")
+    semillas = create_semilla(15)
+    logger.info(f"se crearon {len(semillas)} semillas")
+    
+    lanzar_experimento_2(fecha , semillas,"experimento")
 
 
 
