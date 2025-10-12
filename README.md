@@ -1,4 +1,3 @@
 # churn-prediction-bank
 
-Version 1
-En esta version hice 
+Para correr todo el script y hacer las predicciones -->  python main.py
