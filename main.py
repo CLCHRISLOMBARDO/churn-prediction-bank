@@ -82,7 +82,7 @@ logger = logging.getLogger(__name__)
 def main():
     
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
-    semillas = create_semilla(45)
+    semillas = create_semilla(15)
     logger.info(f"se crearon {len(semillas)} semillas")
 
     lanzar_experimento_7(fecha ,semillas , "prediccion_final" )
