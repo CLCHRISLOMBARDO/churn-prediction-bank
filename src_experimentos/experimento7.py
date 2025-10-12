@@ -240,8 +240,8 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
             # Carga del umbral optimo de todas las tiradas : 
             fecha_name='2025-10-10_13-53-26'
             umbrales_file=f"{fecha_name}_EXPERIMENTO_5.json"
-            path = path_output_exp_umbral
-            file = path + umbrales_file 
+            # path = path_output_exp_umbral
+            file = umbrales_file 
             logger.info(f"Comienzo de la carga de los datos de umbrales {umbrales_file}")
             
             try :
@@ -292,24 +292,6 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
         # Predicciones en test 04 para cada modelo
         y_apred=preparacion_ypred_kaggle(y_apred, y_pred_ensamble ,cliente_optimo_mean , fecha_name ,prediccion_final_path)
 
-
-# ## 6. FINAL TRAIN con mejores hiperp, mejor iter y mejor umbral
-# name_final_train="final_train"
-# # X_train_final= pd.concat([X_train , X_test],axis=0)
-# # logger.info(f"meses en train {X_train_final['foto_mes'].unique()}")
-# # logger.info(f"train shape {X_train_final.shape}")
-# # y_train_binaria_final = pd.concat([y_train_binaria , y_test_binaria],axis=0)
-# # w_train_final=pd.concat([w_train,w_test],axis=0)
-
-# MES_TRAIN.append(MES_TEST)
-# X_train_final, y_train_binaria_final,y_train_class_final, w_train_final, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_binario(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR)
-# # umbral_optimo=0.03083123681364618 
-# umbral_optimo =0.025
-# model_lgbm_final = entrenamiento_lgbm(X_train_final , y_train_binaria_final,w_train_final ,best_iter,best_params , fecha,name_final_train)
-# grafico_feature_importance(model_lgbm_final,X_train_final,name_final_train,fecha)
-# y_apred=X_apred[["numero_de_cliente"]]
-
-# y_apred_final=prediccion_apred(X_apred ,y_apred,model_lgbm_final,umbral_optimo,fecha,comentario)
 
 logger.info(f">>> Ejecucion finalizada. Revisar logs para mas detalles.")
 
