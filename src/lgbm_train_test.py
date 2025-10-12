@@ -14,7 +14,7 @@ import datetime
 import pickle
 import json
 
-from src.config import GANANCIA,ESTIMULO,prediccion_final_path #eliminar proximamente
+from src.config import GANANCIA,ESTIMULO,prediccion_final_path
 
 ganancia_acierto = GANANCIA
 costo_estimulo=ESTIMULO
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, best_iter:int, best_parameters:dict[str, object],name:str,output_path:str,semilla:int)->lgb.Booster:
     # name es para identificar 1rt_train o final_train
     name=f"{name}_model_lgbm"
-    logger.info(f"Comienzo del entrenamiento del lgbm : {name}")
+    logger.info(f"Comienzo del entrenamiento del lgbm : {name} en el mes train : {X_train['foto_mes'].unique()}")
         
     best_iter = best_iter
     print(f"Mejor cantidad de árboles para el mejor model {best_iter}")
@@ -57,11 +57,12 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:p
         filename=output_path+f'{name}.txt'
         model_lgbm.save_model(filename )                         
         logger.info(f"Modelo {name} guardado en {filename}")
-        logger.info("Fin del entrenamiento del LGBM")
+        logger.info(f"Fin del entrenamiento del LGBM en el mes train : {X_train['foto_mes'].unique()}")
     except Exception as e:
         logger.error(f"Error al intentar guardar el modelo {name}, por el error {e}")
         return
     return model_lgbm
+
 
 def grafico_feature_importance(model_lgbm:lgb.Booster,X_train:pd.DataFrame,name:str,output_path:str):
     logger.info("Comienzo del grafico de feature importance")
@@ -86,10 +87,11 @@ def grafico_feature_importance(model_lgbm:lgb.Booster,X_train:pd.DataFrame,name:
     except Exception as e:
         logger.error(f"Error al intentar guardar los feat imp en excel por {e}")
 
-def prediccion_test_lgbm(X_test:pd.DataFrame ,  model_lgbm:lgb.Booster)-> pd.Series:
-    logger.info("comienzo prediccion en test del modelo")
-    y_pred_lgbm = model_lgbm.predict(X_test)
-    logger.info("Fin de la prediccion en test del modelo")
+def prediccion_test_lgbm(X:pd.DataFrame ,  model_lgbm:lgb.Booster)-> pd.Series:
+    mes=X["foto_mes"].unique()
+    logger.info(f"comienzo prediccion del modelo en el mes {mes}")
+    y_pred_lgbm = model_lgbm.predict(X)
+    logger.info("Fin de la prediccion del modelo")
     return y_pred_lgbm
 
 
@@ -370,7 +372,7 @@ def graf_hist_ganancias(df_lb_long:pd.DataFrame|list[pd.DataFrame] ,name:str ,ou
 
 ## PREDICCION FINAL-------------------------------------------------------------------
 
-def prediccion_apred(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lgbm:lgb.Booster, umbral:float,fecha:str,comentario:str)->pd.DataFrame:
+def prediccion_apred_prob(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lgbm:lgb.Booster, umbral:float,fecha:str,comentario:str)->pd.DataFrame:
     name=fecha+"_predicciones"
     logger.info(f"Comienzo de las predicciones del mes {X_apred['foto_mes'].unique()} ")
     y_pred=model_lgbm.predict(X_apred)
@@ -387,4 +389,24 @@ def prediccion_apred(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lgbm:lg
         raise
     return y_apred
 
-    
+def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series ,umbral_cliente:int , name:str ,output_path:str) -> pd.DataFrame:
+    name = name+"_predicciones_finales"
+    y_apred = y_apred.copy()
+    y_apred["prediction"] = y_pred 
+    y_apred= y_apred.sort_values(by="prediction" , ascending=False)
+    k = int(np.floor(umbral_cliente))
+    y_apred["prediction"] = 0
+
+    y_apred.iloc[:k , y_apred.columns.get_loc("prediction")] = 1
+    logger.info(f"cantidad de bajas predichas : {int((y_apred['prediction']==1).sum())}")
+    y_apred = y_apred.set_index("numero_de_cliente")
+    file_name=output_path+name+".csv"
+    try:
+        y_apred.to_csv(file_name)
+        logger.info(f"predicciones guardadas en {file_name}")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar las predicciones --> {e}")
+        raise
+    return y_apred
+
+

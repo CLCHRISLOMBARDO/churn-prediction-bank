@@ -7,13 +7,16 @@ from src.config import SEMILLA
 import logging
 logger = logging.getLogger(__name__)
 
-def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_test:int,mes_apred:int) ->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
+def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_test:int,mes_apred:int,semilla:int=SEMILLA,subsampleo:bool=True) ->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
     logger.info(f"mes train={mes_train}  -  mes test={mes_test} - mes apred={mes_apred} ")
 
     train_data = df[df['foto_mes'].isin(mes_train)]
     test_data = df[df['foto_mes'] == mes_test]
     apred_data = df[df['foto_mes'] == mes_apred]
+
+    if subsampleo:
+        train_data=undersampling(train_data , 0.5,semilla)
 
     # TRAIN
     X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria'], axis=1)
@@ -26,6 +29,7 @@ def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:list[int],mes_tes
     y_test_binaria = test_data['clase_binaria']
     y_test_class = test_data['clase_ternaria']
     w_test = test_data['clase_peso']
+
 
     # A PREDECIR
     X_apred = apred_data.drop(['clase_ternaria', 'clase_peso','clase_binaria'], axis=1)
@@ -60,4 +64,27 @@ def conversion_binario(df:pd.DataFrame|np.ndarray) ->pd.DataFrame:
     logger.info(f"Finalizacion de la binarizacion")
     return df
 
+
+def undersampling(df:pd.DataFrame ,undersampling_rate:float , semilla:int) -> pd.DataFrame:
+    logger.info("Comienzo del subsampleo")
+    np.random.seed(semilla)
+    clientes_minoritaria = df.loc[df["clase_ternaria"] != "Continua", "numero_de_cliente"].unique()
+    clientes_mayoritaria = df.loc[df["clase_ternaria"] == "Continua", "numero_de_cliente"].unique()
+
+    logger.info(f"Clientes minoritarios: {len(clientes_minoritaria)}")
+    logger.info(f"Clientes mayoritarios: {len(clientes_mayoritaria)}")
+
+    n_sample = int(len(clientes_mayoritaria) * undersampling_rate)
+    clientes_mayoritaria_sample = np.random.choice(clientes_mayoritaria, n_sample, replace=False)
+
+    # Unimos los IDs seleccionados
+    clientes_finales = np.concatenate([clientes_minoritaria, clientes_mayoritaria_sample])
+
+    df_train_undersampled = df[df["numero_de_cliente"].isin(clientes_finales)].copy()
+
+    logger.info(f"Shape original: {df.shape}")
+    logger.info(f"Shape undersampled: {df_train_undersampled.shape}")
+
+    df_train_undersampled = df_train_undersampled.sample(frac=1, random_state=semilla).reset_index(drop=True)
+    return df_train_undersampled
 

@@ -1,0 +1,120 @@
+#main.py
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+import datetime 
+import logging
+import json
+import lightgbm as lgb
+import optuna
+
+from src.config import *
+from src.generadora_semillas import create_semilla
+from src_experimentos.experimento2 import lanzar_experimento_2
+from src_experimentos.experimento_ensamble import lanzar_experimento_ensamble
+from src_experimentos.experimento3 import lanzar_experimento_3
+from src_experimentos.experimento4 import lanzar_experimento_4
+from src_experimentos.experimento_bayesiana import lanzar_bayesiana_lgbm
+from src_experimentos.experimento_bayesiana_xgb import lanzar_bayesiana_xgb
+from src_experimentos.experimento5 import lanzar_experimento_5
+from src_experimentos.experimento6 import lanzar_experimento_6
+from src_experimentos.experimento7 import lanzar_experimento_7
+from src_experimentos.experimento8 import lanzar_experimento_8
+from src_experimentos.experimento9 import lanzar_experimento_9
+from src_experimentos.experimento10 import lanzar_experimento_10
+## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
+
+
+## Carga de variables
+n_trials=N_TRIALS
+
+## Creacion de las carpetas
+        #LOGS PATHS
+os.makedirs(PATH_LOGS,exist_ok=True)
+        #OUTPUT PATHS
+os.makedirs(PATH_OUTPUT_FINALES,exist_ok=True)
+os.makedirs(PATH_OUTPUT_EXPERIMENTOS,exist_ok=True)
+        #BAYESIANA
+os.makedirs(PATH_OUTPUT_OPTIMIZACION,exist_ok=True)
+os.makedirs(db_path,exist_ok=True)
+os.makedirs(bestparams_path,exist_ok=True)
+os.makedirs(best_iter_path,exist_ok=True)
+os.makedirs(graf_bayesiana_path,exist_ok=True)
+        #MODELS
+os.makedirs(PATH_OUTPUT_LGBM,exist_ok=True)
+os.makedirs(model_path,exist_ok=True)
+os.makedirs(prediccion_final_path,exist_ok=True)
+os.makedirs(graf_curva_ganancia_path,exist_ok=True)
+os.makedirs(graf_hist_ganancia_grilla_path,exist_ok=True)
+os.makedirs(graf_hist_ganancia_total_path,exist_ok=True)
+os.makedirs(graf_hist_ganancia_semillas_path,exist_ok=True)
+os.makedirs(umbrales_path,exist_ok=True)
+os.makedirs(feat_imp_path,exist_ok=True)
+        #EXPERIMENTOS
+os.makedirs(path_output_exp_model,exist_ok=True)
+os.makedirs(path_output_exp_feat_imp,exist_ok=True)
+os.makedirs(path_output_exp_graf_gan_hist_grilla,exist_ok=True)
+os.makedirs(path_output_exp_graf_gan_hist_total,exist_ok=True)
+os.makedirs(path_output_exp_graf_gan_hist_semillas,exist_ok=True)
+os.makedirs(path_output_exp_graf_curva_ganancia,exist_ok=True)
+os.makedirs(path_output_exp_umbral,exist_ok=True)
+
+
+
+fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+test= "TEST_TEST_TEST_TEST"
+comentario=input(f"Ingrese un comentario")
+nombre_log=fecha+"_experimento"
+# CONFIGURACION LOG
+logging.basicConfig(
+    level=logging.INFO, #Puede ser INFO o ERROR
+    format='%(asctime)s - %(levelname)s - %(name)s  - %(funcName)s -  %(lineno)d - %(message)s',
+    handlers=[
+        logging.FileHandler(f"{PATH_LOGS}/{nombre_log}", mode="w", encoding="utf-8"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+## --------------------------------------------------------Funcion main ------------------------------------------
+
+def main():
+    
+    logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
+    semillas = create_semilla(45)
+    logger.info(f"se crearon {len(semillas)} semillas")
+
+    lanzar_experimento_7(fecha ,semillas , "prediccion_final" )
+    # lanzar_experimento_10(fecha ,semillas , "prediccion_final" )
+    # lanzar_experimento_9(fecha ,semillas , "prediccion_final" )
+
+
+    # 
+   
+    # lanzar_bayesiana_xgb(fecha , SEMILLA)
+    # lanzar_bayesiana_lgbm(fecha , SEMILLA)
+    # lanzar_experimento_8(fecha ,semillas , "prediccion_final" )
+    # lanzar_experimento_7(fecha ,semillas , "prediccion_final" )
+    # lanzar_experimento_6(fecha ,semillas , "prediccion_final" )
+    # lanzar_experimento_6(fecha ,semillas , "experimento" )
+    # lanzar_experimento_5(fecha ,semillas , "prediccion_final" )
+    # lanzar_experimento_5(fecha ,semillas , "experimento" )
+    # lanzar_experimento_5(test ,semillas[:3] , "prediccion_final" )
+#     lanzar_experimento_5(test ,semillas[:2] , "experimento" )
+    #lanzar_bayesiana(fecha , SEMILLA)
+    
+#     lanzar_experimento_4(fecha , [semillas[0]],"prediccion_final")
+#     lanzar_experimento_4(fecha , semillas,"experimento")
+#     lanzar_experimento_ensamble(fecha , semillas,"experimento")
+#     lanzar_experimento_2(fecha , semillas,"experimento")
+        
+
+
+
+#     lanzar_experimento_1(fecha , [SEMILLA],"experimento")
+
+    return
+
+if __name__ =="__main__":
+    main()

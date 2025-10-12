@@ -21,7 +21,7 @@ logger=logging.getLogger(__name__)
 def lanzar_experimento_2(fecha:str ,semillas:list[int],proceso_ppal:str ="experimento"): #semillas, si queremos hacer una prediccion final, poner solo una semilla en una lista
     n_semillas = len(semillas)
     name=f"{fecha}_EXPERIMENTO_2"
-    logger.info(f"Comienzo del experimento 1 : {name} con {n_semillas} semillas")
+    logger.info(f"Comienzo del experimento 2 : {name} con {n_semillas} semillas")
 
     # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import
     if proceso_ppal =="experimento" :
@@ -59,9 +59,6 @@ def lanzar_experimento_2(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
     cols_ratios=columnas[1]
 #############################################################################-----  DESCOMENTAR  ------############################################
     # ## 2. Feature Engineering
-    #             #01
-  
-                #03
     
     df=feature_engineering_lag(df,cols_lag_delta_max_min_regl,2)
     df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
@@ -122,6 +119,7 @@ def lanzar_experimento_2(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
     lista_df_ganancias_clientes_por_semilla_n_split_1=[]
     lista_df_ganancias_prob_por_semilla_n_split_1=[]
     for i,semilla in enumerate(semillas):
+        logger.info(f"Comienzo de la semilla numero {semilla} del orden {i}*****************************************")
         # Entrenamiento de los modelos
         name_1rst_train=f"{name}_SEMILLA_{semilla}_1rst_train_01"
         model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter,best_params ,name_1rst_train,output_path_models,semilla)
@@ -166,7 +164,7 @@ def lanzar_experimento_2(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
         lista_df_ganancias_prob_por_semilla_n_split_50.append(df_long_prob_semilla_i_n_split_50)
 
 
-    name=f"{fecha}_EXPERIMENTO_1"
+    name=f"{fecha}_EXPERIMENTO_2"
     if guardar_umbral == False:
         try:
             with open(output_path_umbrales+f"{name}.json", "w") as f:
