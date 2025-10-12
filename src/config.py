@@ -21,6 +21,7 @@ db_path = PATH_OUTPUT_OPTIMIZACION + 'db/'
 bestparams_path = PATH_OUTPUT_OPTIMIZACION+'best_params/'
 best_iter_path = PATH_OUTPUT_OPTIMIZACION+'best_iters/'
 graf_bayesiana_path = PATH_OUTPUT_OPTIMIZACION+'grafico_bayesiana/'
+
 ## MODEL PATHS
 PATH_OUTPUT_LGBM=PATH_OUTPUT_FINALES+"lgbm_model/"
 model_path=PATH_OUTPUT_LGBM + 'model/'
@@ -57,7 +58,7 @@ MES_05=202105
 UMBRAL=0.025
 GANANCIA=780000
 ESTIMULO = 20000
-N_TRIALS= 150
+N_TRIALS= 30
 N_BOOSTS=1000
 N_FOLDS=5
 

@@ -118,6 +118,9 @@ def feature_engineering_max_min(df:pd.DataFrame|np.ndarray , columnas:list[str])
     logger.info(f"ejecucion max min finalizada. df shape: {df.shape}")
     return df
 
+
+
+
 def feature_engineering_ratio(df:pd.DataFrame|pd.Series, columnas:list[list[str]] )->pd.DataFrame:
     """
     Genera variables de ratio para los atributos especificados utilizando SQL.
@@ -173,6 +176,27 @@ def feature_engineering_linreg(df : pd.DataFrame|np.ndarray , columnas:list[str]
     logger.info(f"ejecucion reg lineal finalizada. df shape: {df.shape}")
     return df
 
+def feature_engineering_max_min_2(df : pd.DataFrame|np.ndarray , columnas:list[str]) ->pd.DataFrame|np.ndarray:
+    logger.info(f"Comienzo feature max min. df shape: {df.shape}")
+    sql="SELECT *"
+    try:
+
+        for attr in columnas:
+            if attr in df.columns:
+                sql+=f", max({attr}  ) over ventana_3 as max_{attr} ,min({attr}) over ventana_3 as min_{attr}"
+            else :
+                print(f"no se encontro el atributo {attr}")
+        sql+=" FROM df window ventana_3 as (partition by numero_de_cliente order by foto_mes rows between 3 preceding and current row)"
+    except Exception as e:
+        logger.error(f"Error en la max min : {e}")
+        raise
+    con = duckdb.connect(database=":memory:")
+    con.register("df", df)
+    df=con.execute(sql).df()
+    con.close()
+    logger.info(f"ejecucion max min finalizada. df shape: {df.shape}")
+    return df
+
 def feature_engineering_normalizacion(df:pd.DataFrame , columnas:list[str]) -> pd.DataFrame:
     logger.info(f"Comienzo de la normalizacion de las cols seleccionadas , df shape {df.shape}")
     for attr in columnas:
@@ -182,6 +206,54 @@ def feature_engineering_normalizacion(df:pd.DataFrame , columnas:list[str]) -> p
         df[attr]= (df[attr] - min_attr) / dif_max_min
     logger.info(f"Finalizaion de la normalizacion df shape : {df.shape}")
     return df
+
+def feature_engineering_rank(df: pd.DataFrame, columnas: list[str]) -> pd.DataFrame:
+    """
+    Genera variables de ranking para los atributos especificados utilizando SQL.
+
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        DataFrame con los datos
+    columnas : list[str]
+        Lista de atributos para los cuales generar rankings.
+
+    Returns:
+    --------
+    pd.DataFrame
+        DataFrame con las variables de ranking agregadas
+    """
+
+    if not columnas:
+        raise ValueError("La lista de columnas no puede estar vacía")
+
+    columnas_validas = [col for col in columnas if col in df.columns]
+    if not columnas_validas:
+        raise ValueError("Ninguna de las columnas especificadas existe en el DataFrame")
+
+    logger.info(f"Realizando feature engineering RANK para {len(columnas_validas)} columnas: {columnas_validas}")
+
+    logger.info(f"Antes del ranking : la media de la columna {columnas_validas[0]} en 04 es de {df.loc[df['foto_mes']==202104,columnas_validas[0]].mean()}")
+
+    rank_expressions = [
+        f"PERCENT_RANK() OVER (PARTITION BY foto_mes ORDER BY {col}) AS {col}_rank"
+        for col in columnas_validas
+    ]
+
+    sql = f"""
+    SELECT *,
+           {', '.join(rank_expressions)}
+    FROM df
+    """
+
+    con = duckdb.connect(database=":memory:")
+    con.register("df", df)
+    df = con.execute(sql).df()
+    con.close()
+    logger.info(f"Despues del ranking : la media de la columna {columnas_validas[0]} en 04 es de {df.loc[df['foto_mes']==202104,'mcuentas_saldo_rank'].mean()}")
+    logger.info(f"Feature engineering completado. DataFrame resultante con {df.shape[1]} columnas")
+    return df
+    
 
 def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) -> pd.DataFrame:
     logger.info(f"Comienzo dropeo de {len(columnas)} columnas. df shape --> {df.shape} ")
