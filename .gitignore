@@ -6,3 +6,4 @@ outputs/
 logs/
 z601_gbtd.ipynb
 old/
+.venv/
