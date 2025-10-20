@@ -23,6 +23,7 @@ from src_experimentos.experimento7 import lanzar_experimento_7
 from src_experimentos.experimento8 import lanzar_experimento_8
 from src_experimentos.experimento9 import lanzar_experimento_9
 from src_experimentos.experimento10 import lanzar_experimento_10
+from src_experimentos.experimento_i import lanzar_experimento_i
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 
 
@@ -83,8 +84,9 @@ def main():
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
     semillas = create_semilla(15)
     logger.info(f"se crearon {len(semillas)} semillas")
+    lanzar_experimento_i(fecha ,semillas , "experimento" )
 
-    lanzar_experimento_7(fecha ,semillas , "prediccion_final" )
+    # lanzar_experimento_7(fecha ,semillas , "prediccion_final" )
     # lanzar_experimento_10(fecha ,semillas , "prediccion_final" )
     # lanzar_experimento_9(fecha ,semillas , "prediccion_final" )
 
