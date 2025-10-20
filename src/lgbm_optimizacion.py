@@ -7,22 +7,14 @@ from joblib import Parallel, delayed
 import optuna
 from optuna.study import Study
 from time import time
-import os
 
-import pickle
 import json
 import logging
 from optuna.samplers import TPESampler # Para eliminar el componente estocastico de optuna
 from optuna.visualization import plot_param_importances, plot_contour,  plot_slice, plot_optimization_history
 
-from src.config import PATH_OUTPUT_OPTIMIZACION, GANANCIA,ESTIMULO,SEMILLA ,N_BOOSTS ,N_FOLDS
-
-output_path = PATH_OUTPUT_OPTIMIZACION
-db_path = output_path + 'db/'
-bestparams_path = output_path+'best_params/'
-best_iter_path = output_path+'best_iters/'
-graf_bayesiana_path = output_path+'grafico_bayesiana/'
-
+from src.config import GANANCIA,ESTIMULO,SEMILLA ,N_BOOSTS ,N_FOLDS
+from src.config import PATH_OUTPUT_OPTIMIZACION, path_output_bayesian_db,path_output_bayesian_bestparams ,path_output_bayesian_best_iter ,path_output_bayesian_graf
 
 ganancia_acierto = GANANCIA
 costo_estimulo = ESTIMULO
@@ -38,10 +30,8 @@ def lgb_gan_eval(y_pred, data):
 
     return 'gan_eval', np.max(ganancia) , True
 
-def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, n_trials:int, fecha:str)-> Study:
-    logger.info("Comienzo optimizacion hiperp binario")
-    name ="binaria_"+fecha
-    # name ="binaria"+name
+def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, n_trials:int, name:str)-> Study:
+    logger.info(f"Comienzo optimizacion hiperp binario: {name}")
 
 
     def objective(trial):
@@ -93,8 +83,8 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
 
         return max_gan * N_FOLDS
     
-    storage_name = "sqlite:///" + db_path + "optimization_lgbm.db"
-    study_name = f"study_lgbm_{name}"    
+    storage_name = "sqlite:///" + path_output_bayesian_db + "optimization_lgbm.db"
+    study_name = f"study_{name}"    
 
 
     study = optuna.create_study(
@@ -112,41 +102,41 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
     
     # Guardo best iter
     try:
-        with open(best_iter_path + f"best_iter_{name}.json","w") as f:
+        with open(path_output_bayesian_best_iter + f"best_iter_{name}.json","w") as f:
             json.dump(best_iter , f ,indent=4)
-        logger.info(f"best_iter_{name}.json guardado en {best_iter_path} ")
+        logger.info(f"best_iter_{name}.json guardado en {path_output_bayesian_best_iter} ")
     except Exception as e:
         logger.error(f"Error al tratar de guardar el json de best iter por el error :{e}")
 
     # Guardo best params
     try:
-        with open(bestparams_path+f"best_params_{name}.json", "w") as f:
+        with open(path_output_bayesian_bestparams+f"best_params_{name}.json", "w") as f:
             json.dump(best_params, f, indent=4) 
-        logger.info(f"best_params_{name}.json guardado en {bestparams_path}")
+        logger.info(f"best_params_{name}.json guardado en {path_output_bayesian_bestparams}")
         logger.info(f"Finalizacion de optimizacion hiperp binario con study name {study_name}.")
     except Exception as e:
         logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
     return study
 
-def graficos_bayesiana(study:Study, fecha: str):
-    logger.info("Comienzo de la creacion de graficos")
+def graficos_bayesiana(study:Study, name: str):
+    logger.info(f"Comienzo de la creacion de graficos de {name}")
     try:
         fig1 = plot_optimization_history(study)
-        fig1.write_image(graf_bayesiana_path+f"{fecha}_graficos_opt_history.png")
+        fig1.write_image(path_output_bayesian_graf+f"{name}_graficos_opt_history.png")
 
         fig2 = plot_param_importances(study)
-        fig2.write_image(graf_bayesiana_path+f"{fecha}_graficos_param_importances.png")
+        fig2.write_image(path_output_bayesian_graf+f"{name}_graficos_param_importances.png")
 
         fig3 = plot_slice(study)
-        fig3.write_image(graf_bayesiana_path+f"{fecha}_graficos_slice.png")
+        fig3.write_image(path_output_bayesian_graf+f"{name}_graficos_slice.png")
 
         fig4 = plot_contour(study)
-        fig4.write_image(graf_bayesiana_path+f"{fecha}_graficos_contour_all.png")
+        fig4.write_image(path_output_bayesian_graf+f"{name}_graficos_contour_all.png")
 
         fig5 = plot_contour(study, params=["num_leaves", "learning_rate"])
-        fig5.write_image(graf_bayesiana_path+f"{fecha}_graficos_contour_specific.png")
+        fig5.write_image(path_output_bayesian_graf+f"{name}_graficos_contour_specific.png")
 
-        logger.info(f" Gráficos guardados en {output_path}")
+        logger.info(f" Gráficos guardados en {path_output_bayesian_graf}")
     except Exception as e:
         logger.error(f"Error al generar las gráficas: {e}")
 

@@ -14,7 +14,7 @@ import pickle
 import json
 import os
 
-from src.config import GANANCIA,ESTIMULO,prediccion_final_path
+from src.config import GANANCIA,ESTIMULO
 
 ganancia_acierto = GANANCIA
 costo_estimulo=ESTIMULO

@@ -15,8 +15,8 @@ from src_experimentos.experimento2 import lanzar_experimento_2
 from src_experimentos.experimento_ensamble import lanzar_experimento_ensamble
 from src_experimentos.experimento3 import lanzar_experimento_3
 from src_experimentos.experimento4 import lanzar_experimento_4
-from src_experimentos.experimento_bayesiana import lanzar_bayesiana_lgbm
-from src_experimentos.experimento_bayesiana_xgb import lanzar_bayesiana_xgb
+from src_bayesianas.experimento_bayesiana_lgbm import lanzar_bayesiana_lgbm
+from src_bayesianas.experimento_bayesiana_xgb import lanzar_bayesiana_xgb
 from src_experimentos.experimento5 import lanzar_experimento_5
 from src_experimentos.experimento6 import lanzar_experimento_6
 from src_experimentos.experimento7 import lanzar_experimento_7
@@ -33,24 +33,23 @@ n_trials=N_TRIALS
         #LOGS PATHS
 os.makedirs(PATH_LOGS,exist_ok=True)
         #OUTPUT PATHS
+os.makedirs(PATH_OUTPUT_BAYESIAN,exist_ok=True)
 os.makedirs(PATH_OUTPUT_FINALES,exist_ok=True)
 os.makedirs(PATH_OUTPUT_EXPERIMENTOS,exist_ok=True)
         #BAYESIANA
-os.makedirs(PATH_OUTPUT_OPTIMIZACION,exist_ok=True)
-os.makedirs(db_path,exist_ok=True)
-os.makedirs(bestparams_path,exist_ok=True)
-os.makedirs(best_iter_path,exist_ok=True)
-os.makedirs(graf_bayesiana_path,exist_ok=True)
-        #MODELS
-os.makedirs(PATH_OUTPUT_LGBM,exist_ok=True)
-os.makedirs(model_path,exist_ok=True)
-os.makedirs(prediccion_final_path,exist_ok=True)
-os.makedirs(graf_curva_ganancia_path,exist_ok=True)
-os.makedirs(graf_hist_ganancia_grilla_path,exist_ok=True)
-os.makedirs(graf_hist_ganancia_total_path,exist_ok=True)
-os.makedirs(graf_hist_ganancia_semillas_path,exist_ok=True)
-os.makedirs(umbrales_path,exist_ok=True)
-os.makedirs(feat_imp_path,exist_ok=True)
+os.makedirs(path_output_bayesian_db,exist_ok=True)
+os.makedirs(path_output_bayesian_bestparams,exist_ok=True)
+os.makedirs(path_output_bayesian_best_iter,exist_ok=True)
+os.makedirs(path_output_bayesian_graf,exist_ok=True)
+        #FINALES
+os.makedirs(path_output_finales_model,exist_ok=True)
+os.makedirs(path_output_finales_feat_imp,exist_ok=True)
+os.makedirs(path_output_finales_graf_gan_hist_grilla,exist_ok=True)
+os.makedirs(path_output_finales_graf_gan_hist_total,exist_ok=True)
+os.makedirs(path_output_finales_graf_gan_hist_semillas,exist_ok=True)
+os.makedirs(path_output_finales_graf_curva_ganancia,exist_ok=True)
+os.makedirs(path_output_finales_umbral,exist_ok=True)
+os.makedirs(path_output_prediccion_final,exist_ok=True)
         #EXPERIMENTOS
 os.makedirs(path_output_exp_model,exist_ok=True)
 os.makedirs(path_output_exp_feat_imp,exist_ok=True)
