@@ -390,6 +390,7 @@ def prediccion_apred_prob(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lg
     return y_apred
 
 def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series ,umbral_cliente:int , name:str ,output_path:str) -> pd.DataFrame:
+    logger.info("Comienzo de la preparacion de las predicciones finales")
     name = name+"_predicciones_finales"
     y_apred = y_apred.copy()
     y_apred["prediction"] = y_pred 
