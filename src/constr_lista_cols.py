@@ -2,10 +2,8 @@
 import pandas as pd
 import numpy as np
 import logging
-from src.config import PATH_OUTPUT_LGBM
 
 logger=logging.getLogger(__name__)
-feat_imp_path=PATH_OUTPUT_LGBM +'feature_importances/'
 
 def contruccion_cols(df:pd.DataFrame|np.ndarray)->list[list]:
     logger.info("Comienzo de la extraccion de la seleccion de las columnas")

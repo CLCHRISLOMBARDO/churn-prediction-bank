@@ -4,8 +4,8 @@ SEMILLA= 773767
 SEMILLAS=[259621, 282917, 413417, 773767, 290827]
 N_SEMILLAS= 49
 ## INPUT PATHS
-# PATH_INPUT_DATA="data/competencia_01.csv"
-PATH_INPUT_DATA="~/buckets/b1/datasets/competencia_01.csv"
+PATH_INPUT_DATA="data/competencia_01.csv"
+# PATH_INPUT_DATA="~/buckets/b1/datasets/competencia_01.csv"
 
 ## LOG PATH
 PATH_LOGS= "logs/"
@@ -57,7 +57,7 @@ MES_05=202105
 UMBRAL=0.025
 GANANCIA=780000
 ESTIMULO = 20000
-N_TRIALS= 30
+N_TRIALS= 3
 N_BOOSTS=1000
 N_FOLDS=5
 

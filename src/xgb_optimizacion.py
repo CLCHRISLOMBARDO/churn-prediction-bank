@@ -14,7 +14,7 @@ from optuna.samplers import TPESampler # Para eliminar el componente estocastico
 from optuna.visualization import plot_param_importances, plot_contour,  plot_slice, plot_optimization_history
 
 from src.config import GANANCIA,ESTIMULO,SEMILLA ,N_BOOSTS ,N_FOLDS
-from src.config import PATH_OUTPUT_OPTIMIZACION, path_output_bayesian_db,path_output_bayesian_bestparams ,path_output_bayesian_best_iter ,path_output_bayesian_graf
+from src.config import  path_output_bayesian_db,path_output_bayesian_bestparams ,path_output_bayesian_best_iter ,path_output_bayesian_graf
 
 logger = logging.getLogger(__name__)
 
