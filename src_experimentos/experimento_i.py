@@ -17,7 +17,7 @@ from src.xgb_train_test import entrenamiento_xgb , grafico_feature_importance_xg
 
 logger=logging.getLogger(__name__)
 
-def lanzar_experimento_i(fecha:str ,semillas:list[int],proceso_ppal:str ="experimento"): 
+def lanzar_experimento(fecha:str ,semillas:list[int],proceso_ppal:str ="experimento"): 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero='i'
     #"""----------------------------------------------------------------------------------------------"""
@@ -79,11 +79,11 @@ def lanzar_experimento_i(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
     # df=feature_engineering_drop_cols(df,cols_dropear)
 
 
-    #3. spliteo train - test - apred
+    #3. spliteo train - test - apred - Subsampleo
     if proceso_ppal =="prediccion_final":
         MES_TRAIN.append(MES_04)
     df = conversion_binario(df)
-    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA)
+    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,0.4)
 
     # 4. Carga de mejores Hiperparametros
 
@@ -92,20 +92,17 @@ def lanzar_experimento_i(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
         
             
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
-    bayesiana_fecha_hora_lgbm= '2025-10-05_23-29-49'
+    bayesiana_fecha_hora_lgbm= 'TEST_TEST_TEST_TEST'
     numero_bayesiana_lgbm ='1'
-    bayesiana_fecha_hora_xgb = '2025-10-10_01-38-02'
+    bayesiana_fecha_hora_xgb = 'TEST_TEST_TEST_TEST'
     numero_bayesiana_xgb='1'
     #"""-----------------------------------------------------------------------------------------------"""
 
     name_best_params_file_lgbm=f"best_params_bayesiana_{numero_bayesiana_lgbm}_lgbm_{bayesiana_fecha_hora_lgbm}.json"
     name_best_iter_file_lgbm=f"best_iter_bayesiana_{numero_bayesiana_lgbm}_lgbm_{bayesiana_fecha_hora_lgbm}.json"
 
-    name_best_params_file_xgb=f"best_params_bayesiana_{numero_bayesiana_xgb}_xgb_{bayesiana_fecha_hora_xgb}.json"
-    name_best_iter_file_xgb=f"best_iter_bayesiana_{numero_bayesiana_xgb}_xgb_{bayesiana_fecha_hora_xgb}.json"
-
     try:
-        with open(name_best_params_file_lgbm, "r") as f:
+        with open(path_output_bayesian_bestparams+name_best_params_file_lgbm, "r") as f:
             best_params_lgbm = json.load(f)
             logger.info(f"Correcta carga de los best params del LGBM : {best_params_lgbm}")
 
@@ -116,12 +113,16 @@ def lanzar_experimento_i(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
         logger.error(f"No se pudo encontrar los best params ni best iter del LGBM por el error {e}")
         raise
 
+
+    name_best_params_file_xgb=f"best_params_bayesiana_{numero_bayesiana_xgb}_xgb_{bayesiana_fecha_hora_xgb}.json"
+    name_best_iter_file_xgb=f"best_iter_bayesiana_{numero_bayesiana_xgb}_xgb_{bayesiana_fecha_hora_xgb}.json"
+
     try:
-        with open(name_best_params_file_xgb, "r") as f:
+        with open(path_output_bayesian_bestparams+name_best_params_file_xgb, "r") as f:
             best_params_xgb = json.load(f)
             logger.info(f"Correcta carga de los best params del XGB : {best_params_xgb}")
 
-        with open(path_output_bayesian_bestparams+name_best_iter_file_xgb, "r") as f:
+        with open(path_output_bayesian_best_iter+name_best_iter_file_xgb, "r") as f:
             best_iter_xgb = json.load(f)
             logger.info(f"Correcta carga de la best iter del XGB : {best_iter_xgb}")
     except Exception as e:
@@ -237,7 +238,8 @@ def lanzar_experimento_i(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
             # Carga del umbral optimo de todas las tiradas : 
 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
-            fecha_name_umbral='2025-10-10_13-53-26'
+            # fecha_name_umbral='2025-10-10_13-53-26'
+            fecha_name_umbral='TEST_TEST_TEST_TEST'
             numero_umbral='i'
     #"""----------------------------------------------------------------------------------------------"""
             umbrales_file=f"{fecha_name_umbral}_EXPERIMENTO_{numero_umbral}.json"
