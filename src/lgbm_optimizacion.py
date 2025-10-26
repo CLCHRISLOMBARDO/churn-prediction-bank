@@ -41,6 +41,8 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
         min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 10, 1600)
         feature_fraction = trial.suggest_float('feature_fraction', 0.1, 1.0)
         bagging_fraction = trial.suggest_float('bagging_fraction', 0.1, 1.0)
+        # Agregar maxdepth
+        # Agregar lo de regularizacion
 
         params = {
             'objective': 'binary',
