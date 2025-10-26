@@ -5,7 +5,7 @@ SEMILLAS=[259621, 282917, 413417, 773767, 290827]
 N_SEMILLAS= 49
 ## INPUT PATHS
 #PATH_INPUT_DATA="data/competencia_01.csv"
- PATH_INPUT_DATA="~/buckets/b1/datasets/competencia_01.csv"
+PATH_INPUT_DATA="~/buckets/b1/datasets/competencia_01.csv"
 
 ## LOG PATH
 PATH_LOGS= "logs/"
