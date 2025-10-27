@@ -7,7 +7,7 @@ N_SEMILLAS= 49
 in_gcp = True
 # imprimio esto
 if in_gcp:
-    PLACE_PATHS = "~/buckets/b1/"
+    PLACE_PATHS = "/home/christian_lombardo14/buckets/b1/"
 else:
     PLACE_PATHS = ""
 # ------------------------------------------------------------------------------------------------------------------------------
