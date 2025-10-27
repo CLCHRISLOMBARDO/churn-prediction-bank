@@ -1,4 +1,4 @@
-/data
+datasets/
 /env_bank
 __pycache__/
 logss/
