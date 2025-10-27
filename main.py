@@ -11,19 +11,11 @@ import optuna
 
 from src.config import *
 from src.generadora_semillas import create_semilla
-# from src_experimentos.experimento2 import lanzar_experimento_2
-# from src_experimentos.experimento_ensamble import lanzar_experimento_ensamble
-# from src_experimentos.experimento3 import lanzar_experimento_3
-# from src_experimentos.experimento4 import lanzar_experimento_4
+
 from src_bayesianas.experimento_bayesiana_lgbm import lanzar_bayesiana_lgbm
 from src_bayesianas.experimento_bayesiana_xgb import lanzar_bayesiana_xgb
-# from src_experimentos.experimento5 import lanzar_experimento_5
-# from src_experimentos.experimento6 import lanzar_experimento_6
-# from src_experimentos.experimento7 import lanzar_experimento_7
-# from src_experimentos.experimento8 import lanzar_experimento_8
-# from src_experimentos.experimento9 import lanzar_experimento_9
-# from src_experimentos.experimento10 import lanzar_experimento_10
-# from src_experimentos.experimento_i import lanzar_experimento_i
+
+from src_experimentos.experimento_i import lanzar_experimento
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 
 
@@ -84,8 +76,11 @@ def main():
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
     semillas = create_semilla(15)
     logger.info(f"se crearon {len(semillas)} semillas")
-    lanzar_bayesiana_lgbm(test,SEMILLA)
-    lanzar_bayesiana_xgb(test,SEMILLA)
+    lanzar_experimento(test,semillas[:3] ,'prediccion_final')
+    # lanzar_experimento(test,semillas[:3] ,'experimento')
+    # lanzar_bayesiana_lgbm(test,SEMILLA)
+    # lanzar_bayesiana_xgb(test,SEMILLA)
+
 
     # lanzar_experimento_i(fecha ,semillas , "experimento" )
 
