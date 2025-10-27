@@ -3,18 +3,24 @@
 SEMILLA= 773767
 SEMILLAS=[259621, 282917, 413417, 773767, 290827]
 N_SEMILLAS= 49
+# --------------------Determinar si estamos en gcp (in_gcp = True) o en local (in_gcp = False) --------------------------------
+in_gcp = True
+if in_gcp:
+    PLACE_PATHS = "~/buckets/b1/"
+else:
+    PLACE_PATHS = ""
+# ------------------------------------------------------------------------------------------------------------------------------
 ## INPUT PATHS
-#PATH_INPUT_DATA="data/competencia_01.csv"
-PATH_INPUT_DATA="~/buckets/b1/datasets/competencia_01.csv"
-
+PATH_INPUT_DATA=PLACE_PATHS+"datasets/competencia_01.csv"
 ## LOG PATH
-PATH_LOGS= "logs/"
+PATH_LOGS= PLACE_PATHS+"logs/"
 
 ## OUTPUTS PATHS
-PATH_OUTPUT_DATA="outputs/data_outputs/"
-PATH_OUTPUT_BAYESIAN="outputs/bayesian_outputs/"
-PATH_OUTPUT_FINALES = "outputs/finales_outputs/"
-PATH_OUTPUT_EXPERIMENTOS = "outputs/experimentos_outputs/"
+PATH_OUTPUT= PLACE_PATHS+"outputs/"
+PATH_OUTPUT_DATA=PATH_OUTPUT+"data_outputs/"
+PATH_OUTPUT_BAYESIAN=PATH_OUTPUT+"bayesian_outputs/"
+PATH_OUTPUT_FINALES = PATH_OUTPUT+"finales_outputs/"
+PATH_OUTPUT_EXPERIMENTOS = PATH_OUTPUT+"experimentos_outputs/"
 
 
 ## PATH_OUTPUT_BAYESIAN
@@ -26,11 +32,6 @@ path_output_bayesian_graf = PATH_OUTPUT_BAYESIAN+'grafico_bayesiana/'
 ## PATH_OUTPUT_FINALES
 path_output_finales_model=PATH_OUTPUT_FINALES + 'model/'
 path_output_finales_feat_imp=PATH_OUTPUT_FINALES +'feature_importances/'
-path_output_finales_graf_gan_hist_grilla=PATH_OUTPUT_FINALES +'graf_ganancias_hist_grilla/'
-path_output_finales_graf_gan_hist_total=PATH_OUTPUT_FINALES +'graf_ganancias_hist_total/'
-path_output_finales_graf_gan_hist_semillas=PATH_OUTPUT_FINALES +'graf_ganancias_hist_semillas/'
-path_output_finales_graf_curva_ganancia=PATH_OUTPUT_FINALES +'graf_curva_ganancia/'
-path_output_finales_umbral=PATH_OUTPUT_FINALES +'umbrales/'
 path_output_prediccion_final = PATH_OUTPUT_FINALES + 'final_prediction/'
 
 # PATH_OUTPUT_EXPERIMENTOS

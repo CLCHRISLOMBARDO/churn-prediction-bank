@@ -42,11 +42,7 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
         logger.info(f"LANZAMIENTO PARA PREDICCION FINAL CON {n_semillas} SEMILLAS")
         output_path_models = path_output_finales_model
         output_path_feat_imp =path_output_finales_feat_imp
-        output_path_graf_ganancia_hist_semillas=path_output_finales_graf_gan_hist_semillas
-        output_path_graf_ganancia_hist_total=path_output_finales_graf_gan_hist_total
-        output_path_graf_ganancia_hist_grilla=path_output_finales_graf_gan_hist_grilla
-        output_path_graf_curva_ganancia = path_output_finales_graf_curva_ganancia
-        output_path_umbrales=path_output_finales_umbral
+   
 
     ## 0. load datos
     df=cargar_datos(PATH_INPUT_DATA)
