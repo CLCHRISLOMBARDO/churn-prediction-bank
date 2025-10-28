@@ -79,7 +79,7 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],proceso_ppal:str ="experi
     if proceso_ppal =="prediccion_final":
         MES_TRAIN.append(MES_04)
     df = conversion_binario(df)
-    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,0.4)
+    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA)
 
     # 4. Carga de mejores Hiperparametros
 
