@@ -15,7 +15,7 @@ from src.generadora_semillas import create_semilla
 from src_bayesianas.experimento_bayesiana_lgbm import lanzar_bayesiana_lgbm
 from src_bayesianas.experimento_bayesiana_xgb import lanzar_bayesiana_xgb
 
-from src_experimentos.experimento_7 import lanzar_experimento
+from src_experimentos.experimento_7 import lanzar_experimento_7
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 
 
@@ -72,7 +72,7 @@ def main():
     semillas = create_semilla(15)
     logger.info(f"se crearon {len(semillas)} semillas")
     # lanzar_experimento(test,semillas[:3] ,'prediccion_final')
-    lanzar_experimento(fecha,semillas ,'experimento')
+    lanzar_experimento_7(fecha,semillas ,'experimento')
     # lanzar_bayesiana_lgbm(test,SEMILLA)
     # lanzar_bayesiana_xgb(test,SEMILLA)
 
