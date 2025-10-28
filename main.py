@@ -51,7 +51,7 @@ os.makedirs(path_output_exp_umbral,exist_ok=True)
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 test= "TEST_TEST_TEST_TEST"
-comentario=input(f"Ingrese un comentario")
+# comentario=input(f"Ingrese un comentario")
 nombre_log=fecha+"_experimento"
 # CONFIGURACION LOG
 logging.basicConfig(
@@ -71,8 +71,8 @@ def main():
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
     semillas = create_semilla(15)
     logger.info(f"se crearon {len(semillas)} semillas")
-    lanzar_experimento(test,semillas[:3] ,'prediccion_final')
-    # lanzar_experimento(test,semillas[:3] ,'experimento')
+    # lanzar_experimento(test,semillas[:3] ,'prediccion_final')
+    lanzar_experimento(test,semillas ,'experimento')
     # lanzar_bayesiana_lgbm(test,SEMILLA)
     # lanzar_bayesiana_xgb(test,SEMILLA)
 
