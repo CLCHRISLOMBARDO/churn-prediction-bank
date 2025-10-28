@@ -72,7 +72,7 @@ def main():
     semillas = create_semilla(15)
     logger.info(f"se crearon {len(semillas)} semillas")
     # lanzar_experimento(test,semillas[:3] ,'prediccion_final')
-    lanzar_experimento_7(fecha,semillas ,'experimento')
+    lanzar_experimento_7(fecha,semillas ,'prediccion_final')
     # lanzar_bayesiana_lgbm(test,SEMILLA)
     # lanzar_bayesiana_xgb(test,SEMILLA)
 
