@@ -17,7 +17,7 @@ from src.xgb_train_test import entrenamiento_xgb , grafico_feature_importance_xg
 
 logger=logging.getLogger(__name__)
 
-def lanzar_experimento(fecha:str ,semillas:list[int],proceso_ppal:str ="experimento"): 
+def lanzar_experimento_i(fecha:str ,semillas:list[int],proceso_ppal:str ="experimento"): 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero='i'
     #"""----------------------------------------------------------------------------------------------"""
@@ -229,7 +229,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],proceso_ppal:str ="experime
     elif proceso_ppal =="prediccion_final":
         y_predicciones_lista=[]
         for i,semilla in enumerate(semillas):
-            logger.info(f"Comienzo de la prediccion final  *****************************************")
+            logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones *****************************************")
             # Carga del umbral optimo de todas las tiradas : 
 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""

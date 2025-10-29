@@ -4,7 +4,7 @@ SEMILLA= 773767
 SEMILLAS=[259621, 282917, 413417, 773767, 290827]
 N_SEMILLAS= 49
 # --------------------Determinar si estamos en gcp (in_gcp = True) o en local (in_gcp = False) --------------------------------
-in_gcp = True
+in_gcp = False
 # imprimio esto
 if in_gcp:
     PLACE_PATHS = "/home/christian_lombardo14/buckets/b1/"
