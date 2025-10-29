@@ -26,7 +26,9 @@ logger = logging.getLogger(__name__)
 ## --------------------------------------------------------Funcion main ------------------------------------------
 
 def lanzar_bayesiana_xgb(fecha:str , semilla:int ):
-    numero="1" # Cambiar en cada nueva creacion
+    #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
+    numero="2" 
+    #"""----------------------------------------------------------------------------------------------"""
     name=f"bayesiana_{numero}_xgb_{fecha}"
     nombre_log=f"log_{name}"
     logger.info(f"Inicio de ejecucion del flujo : {name}")

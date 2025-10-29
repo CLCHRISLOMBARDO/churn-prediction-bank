@@ -27,7 +27,9 @@ logger = logging.getLogger(__name__)
 ## --------------------------------------------------------Funcion main ------------------------------------------
 
 def lanzar_bayesiana_lgbm(fecha:str , semilla:int ):
-    numero="1"
+    #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
+    numero="2" 
+    #"""----------------------------------------------------------------------------------------------"""
     name=f"bayesiana_{numero}_lgbm_{fecha}"
     nombre_log=f"log_{name}"
     logger.info(f"Inicio de ejecucion del flujo : {name}")
@@ -52,8 +54,7 @@ def lanzar_bayesiana_lgbm(fecha:str , semilla:int ):
     ## 3. Preprocesamiento para entrenamiento
     # split X_train, y_train
     df=conversion_binario(df)
-    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR
-    ,semilla,0.4)
+    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,semilla,0.4)
  
 
     ## 4.a. Optimizacion Hiperparametros
