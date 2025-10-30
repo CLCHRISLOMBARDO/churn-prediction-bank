@@ -206,7 +206,11 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
 
             y_pred_sorted_s=y_pred_sorted[s]
             ganancia_acumulada_s = ganancia_acumulada[s]
-            linea,=plt.plot(y_pred_sorted_s[piso:techo] ,ganancia_acumulada_s[piso:techo] ,label=f"SEMILLA {s} ganancia max a {max_ganancia_acumulada} / punto de corte a {umbral_optimo}")
+            if s == "ensamble_semillas":
+                alpha = 1
+            else:
+                alpha=0.3
+            linea,=plt.plot(y_pred_sorted_s[piso:techo] ,ganancia_acumulada_s[piso:techo],alpha=alpha ,label=f"SEMILLA {s} ganancia max a {max_ganancia_acumulada} / punto de corte a {umbral_optimo}")
             color=linea.get_color()
             if i==0:
                 plt.axvline(x=0.025 , color="red" , linestyle="--" ,label="Punto de Corte a 0.025" , alpha=0.3)
@@ -233,7 +237,11 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
             max_ganancia_acumulada= umbrales[s]["ganancia_max"]
             y_pred_sorted_s=y_pred_sorted[s]
             ganancia_acumulada_s = ganancia_acumulada[s]
-            linea,=plt.plot(range(piso,len(ganancia_acumulada_s[piso:techo])+piso) ,ganancia_acumulada_s[piso:techo] ,label=f"SEMILLA {s} ganancia max a {max_ganancia_acumulada} / punto de corte a {indx_max_ganancia_acumulada}")
+            if s == "ensamble_semillas":
+                alpha = 1
+            else:
+                alpha=0.3
+            linea,=plt.plot(range(piso,len(ganancia_acumulada_s[piso:techo])+piso) ,ganancia_acumulada_s[piso:techo] ,alpha=alpha,label=f"SEMILLA {s} ganancia max a {max_ganancia_acumulada} / punto de corte a {indx_max_ganancia_acumulada}")
             color=linea.get_color()
             plt.axvline(x=indx_max_ganancia_acumulada , color=color , linestyle="--" )
             plt.axhline(y=max_ganancia_acumulada , color=color,linestyle="--" )

@@ -12,11 +12,13 @@ import optuna
 from src.config import *
 from src.generadora_semillas import create_semilla
 
-from src_bayesianas.experimento_bayesiana_lgbm import lanzar_bayesiana_lgbm
-from src_bayesianas.experimento_bayesiana_xgb import lanzar_bayesiana_xgb
+from src_bayesianas.experimento_bayesiana_lgbm_2 import lanzar_bayesiana_lgbm
+from src_bayesianas.experimento_bayesiana_xgb_2 import lanzar_bayesiana_xgb
 
 from src_experimentos.experimento_7 import lanzar_experimento_7
 from src_experimentos.experimento_8 import lanzar_experimento_8
+from src_experimentos.experimento_9 import lanzar_experimento_9
+
 
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 
@@ -52,9 +54,13 @@ os.makedirs(path_output_exp_umbral,exist_ok=True)
 
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+# ----------------------------Cambiar numero y proceso ppal -----------------------------------------------------------------
+n_experimento=9
+proceso_ppal="experimento"
+# ---------------------------------------------------------------------------------------------------------------------------
 test= "TEST_TEST_TEST_TEST"
 # comentario=input(f"Ingrese un comentario")
-nombre_log=fecha+"_experimento"
+nombre_log=fecha+f"_{proceso_ppal}_{n_experimento}"
 # CONFIGURACION LOG
 logging.basicConfig(
     level=logging.INFO, #Puede ser INFO o ERROR
@@ -73,8 +79,11 @@ def main():
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
     semillas = create_semilla(15)
     logger.info(f"se crearon {len(semillas)} semillas")
-    lanzar_bayesiana_lgbm(fecha,SEMILLA)
-    lanzar_bayesiana_xgb(fecha,SEMILLA)
+    lanzar_experimento_9(test,semillas[:3],n_experimento,proceso_ppal)
+    # lanzar_experimento_9(fecha,semillas,n_experimento,proceso_ppal)
+    # lanzar_experimento_9(test,semillas[:3],n_experimento,'prediccion_final')
+    # lanzar_bayesiana_lgbm(fecha,SEMILLA)
+    # lanzar_bayesiana_xgb(fecha,SEMILLA)
     # lanzar_experimento_8(fecha,semillas,'prediccion_final')
     # lanzar_experimento_8(fecha,semillas,'experimento')
     # lanzar_experimento_8(test,semillas[:3] ,'prediccion_final')

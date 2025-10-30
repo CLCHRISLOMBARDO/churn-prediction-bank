@@ -1,5 +1,5 @@
 #experimento_i.py
-# EXPERIMENTO i: Ensamble con lgb y xgb. Es el 5 pero saco las predicciones del modelo promedio. Es el 7
+# EXPERIMENTO 9: Ensamble con lgb y xgb. Es el 8 pero pongo el subsampleo
 import numpy as np
 import pandas as pd
 import logging
@@ -17,7 +17,7 @@ from src.xgb_train_test import entrenamiento_xgb , grafico_feature_importance_xg
 
 logger=logging.getLogger(__name__)
 
-def lanzar_experimento_7(fecha:str ,semillas:list[int],n_experimento:int=7,proceso_ppal:str ="experimento"): 
+def lanzar_experimento_9(fecha:str ,semillas:list[int],n_experimento:int,proceso_ppal:str ="experimento"): 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
@@ -79,7 +79,7 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],n_experimento:int=7,proce
     if proceso_ppal =="prediccion_final":
         MES_TRAIN.append(MES_04)
     df = conversion_binario(df)
-    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA)
+    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,0.4)
 
     # 4. Carga de mejores Hiperparametros
 
@@ -88,10 +88,10 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],n_experimento:int=7,proce
         
             
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
-    bayesiana_fecha_hora_lgbm= '2025-10-05_23-29-49'
-    numero_bayesiana_lgbm ='1'
-    bayesiana_fecha_hora_xgb = '2025-10-10_01-38-02'
-    numero_bayesiana_xgb='1'
+    bayesiana_fecha_hora_lgbm= '2025-10-29_11-32-15'
+    numero_bayesiana_lgbm ='2'
+    bayesiana_fecha_hora_xgb = '2025-10-29_11-32-15'
+    numero_bayesiana_xgb='2'
     #"""-----------------------------------------------------------------------------------------------"""
 
     name_best_params_file_lgbm=f"best_params_bayesiana_{numero_bayesiana_lgbm}_lgbm_{bayesiana_fecha_hora_lgbm}.json"
@@ -130,6 +130,7 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],n_experimento:int=7,proce
 
     if proceso_ppal =="experimento":
         logger.info(f"Entro en el proceso experimento !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        y_predicciones_lista=[]
         y_pred_sorted_dict={}
         ganancia_acumulada_dict={}
         umbrales_dict={}
@@ -161,8 +162,7 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],n_experimento:int=7,proce
 
             name_1rst_train = f"{name}_SEMILLA_{semilla}_1rst_train_ensamble_xgb_lgbm"
             y_pred_ensamble = (y_pred_lgbm+y_pred_xgb)/2
-
-            
+            y_predicciones_lista.append(y_pred_ensamble)
 
             # Umbral optimo
             if proceso_ppal == "experimento":
@@ -198,7 +198,28 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],n_experimento:int=7,proce
             lista_df_ganancias_prob_por_semilla_n_split_50.append(df_long_prob_semilla_i_n_split_50)
 
 
+        # Creacion de lqs predicciones medias a partir de los ensambles de las semillas
+        semilla = "ensamble_semillas"
+        logger.info("Comienzo del ensamblado de todas las semillas")
+        y_pred_df = np.vstack(y_predicciones_lista)
+        logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_df.shape}")
+        y_pred_ensamble = y_pred_df.mean(axis=0)
+        logger.info("Fin del ensamblado ")
+        name_1rst_train = f"{name}_ensambles_semillas_1rst_train_ensamble_xgb_lgbm"
+        dict_calc_umbrales= umbral_optimo_calc(y_test_class , y_pred_ensamble ,name_1rst_train , output_path_umbrales , semilla, guardar_umbral )
+
+        umbrales=dict_calc_umbrales["umbrales"]
+        umbrales_dict[semilla] = umbrales 
+
+        y_pred_sorted = dict_calc_umbrales["y_pred_sorted"]
+        y_pred_sorted_dict[semilla] = y_pred_sorted
+
+        ganancia_acumulada = dict_calc_umbrales["ganancia_acumulada"]
+        ganancia_acumulada_dict[semilla] = ganancia_acumulada
+
+
         name=f"{fecha}_EXPERIMENTO_{numero}"
+        name_1rst_train = f"{name}_1rst_train_ensamble_xgb_lgbm"
         if guardar_umbral == False:
             try:
                 with open(output_path_umbrales+f"{name}.json", "w") as f:
@@ -208,7 +229,9 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],n_experimento:int=7,proce
             logger.info(f"Los datos de umbrales moviles son : {umbrales}")
             logger.info("Fin de la prediccion de umbral movil")
 
-        grafico_curvas_ganancia(y_pred_sorted_dict ,ganancia_acumulada_dict,umbrales_dict,semillas,name_1rst_train,output_path_graf_curva_ganancia)
+        logger.info("Vamos a graficar la curva de ganancia con la y_pred_ensamble")
+        semillas_con_pred_ensamble = y_pred_sorted_dict.keys()
+        grafico_curvas_ganancia(y_pred_sorted_dict ,ganancia_acumulada_dict,umbrales_dict,semillas_con_pred_ensamble,name_1rst_train,output_path_graf_curva_ganancia)
 
         # Graficos de histogramas con las semillas juntas con 1 split
         df_long_cliente_n_split_1 = pd.concat(lista_df_ganancias_clientes_por_semilla_n_split_1,axis=0)
@@ -235,8 +258,8 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],n_experimento:int=7,proce
 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
             # fecha_name_umbral='2025-10-10_13-53-26'
-            fecha_name_umbral='2025-10-28_19-09-00'
-            numero_umbral='7'
+            fecha_name_umbral='TEST_TEST_TEST_TEST'
+            numero_umbral='9'
     #"""----------------------------------------------------------------------------------------------"""
             umbrales_file=f"{fecha_name_umbral}_EXPERIMENTO_{numero_umbral}.json"
             file = path_output_exp_umbral+umbrales_file 
@@ -250,12 +273,14 @@ def lanzar_experimento_7(fecha:str ,semillas:list[int],n_experimento:int=7,proce
                 logger.error(f"Error al tratar de cargar umbrales {umbrales_file} por {e}")
                 raise
             logger.info("Calculo del cliente optimo mean")
-            clientes_optimos = []
-            for semilla_gan in data_ganancias.keys():
-                clientes_optimos.append(data_ganancias[semilla_gan]["cliente"])
-            
+            # clientes_optimos = []
+            # for semilla_gan in data_ganancias.keys():
+            #     clientes_optimos.append(data_ganancias[semilla_gan]["cliente"])
+            # cliente_optimo_mean = np.mean(clientes_optimos)
 
-            cliente_optimo_mean = np.mean(clientes_optimos)
+            cliente_optimo_mean = data_ganancias["ensamble_semillas"]["cliente"]
+
+
             logger.info(f"Cliente optimo mean = {cliente_optimo_mean}")
             #entrenamiento de los modelos
             logger.info(f"Comienzo de los entrenamientos del modelo  : {X_apred['foto_mes'].unique()} para cada modelo")

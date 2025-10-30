@@ -17,9 +17,9 @@ from src.xgb_train_test import entrenamiento_xgb , grafico_feature_importance_xg
 
 logger=logging.getLogger(__name__)
 
-def lanzar_experimento_8(fecha:str ,semillas:list[int],proceso_ppal:str ="experimento"): 
+def lanzar_experimento_8(fecha:str ,semillas:list[int],n_experimento:int=8,proceso_ppal:str ="experimento"): 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
-    numero='8'
+    numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
     n_semillas = len(semillas)
     name=f"{fecha}_EXPERIMENTO_{numero}_{proceso_ppal}"
