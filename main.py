@@ -56,7 +56,7 @@ os.makedirs(path_output_exp_umbral,exist_ok=True)
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 # ----------------------------Cambiar numero y proceso ppal -----------------------------------------------------------------
 n_experimento=9
-proceso_ppal="experimento"
+proceso_ppal="prediccion_final"
 # ---------------------------------------------------------------------------------------------------------------------------
 test= "TEST_TEST_TEST_TEST"
 # comentario=input(f"Ingrese un comentario")
@@ -79,7 +79,10 @@ def main():
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
     semillas = create_semilla(15)
     logger.info(f"se crearon {len(semillas)} semillas")
-    lanzar_experimento_9(test,semillas[:3],n_experimento,proceso_ppal)
+    lanzar_experimento_9(fecha , semillas,n_experimento ,proceso_ppal )
+
+    # lanzar_bayesiana_lgbm(fecha , SEMILLA)
+    # lanzar_experimento_9(test,semillas[:3],n_experimento,proceso_ppal)
     # lanzar_experimento_9(fecha,semillas,n_experimento,proceso_ppal)
     # lanzar_experimento_9(test,semillas[:3],n_experimento,'prediccion_final')
     # lanzar_bayesiana_lgbm(fecha,SEMILLA)
