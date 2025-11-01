@@ -15,11 +15,11 @@ def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
 
     drop_cols = ["foto_mes" ]
 
-    num_cols = [ c for c in num_cols if c not in drop_cols]
+    cols = [ c for c in df.columns if c not in drop_cols]
     
     sql='select foto_mes'
 
-    for c in num_cols:
+    for c in cols:
         sql+=f', count(distinct({c})) as {c}_nunique'
     sql+=' from df group by foto_mes'
 
