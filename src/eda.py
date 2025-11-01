@@ -67,10 +67,10 @@ def std_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
 
     con = duckdb.connect(database=":memory:")
     con.register("df",df)
-    medias_por_mes = con.execute(sql).df()
+    variacion_por_mes = con.execute(sql).df()
     con.close()
     logger.info("Fin del eda de std por foto_mes")
-    return std_por_mes
+    return variacion_por_mes
 
 def crear_reporte_pdf(df, xcol, columnas_y, name_pdf, titulo="Reporte de gráficos"):
     """
