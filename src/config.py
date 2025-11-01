@@ -12,20 +12,29 @@ try:
     with open(PATH_CONFIG, "r") as f:
         cfg = yaml.safe_load(f)
 
-        # Secciones del YAML
         sem        = cfg["configuracion_semilla"]
         gcp        = cfg["configuracion_gcp"]
         paths      = cfg["configuracion_paths"]
         out        = paths["path_outputs"]
         out_bayes  = paths["path_outputs_bayesian"]
         out_final  = paths["path_outputs_finales"]
-        comp       = cfg["configuracion_competencia_1"]
+        out_exp    = paths["path_outputs_experimentos"]
+
+
+        COMPETENCIA =cfg["COMPETENCIA"]
+        N_EXPERIMENTO =cfg["N_EXPERIMENTO"]
+        PROCESO_PPAL = cfg["PROCESO_PPAL"]
+        if COMPETENCIA == 1:
+            comp    = cfg["configuracion_competencia_1"]
+        elif COMPETENCIA == 2:
+            comp      = cfg["configuracion_competencia_2"]
         bayes      = cfg["configuracion_bayesiana"]
 
         # ================= Configuración General =================
         SEMILLA    = sem.get("SEMILLA", 773767)
         SEMILLAS   = sem.get("SEMILLAS", [259621, 282917, 413417, 773767, 290827])
         N_SEMILLAS = sem.get("N_SEMILLAS", 49)
+        
 
         # ---------------- Entorno (GCP vs local) ----------------
         in_gcp = bool(gcp.get("IN_GCP", False))
@@ -35,7 +44,7 @@ try:
             PLACE_PATHS = paths["place_path"]["LOCAL_PATH"]
 
         # ================= Rutas de INPUT / LOG ==================
-        PATH_INPUT_DATA = PLACE_PATHS + paths["PATH_INPUT_DATA"]
+        PATH_INPUT_DATA = PLACE_PATHS + comp["PATH_INPUT_DATA"]
         PATH_LOGS       = PLACE_PATHS + paths["PATH_LOGS"]
 
         # ==================== OUTPUTS BASES ======================
@@ -44,6 +53,7 @@ try:
         PATH_OUTPUT_BAYESIAN     = PLACE_PATHS + out["PATH_OUTPUT_BAYESIAN"]
         PATH_OUTPUT_FINALES      = PLACE_PATHS + out["PATH_OUTPUT_FINALES"]
         PATH_OUTPUT_EXPERIMENTOS = PLACE_PATHS + out["PATH_OUTPUT_EXPERIMENTOS"]
+        PATH_OUTPUT_EDA = PLACE_PATHS + out["PATH_OUTPUT_EDA"]
 
         # ============= PATH_OUTPUT_BAYESIAN (detallados) =========
         path_output_bayesian_db         = PLACE_PATHS + out_bayes["PATH_OUTPUT_BAYESIAN_DB"]
@@ -57,13 +67,13 @@ try:
         path_output_prediccion_final     = PLACE_PATHS + out_final["PATH_OUTPUT_FINALES_PREDICCION_FINAL"]
 
         # ======= PATH_OUTPUT_EXPERIMENTOS (derivados directos) ===
-        path_output_exp_model                  = PATH_OUTPUT_EXPERIMENTOS + "exp_model/"
-        path_output_exp_feat_imp               = PATH_OUTPUT_EXPERIMENTOS + "exp_feat_importances/"
-        path_output_exp_graf_gan_hist_grilla   = PATH_OUTPUT_EXPERIMENTOS + "exp_graf_ganancias_hist_grilla/"
-        path_output_exp_graf_gan_hist_total    = PATH_OUTPUT_EXPERIMENTOS + "exp_graf_ganancias_hist_total/"
-        path_output_exp_graf_gan_hist_semillas = PATH_OUTPUT_EXPERIMENTOS + "exp_graf_ganancias_hist_semillas/"
-        path_output_exp_graf_curva_ganancia    = PATH_OUTPUT_EXPERIMENTOS + "exp_graf_curva_ganancia/"
-        path_output_exp_umbral                 = PATH_OUTPUT_EXPERIMENTOS + "exp_umbrales/"
+        path_output_exp_model                  = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_MODEL"]
+        path_output_exp_feat_imp               = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_FEAT_IMP"]
+        path_output_exp_graf_gan_hist_grilla   = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_GRAF_GAN_HIST_GRILLA"]
+        path_output_exp_graf_gan_hist_total    = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_GRAF_HIST_TOTAL"]
+        path_output_exp_graf_gan_hist_semillas = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_GRAF_HIST_SEMILLA"]
+        path_output_exp_graf_curva_ganancia    = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP__GRAF_CURVA_GANANCIA"]
+        path_output_exp_umbral                 = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_UMBRAL"]
 
         # ================= Submuestra / competencia ==============
         MES_TRAIN      = comp.get("MES_TRAIN", [202101, 202102, 202103])

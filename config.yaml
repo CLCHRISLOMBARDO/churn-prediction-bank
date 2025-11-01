@@ -1,3 +1,8 @@
+COMPETENCIA: 1
+N_EXPERIMENTO : "EDA"
+PROCESO_PPAL: "reporte_media_por_mes"
+
+
 configuracion_semilla:
   SEMILLA: 773767
   SEMILLAS: [259621, 282917, 413417, 773767, 290827]
@@ -10,27 +15,50 @@ configuracion_paths:
   place_path:
     LOCAL_PATH: ""
     GCP_PATH: "/home/christian_lombardo14/buckets/b1/"
-  PATH_INPUT_DATA: "datasets/competencia_01.csv"
   PATH_LOGS: "logs/"
+
   path_outputs:
     PATH_OUTPUT: "outputs/"
     PATH_OUTPUT_DATA: "outputs/data_outputs/"
     PATH_OUTPUT_BAYESIAN: "outputs/bayesian_outputs/"
     PATH_OUTPUT_FINALES: "outputs/finales_outputs/"
     PATH_OUTPUT_EXPERIMENTOS: "outputs/experimentos_outputs/"
+    PATH_OUTPUT_EDA : "outputs/eda_outputs/"
 
   path_outputs_bayesian:
     PATH_OUTPUT_BAYESIAN_DB: "outputs/bayesian_outputs/db/"
     PATH_OUTPUT_BAYESIAN_BESTPARAMS: "outputs/bayesian_outputs/best_params/"
     PATH_OUTPUT_BAYESIAN_BEST_ITER: "outputs/bayesian_outputs/best_iters/"
     PATH_OUTPUT_BAYESIAN_GRAF: "outputs/bayesian_outputs/grafico_bayesiana/"
+  
+  path_outputs_experimentos:
+    PATH_OUTPUT_EXP_MODEL : "outputs/experimentos_outputs/exp_model/"
+    PATH_OUTPUT_EXP_FEAT_IMP : "outputs/experimentos_outputs/exp_feat_importances/"
+    PATH_OUTPUT_EXP_GRAF_GAN_HIST_GRILLA: "outputs/experimentos_outputs/exp_graf_ganancias_hist_grilla/"
+    PATH_OUTPUT_EXP_GRAF_HIST_TOTAL: "outputs/experimentos_outputs/exp_graf_ganancias_hist_total/"
+    PATH_OUTPUT_EXP_GRAF_HIST_SEMILLA: "outputs/experimentos_outputs/exp_graf_ganancias_hist_semillas/"
+    PATH_OUTPUT_EXP__GRAF_CURVA_GANANCIA: "outputs/experimentos_outputs/exp_graf_curva_ganancia/"
+    PATH_OUTPUT_EXP_UMBRAL: "outputs/experimentos_outputs/exp_umbrales/"
 
   path_outputs_finales:
     PATH_OUTPUT_FINALES_MODEL: "outputs/finales_outputs/model/"
     PATH_OUTPUT_FINALES_FEAT_IMP: "outputs/finales_outputs/feature_importances/"
     PATH_OUTPUT_FINALES_PREDICCION_FINAL: "outputs/finales_outputs/final_prediction/"
 
+
 configuracion_competencia_1:
+  PATH_INPUT_DATA: "datasets/competencia_01.csv"
+  MES_TRAIN: [202101, 202102, 202103]
+  MES_TEST: [202104]
+  MES_A_PREDECIR: 202106
+  MES_01: 202101
+  MES_02: 202102
+  MES_03: 202103
+  MES_04: 202104
+  MES_05: 202105
+
+configuracion_competencia_2:
+  PATH_INPUT_DATA: "datasets/competencia_02_crudo.csv.gz"
   MES_TRAIN: [202101, 202102, 202103]
   MES_TEST: [202104]
   MES_A_PREDECIR: 202106
