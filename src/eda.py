@@ -45,6 +45,33 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
     logger.info("Fin del eda de media por foto_mes")
     return medias_por_mes
 
+def std_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
+    logger.info("Comienzo del eda de std por foto_mes")
+    if isinstance(df , pl.DataFrame):
+        num_cols=df.select(pl.selectors.numeric()).columns
+    elif isinstance(df , pd.DataFrame):
+        num_cols = df.select_dtypes(include="number").columns
+
+    drop_cols = ["foto_mes" ]
+
+    num_cols = [ c for c in num_cols if c not in drop_cols]
+    
+    # Veo primero cuales son los uniques de foto_mes
+
+    
+    sql='select foto_mes'
+
+    for c in num_cols:
+        sql+=f', STDDEV_SAMP({c}) as {c}_STD'
+    sql+=' from df group by foto_mes'
+
+    con = duckdb.connect(database=":memory:")
+    con.register("df",df)
+    medias_por_mes = con.execute(sql).df()
+    con.close()
+    logger.info("Fin del eda de std por foto_mes")
+    return std_por_mes
+
 def crear_reporte_pdf(df, xcol, columnas_y, name_pdf, titulo="Reporte de gráficos"):
     """
     Genera un PDF con una página por gráfico 
