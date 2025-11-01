@@ -16,6 +16,10 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
         num_cols=df.select(pl.selectors.numeric()).columns
     elif isinstance(df , pd.DataFrame):
         num_cols = df.select_dtypes(include="number").columns
+
+    drop_cols = ["foto_mes" ]
+
+    num_cols = [ c for c in num_cols if c not in drop_cols]
     
     # Veo primero cuales son los uniques de foto_mes
     logger.info("Vemos los uniques de los meses")
@@ -47,6 +51,10 @@ def crear_reporte_pdf(df, xcol, columnas_y, name_pdf, titulo="Reporte de gráfic
     """
 
     logger.info("Comienzo de la creacion del reporte")
+
+    drop_cols = ["foto_mes" ]
+
+    columnas_y = [ c for c in columnas_y if c not in drop_cols]
 
     salida_pdf = PATH_OUTPUT_EDA+name_pdf
     df["_fecha"] = pd.to_datetime(df[xcol].astype(str), format="%Y%m")
