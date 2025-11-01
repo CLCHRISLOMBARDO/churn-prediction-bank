@@ -1,5 +1,6 @@
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import seaborn as sns
 import pandas as pd
 import polars as pl
@@ -15,6 +16,17 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
         num_cols=df.select(pl.selectors.numeric()).columns
     elif isinstance(df , pd.DataFrame):
         num_cols = df.select_dtypes(include="number").columns
+    
+    # Veo primero cuales son los uniques de foto_mes
+    logger.info("Vemos los uniques de los meses")
+    sql = 'select distinct(foto_mes) from df order by foto_mes'
+    con = duckdb.connect(database=":memory:")
+    con.register("df",df)
+    mes_unique = con.execute(sql).df()
+    con.close()
+    logger.info(f"Los unicos meses: {mes_unique}")
+
+    logger.info("Seguimos con el eda de media por foto_mes")
     
     sql='select foto_mes'
 
@@ -37,6 +49,7 @@ def crear_reporte_pdf(df, xcol, columnas_y, name_pdf, titulo="Reporte de gráfic
     logger.info("Comienzo de la creacion del reporte")
 
     salida_pdf = PATH_OUTPUT_EDA+name_pdf
+    df["_fecha"] = pd.to_datetime(df[xcol].astype(str), format="%Y%m")
     with PdfPages(salida_pdf) as pdf:
         fig = plt.figure(figsize=(11.69, 8.27))  
         fig.text(0.5, 0.6, titulo, ha="center", va="center", fontsize=20)
@@ -47,12 +60,15 @@ def crear_reporte_pdf(df, xcol, columnas_y, name_pdf, titulo="Reporte de gráfic
 
         for col in columnas_y:
             fig, ax = plt.subplots(figsize=(11.69, 8.27))
-            sns.lineplot(data=df , x = xcol , y =col,ax=ax)
-            sns.scatterplot(data=df , x = xcol , y =col,ax=ax)
+            sns.lineplot(data=df , x = "_fecha" , y =col,ax=ax, marker='o')
             ax.set_title(f"{col} vs {xcol}")
             ax.set_xlabel(xcol)
             ax.set_ylabel(col)
             ax.grid(True, alpha=0.3)
+            ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
+            plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
+
             fig.tight_layout()
             pdf.savefig(fig)
             plt.close(fig)
