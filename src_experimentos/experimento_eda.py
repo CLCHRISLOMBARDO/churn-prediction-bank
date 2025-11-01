@@ -4,7 +4,7 @@ import polars as pl
 import matplotlib.pyplot as plt
 import seaborn as sns
 from src.config import *
-from src.eda import mean_por_mes , crear_reporte_pdf,std_por_mes
+from src.eda import mean_por_mes , crear_reporte_pdf,std_por_mes , nunique_por_mes
 
 
 
@@ -21,3 +21,5 @@ def lanzar_eda():
     crear_reporte_pdf(variacion_por_mes, xcol='foto_mes', columnas_y=variacion_por_mes.columns,
                   name_pdf="reporte_std_por_mes.pdf",
                   titulo="std por mes — Scatter por variable")
+    
+    num_uniques_por_mes = nunique_por_mes(df)

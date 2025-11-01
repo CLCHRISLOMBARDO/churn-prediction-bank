@@ -10,6 +10,33 @@ import logging
 from src.config import PATH_OUTPUT_EDA
 
 logger = logging.getLogger(__name__)
+def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
+    logger.info("Comienzo del eda de nunique por foto_mes")
+
+    drop_cols = ["foto_mes" ]
+
+    num_cols = [ c for c in num_cols if c not in drop_cols]
+    
+    sql='select foto_mes'
+
+    for c in num_cols:
+        sql+=f', count(distinct({c})) as {c}_nunique'
+    sql+=' from df group by foto_mes'
+
+    con = duckdb.connect(database=":memory:")
+    con.register("df",df)
+    nuniques_por_mes = con.execute(sql).df()
+    con.close()
+    logger.info("Intento de guardado")
+    try:
+        nuniques_por_mes.to_csv(PATH_OUTPUT_EDA+"nuniques_por_mes.csv")
+        logger.info("Fin del eda de media por foto_mes")
+    except Exception as e:
+        logger.error(f"No se pudo guardar por : {e}")
+    
+    return nuniques_por_mes
+
+
 def mean_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
     logger.info("Comienzo del eda de media por foto_mes")
     if isinstance(df , pl.DataFrame):
@@ -42,7 +69,16 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
     con.register("df",df)
     medias_por_mes = con.execute(sql).df()
     con.close()
-    logger.info("Fin del eda de media por foto_mes")
+
+
+    logger.info("Intento de guardado")
+    try:
+        medias_por_mes.to_csv(PATH_OUTPUT_EDA+"medias_por_mes.csv")
+        logger.info("Fin del eda de media por foto_mes")
+
+    except Exception as e:
+        logger.error(f"No se pudo guardar por : {e}")
+    
     return medias_por_mes
 
 def std_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
