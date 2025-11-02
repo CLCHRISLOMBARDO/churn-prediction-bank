@@ -1,12 +1,14 @@
 COMPETENCIA: 1
-N_EXPERIMENTO : "EDA"
-PROCESO_PPAL: "reporte"
+N_EXPERIMENTO : 10
+# opciones : numeros | EDA 
 
+PROCESO_PPAL: "experimento"
+# opciones : bayesiana | experimento | prediccion_final | test | analisis_exploratorio
 
 configuracion_semilla:
   SEMILLA: 773767
   SEMILLAS: [259621, 282917, 413417, 773767, 290827]
-  N_SEMILLAS: 49
+  N_SEMILLAS: 15
 
 configuracion_gcp:
   IN_GCP: False
@@ -16,6 +18,7 @@ configuracion_paths:
     LOCAL_PATH: ""
     GCP_PATH: "/home/christian_lombardo14/buckets/b1/"
   PATH_LOGS: "logs/"
+  PATH_LOG_GLOBAL : "global_log/"
 
   path_outputs:
     PATH_OUTPUT: "outputs/"

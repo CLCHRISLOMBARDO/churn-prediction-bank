@@ -1,5 +1,5 @@
 #experimento_i.py
-# EXPERIMENTO 9: Ensamble con lgb y xgb. Es el 8 pero pongo el subsampleo
+# EXPERIMENTO : Ensamble con lgb y xgb. Es el 8 pero pongo el subsampleo. Eliminaos cprestamos_personales y mprestamos_personales
 import numpy as np
 import pandas as pd
 import logging
@@ -53,13 +53,15 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
                             ## A - AGREGADO DE FEATURES
 
     # 1. Contruccion de las columnas
+    cols_a_dropear=["mprestamos_personales","cprestamos_personales"]
+    df = feature_engineering_drop_cols(df , cols_a_dropear)
     columnas=contruccion_cols(df)
     cols_lag_delta_max_min_regl=columnas[0]
     cols_ratios=columnas[1]
-
+    
     # 2. Feature Engineering
     # df = feature_engineering_rank(df,["mcuentas_saldo"])
-    # df=feature_engineering_drop_cols(df,["mcuentas_saldo"])
+    # df=feature_engineering_drop_cols(df,["mcuentas_saldo"])    
     df=feature_engineering_lag(df,cols_lag_delta_max_min_regl,2)
     df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
     df=feature_engineering_ratio(df,cols_ratios)
@@ -69,7 +71,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
     # 1. Contruccion de las columnas
     # feat_imp_file_name='2025-10-05_11-38-34_final_train_lgbm_data_frame_feat_imp.xlsx'
     # feat_imp_file=feat_imp_path+feat_imp_file_name
-    # cols_dropear=contrs_cols_dropear_feat_imp(df,feat_imp_file,0.02)
+    #cols_dropear=contrs_cols_dropear_feat_imp(df,feat_imp_file,0.02)
 
     # ## 2. Feat engin
     # df=feature_engineering_drop_cols(df,cols_dropear)
@@ -258,7 +260,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
             # fecha_name_umbral='2025-10-10_13-53-26'
-            fecha_name_umbral='TEST_TEST_TEST_TEST'
+            # fecha_name_umbral='TEST_TEST_TEST_TEST'
             numero_umbral='9'
     #"""----------------------------------------------------------------------------------------------"""
             umbrales_file=f"{fecha_name_umbral}_EXPERIMENTO_{numero_umbral}.json"

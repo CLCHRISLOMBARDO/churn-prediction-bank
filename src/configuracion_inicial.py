@@ -1,11 +1,13 @@
 import logging
 from src.config import *
+import json
 
 
 def creacion_directorios():
     ## Creacion de las carpetas
             #LOGS PATHS
     os.makedirs(PATH_LOGS,exist_ok=True)
+    os.makedirs(PATH_LOG_GLOBAL,exist_ok=True)
             #OUTPUT PATHS
     os.makedirs(PATH_OUTPUT_BAYESIAN,exist_ok=True)
     os.makedirs(PATH_OUTPUT_FINALES,exist_ok=True)
@@ -30,3 +32,36 @@ def creacion_directorios():
     os.makedirs(path_output_exp_umbral,exist_ok=True)
 
 
+def creacion_logg_local(nombre_log:str):
+    logging.basicConfig(
+        level=logging.INFO, #Puede ser INFO o ERROR
+        format='%(asctime)s - %(levelname)s - %(name)s  - %(funcName)s -  %(lineno)d - %(message)s',
+        handlers=[
+            logging.FileHandler(f"{PATH_LOGS}/{nombre_log}", mode="w", encoding="utf-8"),
+            logging.StreamHandler()
+        ]
+    )
+
+def creacion_logg_global(fecha:str, competencia:str, proceso_ppal:str, n_experimento:str,n_semillas:int,in_gcp:bool=in_gcp):
+    if proceso_ppal =="analisis_exploratorio":
+        registro = {
+            "fecha": fecha,
+            "competencia": competencia,
+            "proceso_ppal": proceso_ppal,
+            "n_experimento": n_experimento,
+            "in_gcp":in_gcp
+        }
+    else:
+        registro = {
+            "fecha": fecha,
+            "competencia": competencia,
+            "proceso_ppal": proceso_ppal,
+            "n_experimento": n_experimento,
+            "n_semillas": n_semillas,
+            "in_gcp":in_gcp
+        }
+
+    # Append en formato JSON para facilitar parsing después
+    file_path = PATH_LOG_GLOBAL + "registro_global.txt"
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(registro) + "\n")

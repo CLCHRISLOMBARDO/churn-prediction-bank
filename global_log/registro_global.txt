@@ -1,0 +1,9 @@
+{"fecha": "2025-11-02_12-08-30", "competencia": 1, "proceso_ppal": "analisis_exploratorio", "n_experimento": "EDA", "in_gcp": false}
+{"fecha": "2025-11-02_12-09-24", "competencia": 1, "proceso_ppal": "analisis_exploratorio", "n_experimento": "EDA", "in_gcp": false}
+{"fecha": "2025-11-02_12-16-42", "competencia": 1, "proceso_ppal": "analisis_exploratorio", "n_experimento": "EDA", "in_gcp": false}
+{"fecha": "2025-11-02_12-24-16", "competencia": 1, "proceso_ppal": "test", "n_experimento": 9, "n_semillas": 3, "in_gcp": false}
+{"fecha": "2025-11-02_13-44-14", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": 10, "n_semillas": 15, "in_gcp": false}
+{"fecha": "2025-11-02_13-51-02", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": 10, "n_semillas": 15, "in_gcp": false}
+{"fecha": "2025-11-02_13-55-36", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": 10, "n_semillas": 15, "in_gcp": false}
+{"fecha": "2025-11-02_13-56-42", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": 10, "n_semillas": 15, "in_gcp": false}
+{"fecha": "2025-11-02_14-57-33", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": 10, "n_semillas": 15, "in_gcp": false}

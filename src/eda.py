@@ -124,6 +124,8 @@ def crear_reporte_pdf(df, xcol, columnas_y, name_eda, motivo:str):
 
     columnas_y = [ c for c in columnas_y if c not in drop_cols]
 
+    n_months = len(df["foto_mes"].unique())
+
     salida_pdf = PATH_OUTPUT_EDA+name_pdf
     df["_fecha"] = pd.to_datetime(df[xcol].astype(str), format="%Y%m")
     with PdfPages(salida_pdf) as pdf:
@@ -134,7 +136,10 @@ def crear_reporte_pdf(df, xcol, columnas_y, name_eda, motivo:str):
             ax.set_xlabel(xcol)
             ax.set_ylabel(col)
             ax.grid(True, alpha=0.3)
-            ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
+            if n_months > 6:
+                ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
+            else:
+                ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
             plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
 
@@ -142,8 +147,8 @@ def crear_reporte_pdf(df, xcol, columnas_y, name_eda, motivo:str):
             pdf.savefig(fig)
             plt.close(fig)
 
-        d = pdf.infodict()
-        d['Title'] = titulo
+        # d = pdf.infodict()
+        # d['Title'] = titulo
         # d['Author'] = "Tu nombre"
         # d['Subject'] = "Reporte automático de gráficos"
         # d['Keywords'] = "matplotlib, reporte, gráficos"

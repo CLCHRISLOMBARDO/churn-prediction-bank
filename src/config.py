@@ -48,6 +48,7 @@ try:
         # ================= Rutas de INPUT / LOG ==================
         PATH_INPUT_DATA = PLACE_PATHS + comp["PATH_INPUT_DATA"]
         PATH_LOGS       = PLACE_PATHS + paths["PATH_LOGS"]
+        PATH_LOG_GLOBAL = PLACE_PATHS + paths["PATH_LOG_GLOBAL"]
 
         # ==================== OUTPUTS BASES ======================
         PATH_OUTPUT              = PLACE_PATHS + out["PATH_OUTPUT"]
