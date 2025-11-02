@@ -2,7 +2,7 @@ COMPETENCIA: 1
 N_EXPERIMENTO : 10
 # opciones : numeros | EDA 
 
-PROCESO_PPAL: "experimento"
+PROCESO_PPAL: "prediccion_final"
 # opciones : bayesiana | experimento | prediccion_final | test | analisis_exploratorio
 
 configuracion_semilla:

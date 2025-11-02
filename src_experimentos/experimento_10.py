@@ -261,7 +261,8 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
             # fecha_name_umbral='2025-10-10_13-53-26'
             # fecha_name_umbral='TEST_TEST_TEST_TEST'
-            numero_umbral='9'
+            fecha_name_umbral='2025-11-02_14-57-33'
+            numero_umbral='10'
     #"""----------------------------------------------------------------------------------------------"""
             umbrales_file=f"{fecha_name_umbral}_EXPERIMENTO_{numero_umbral}.json"
             file = path_output_exp_umbral+umbrales_file 

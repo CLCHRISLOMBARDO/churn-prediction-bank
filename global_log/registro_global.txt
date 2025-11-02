@@ -7,3 +7,4 @@
 {"fecha": "2025-11-02_13-55-36", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": 10, "n_semillas": 15, "in_gcp": false}
 {"fecha": "2025-11-02_13-56-42", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": 10, "n_semillas": 15, "in_gcp": false}
 {"fecha": "2025-11-02_14-57-33", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": 10, "n_semillas": 15, "in_gcp": false}
+{"fecha": "2025-11-02_15-55-09", "competencia": 1, "proceso_ppal": "prediccion_final", "n_experimento": 10, "n_semillas": 15, "in_gcp": false}
