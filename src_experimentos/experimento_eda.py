@@ -8,18 +8,22 @@ from src.eda import mean_por_mes , crear_reporte_pdf,std_por_mes , nunique_por_m
 
 
 
-def lanzar_eda():
+def lanzar_eda(competencia:str|int):
+    name_eda= f"eda_comp_{competencia}"
     df= pl.read_csv(PATH_INPUT_DATA, infer_schema_length=10000)
     logger.info(df["foto_mes"].unique())
-    media_por_mes = mean_por_mes(df)
+    media_por_mes = mean_por_mes(df , name_eda)
 
     crear_reporte_pdf(media_por_mes, xcol='foto_mes', columnas_y=media_por_mes.columns,
-                  name_pdf="reporte_medias_por_mes.pdf",
-                  titulo="Medias por mes — Scatter por variable")
+                  name_eda=name_eda,
+                  motivo="media_por_mes")
     
     variacion_por_mes = std_por_mes(df)
     crear_reporte_pdf(variacion_por_mes, xcol='foto_mes', columnas_y=variacion_por_mes.columns,
-                  name_pdf="reporte_std_por_mes.pdf",
-                  titulo="std por mes — Scatter por variable")
+                  name_eda=name_eda,
+                  motivo="std_por_mes")
     
-    num_uniques_por_mes = nunique_por_mes(df)
+    num_uniques_por_mes = nunique_por_mes(df,name_eda)
+    crear_reporte_pdf(num_uniques_por_mes, xcol='foto_mes', columnas_y=num_uniques_por_mes.columns,
+                  name_eda=name_eda,
+                  motivo="nunique_por_mes")

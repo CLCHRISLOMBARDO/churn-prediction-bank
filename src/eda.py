@@ -10,8 +10,10 @@ import logging
 from src.config import PATH_OUTPUT_EDA
 
 logger = logging.getLogger(__name__)
-def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
+def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str) ->pl.DataFrame|pd.DataFrame:
     logger.info("Comienzo del eda de nunique por foto_mes")
+    name_file = name + "_nuniques_por_mes.csv"
+
 
     drop_cols = ["foto_mes" ]
 
@@ -29,7 +31,7 @@ def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
     con.close()
     logger.info("Intento de guardado")
     try:
-        nuniques_por_mes.to_csv(PATH_OUTPUT_EDA+"nuniques_por_mes.csv")
+        nuniques_por_mes.to_csv(PATH_OUTPUT_EDA+ name_file)
         logger.info("Fin del eda de media por foto_mes")
     except Exception as e:
         logger.error(f"No se pudo guardar por : {e}")
@@ -37,8 +39,12 @@ def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
     return nuniques_por_mes
 
 
-def mean_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
+def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str) ->pl.DataFrame|pd.DataFrame:
     logger.info("Comienzo del eda de media por foto_mes")
+    
+    name_file = name + "_medias_por_mes.csv"
+    
+    
     if isinstance(df , pl.DataFrame):
         num_cols=df.select(pl.selectors.numeric()).columns
     elif isinstance(df , pd.DataFrame):
@@ -70,10 +76,9 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
     medias_por_mes = con.execute(sql).df()
     con.close()
 
-
     logger.info("Intento de guardado")
     try:
-        medias_por_mes.to_csv(PATH_OUTPUT_EDA+"medias_por_mes.csv")
+        medias_por_mes.to_csv(PATH_OUTPUT_EDA+name_file)
         logger.info("Fin del eda de media por foto_mes")
 
     except Exception as e:
@@ -108,11 +113,11 @@ def std_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
     logger.info("Fin del eda de std por foto_mes")
     return variacion_por_mes
 
-def crear_reporte_pdf(df, xcol, columnas_y, name_pdf, titulo="Reporte de gráficos"):
+def crear_reporte_pdf(df, xcol, columnas_y, name_eda, motivo:str):
     """
     Genera un PDF con una página por gráfico 
     """
-
+    name_pdf=name_eda +"_reporte_"+motivo+".pdf"
     logger.info("Comienzo de la creacion del reporte")
 
     drop_cols = ["foto_mes" ]
@@ -122,12 +127,6 @@ def crear_reporte_pdf(df, xcol, columnas_y, name_pdf, titulo="Reporte de gráfic
     salida_pdf = PATH_OUTPUT_EDA+name_pdf
     df["_fecha"] = pd.to_datetime(df[xcol].astype(str), format="%Y%m")
     with PdfPages(salida_pdf) as pdf:
-        # fig = plt.figure(figsize=(11.69, 8.27))  
-        # fig.text(0.5, 0.6, titulo, ha="center", va="center", fontsize=20)
-        # # fig.text(0.5, 0.5, f"Variables: {len(columnas_y)}", ha="center", va="center")
-        # # fig.text(0.5, 0.4, f"Eje X: {xcol}", ha="center", va="center")
-        # pdf.savefig(fig); plt.close(fig)
-
         for col in columnas_y:
             fig, ax = plt.subplots(figsize=(11.69, 8.27))
             sns.lineplot(data=df , x = "_fecha" , y =col,ax=ax, marker='o')

@@ -57,13 +57,14 @@ os.makedirs(path_output_exp_umbral,exist_ok=True)
 
 
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-# ----------------------------Cambiar numero y proceso ppal -----------------------------------------------------------------
-n_experimento= N_EXPERIMENTO
-proceso_ppal=PROCESO_PPAL
-# ---------------------------------------------------------------------------------------------------------------------------
 test= "TEST_TEST_TEST_TEST"
-# comentario=input(f"Ingrese un comentario")
-nombre_log=fecha+f"_{proceso_ppal}_{n_experimento}"
+# ----------------------------Cambiar numero y proceso ppal -----------------------------------------------------------------
+competencia = COMPETENCIA
+proceso_ppal = PROCESO_PPAL
+n_experimento = N_EXPERIMENTO
+study_name = f"_COMP_{competencia}_{proceso_ppal}_{n_experimento}"
+# ---------------------------------------------------------------------------------------------------------------------------
+nombre_log=fecha+study_name
 # CONFIGURACION LOG
 logging.basicConfig(
     level=logging.INFO, #Puede ser INFO o ERROR
@@ -83,7 +84,7 @@ def main():
     semillas = create_semilla(15)
     logger.info(f"se crearon {len(semillas)} semillas")
 
-    lanzar_eda()
+    lanzar_eda(competencia=competencia)
     # lanzar_experimento_9(test , semillas[:2],n_experimento ,proceso_ppal )
 
     # lanzar_bayesiana_lgbm(fecha , SEMILLA)

@@ -1,6 +1,6 @@
-COMPETENCIA: 2
+COMPETENCIA: 1
 N_EXPERIMENTO : "EDA"
-PROCESO_PPAL: "reporte_media_por_mes"
+PROCESO_PPAL: "reporte"
 
 
 configuracion_semilla:
@@ -9,7 +9,7 @@ configuracion_semilla:
   N_SEMILLAS: 49
 
 configuracion_gcp:
-  IN_GCP: True
+  IN_GCP: False
 
 configuracion_paths:
   place_path:

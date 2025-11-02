@@ -24,6 +24,8 @@ try:
         COMPETENCIA =cfg["COMPETENCIA"]
         N_EXPERIMENTO =cfg["N_EXPERIMENTO"]
         PROCESO_PPAL = cfg["PROCESO_PPAL"]
+
+
         if COMPETENCIA == 1:
             comp    = cfg["configuracion_competencia_1"]
         elif COMPETENCIA == 2:
