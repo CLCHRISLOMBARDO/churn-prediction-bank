@@ -3,7 +3,8 @@ import polars as pl
 import pandas as pd
 from src.config import *
 import logging
-logger=logging.getLogger(__name__)
+
+logger =logging.getLogger(__name__)
 
 def contador_targets(df:pd.DataFrame | pl.DataFrame):
     logger.info("Inicio control de la cantidad de los targets")
@@ -25,9 +26,9 @@ def contador_targets(df:pd.DataFrame | pl.DataFrame):
     logger.info("Fin control de la cantidad de los targets")
 
 
-def creacion_clase_ternaria(df:pd.DataFrame | pl.DataFrame ,competencia:str|int) ->pd.DataFrame | pl.DataFrame :
+def creacion_clase_ternaria(df:pd.DataFrame | pl.DataFrame ) ->pd.DataFrame | pl.DataFrame :
     logger.info("Inicio de la creacion del target")
-    output_file = PATH_INPUT_DATA + f"competencia_0{competencia}.csv"
+    output_file = FILE_INPUT_DATA 
     sql= f"""
     with df2 as (
     SELECT foto_mes , numero_de_cliente,
@@ -47,10 +48,23 @@ def creacion_clase_ternaria(df:pd.DataFrame | pl.DataFrame ,competencia:str|int)
     con.register("df", df)
     df=con.execute(sql).df()
     con.close()
-    df.to_parquet(output_file)
+    df.to_csv(output_file)
     contador_targets(df)
 
     logger.info(f"Fin de la creacion de target")
+    return df
+
+
+def lanzar_creacion_clase_ternaria():
+    logger.info("Lanzamiento de la creacion de la clase ternaria target")
+    try:
+        df=pd.read_csv(FILE_INPUT_DATA_CRUDO)
+        logger.info("Cargado del dataset crudo con exito")
+        
+    except Exception as e:
+        logger.error(f"Error al cargar el data set por : {e}")
+    
+    df=creacion_clase_ternaria(df)
     return df
 
 

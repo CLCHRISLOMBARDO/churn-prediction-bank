@@ -15,6 +15,7 @@ try:
         sem        = cfg["configuracion_semilla"]
         gcp        = cfg["configuracion_gcp"]
         paths      = cfg["configuracion_paths"]
+        inp        = paths["path_inputs"]
         out        = paths["path_outputs"]
         out_bayes  = paths["path_outputs_bayesian"]
         out_final  = paths["path_outputs_finales"]
@@ -46,9 +47,11 @@ try:
             PLACE_PATHS = paths["place_path"]["LOCAL_PATH"]
 
         # ================= Rutas de INPUT / LOG ==================
-        PATH_INPUT_DATA = PLACE_PATHS + comp["PATH_INPUT_DATA"]
+        PATH_INPUT_DATA = PLACE_PATHS + inp["PATH_INPUT_DATA"]
+        FILE_INPUT_DATA = PLACE_PATHS + comp["FILE_INPUT_DATA"]
+        FILE_INPUT_DATA_CRUDO = PLACE_PATHS + comp["FILE_INPUT_DATA_CRUDO"]
         PATH_LOGS       = PLACE_PATHS + paths["PATH_LOGS"]
-        PATH_LOG_GLOBAL = PLACE_PATHS + paths["PATH_LOG_GLOBAL"]
+        PATH_LOG_GLOBAL = paths["PATH_LOG_GLOBAL"]
 
         # ==================== OUTPUTS BASES ======================
         PATH_OUTPUT              = PLACE_PATHS + out["PATH_OUTPUT"]

@@ -45,7 +45,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
    
 
     ## 0. load datos
-    df=cargar_datos(PATH_INPUT_DATA)
+    df=cargar_datos(FILE_INPUT_DATA)
     print(df.head())
 
     

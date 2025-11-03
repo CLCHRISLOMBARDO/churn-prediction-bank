@@ -1,9 +1,9 @@
-COMPETENCIA: 1
+COMPETENCIA: 2
 N_EXPERIMENTO : 10
 # opciones : numeros | EDA 
 
 PROCESO_PPAL: "prediccion_final"
-# opciones : bayesiana | experimento | prediccion_final | test | analisis_exploratorio
+# opciones : bayesiana | experimento | prediccion_final | test | analisis_exploratorio | creacion_target_clase_ternaria
 
 configuracion_semilla:
   SEMILLA: 773767
@@ -11,7 +11,7 @@ configuracion_semilla:
   N_SEMILLAS: 15
 
 configuracion_gcp:
-  IN_GCP: False
+  IN_GCP: True
 
 configuracion_paths:
   place_path:
@@ -20,6 +20,8 @@ configuracion_paths:
   PATH_LOGS: "logs/"
   PATH_LOG_GLOBAL : "global_log/"
 
+  path_inputs : 
+    PATH_INPUT_DATA : "datasets/"
   path_outputs:
     PATH_OUTPUT: "outputs/"
     PATH_OUTPUT_DATA: "outputs/data_outputs/"
@@ -50,7 +52,8 @@ configuracion_paths:
 
 
 configuracion_competencia_1:
-  PATH_INPUT_DATA: "datasets/competencia_01.csv"
+  FILE_INPUT_DATA: "datasets/competencia_01.csv"
+  FILE_INPUT_DATA_CRUDO: "datasets/competencia_01_crudo.csv"
   MES_TRAIN: [202101, 202102, 202103]
   MES_TEST: [202104]
   MES_A_PREDECIR: 202106
@@ -61,7 +64,8 @@ configuracion_competencia_1:
   MES_05: 202105
 
 configuracion_competencia_2:
-  PATH_INPUT_DATA: "datasets/competencia_02_crudo.csv.gz"
+  FILE_INPUT_DATA: "datasets/competencia_02.csv"
+  FILE_INPUT_DATA_CRUDO: "datasets/competencia_02_crudo.csv.gz"
   MES_TRAIN: [202101, 202102, 202103]
   MES_TEST: [202104]
   MES_A_PREDECIR: 202106

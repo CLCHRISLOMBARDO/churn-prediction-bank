@@ -12,6 +12,7 @@ import optuna
 from src.config import *
 from src.configuracion_inicial import creacion_directorios,creacion_logg_local , creacion_logg_global
 from src.generadora_semillas import create_semilla
+from src.creacion_target import lanzar_creacion_clase_ternaria
 
 from src_bayesianas.experimento_bayesiana_lgbm_2 import lanzar_bayesiana_lgbm
 from src_bayesianas.experimento_bayesiana_xgb_2 import lanzar_bayesiana_xgb
@@ -51,7 +52,10 @@ def main():
     # CONFIGURACION LOG GLOBAL
     creacion_logg_global(fecha=fecha , competencia=competencia ,proceso_ppal=proceso_ppal,n_experimento=n_experimento,n_semillas=n_semillas)
 
-    if proceso_ppal=="analisis_exploratorio":
+    if proceso_ppal =="creacion_target_clase_ternaria":
+        lanzar_creacion_clase_ternaria()
+    
+    elif proceso_ppal=="analisis_exploratorio":
         lanzar_eda(competencia=competencia)
     elif proceso_ppal =="bayesiana":
         lanzar_bayesiana_lgbm(fecha,SEMILLA)
