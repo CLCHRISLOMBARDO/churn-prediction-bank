@@ -36,7 +36,7 @@ def creacion_clase_ternaria(df:pd.DataFrame | pl.DataFrame ) ->pd.DataFrame | pl
     lead(foto_mes  , 2 ) OVER (PARTITION BY numero_de_cliente ORDER BY foto_mes) as foto_mes_2
     FROM df)
     SELECT * EXCLUDE (foto_mes_1,foto_mes_2),
-    if (foto_mes < 202106 , if(foto_mes <202105 ,
+    if (foto_mes < 202108 , if(foto_mes <202107 ,
     if(df2.foto_mes_1 IS NULL,'BAJA+1', 
     if(df2.foto_mes_2 IS NULL,'BAJA+2','Continua')) ,
     if(df2.foto_mes_1 IS NULL,'BAJA+1',NULL)) ,NULL) as clase_ternaria
