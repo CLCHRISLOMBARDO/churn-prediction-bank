@@ -11,6 +11,7 @@ from src.eda import mean_por_mes , crear_reporte_pdf,std_por_mes , nunique_por_m
 def lanzar_eda(competencia:str|int):
     name_eda= f"eda_comp_{competencia}_bajas"
     df= pl.read_csv(FILE_INPUT_DATA, infer_schema_length=10000)
+    print(df.columns)
     logger.info(df["foto_mes"].unique())
     filtros_target=("BAJA+1","BAJA+2")
     media_por_mes = mean_por_mes(df=df , name=name_eda, filtros_target=filtros_target)

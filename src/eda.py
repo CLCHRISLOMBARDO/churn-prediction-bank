@@ -59,7 +59,7 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str, filtros_target:int|tupl
     elif isinstance(df , pd.DataFrame):
         num_cols = df.select_dtypes(include="number").columns
 
-    drop_cols = ["foto_mes" ]
+    drop_cols = ["foto_mes"]
 
     num_cols = [ c for c in num_cols if c not in drop_cols]
     
