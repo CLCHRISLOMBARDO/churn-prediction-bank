@@ -11,7 +11,8 @@ PATH_CONFIG = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.y
 try:
     with open(PATH_CONFIG, "r") as f:
         cfg = yaml.safe_load(f)
-
+        exp        = cfg["configuracion_experimentos"]
+        bayes      = cfg["configuracion_bayesiana"]
         sem        = cfg["configuracion_semilla"]
         gcp        = cfg["configuracion_gcp"]
         paths      = cfg["configuracion_paths"]
@@ -20,10 +21,10 @@ try:
         out_bayes  = paths["path_outputs_bayesian"]
         out_final  = paths["path_outputs_finales"]
         out_exp    = paths["path_outputs_experimentos"]
+        
 
 
         COMPETENCIA =cfg["COMPETENCIA"]
-        N_EXPERIMENTO =cfg["N_EXPERIMENTO"]
         PROCESO_PPAL = cfg["PROCESO_PPAL"]
 
 
@@ -31,7 +32,21 @@ try:
             comp    = cfg["configuracion_competencia_1"]
         elif COMPETENCIA == 2:
             comp      = cfg["configuracion_competencia_2"]
-        bayes      = cfg["configuracion_bayesiana"]
+
+        # =================== Optimización LGBM ===================
+        N_BAYESIANA = bayes.get("N_BAYESIANA")
+        UMBRAL      = bayes.get("UMBRAL", 0.025)
+        GANANCIA    = bayes.get("GANANCIA", 780000)
+        ESTIMULO    = bayes.get("ESTIMULO", 20000)
+        N_TRIALS    = bayes.get("N_TRIALS", 35)
+        N_BOOSTS    = bayes.get("N_BOOSTS", 1000)
+        N_FOLDS     = bayes.get("N_FOLDS", 5)
+
+        if PROCESO_PPAL =="bayesiana":
+            N_EXPERIMENTO = bayes["N_BAYESIANA"]
+        else:
+            N_EXPERIMENTO = exp["N_EXP"]
+        
 
         # ================= Configuración General =================
         SEMILLA    = sem.get("SEMILLA", 773767)
@@ -91,13 +106,7 @@ try:
         MES_04 = comp.get("MES_04", 202104)
         MES_05 = comp.get("MES_05", 202105)
 
-        # =================== Optimización LGBM ===================
-        UMBRAL   = bayes.get("UMBRAL", 0.025)
-        GANANCIA = bayes.get("GANANCIA", 780000)
-        ESTIMULO = bayes.get("ESTIMULO", 20000)
-        N_TRIALS = bayes.get("N_TRIALS", 35)
-        N_BOOSTS = bayes.get("N_BOOSTS", 1000)
-        N_FOLDS  = bayes.get("N_FOLDS", 5)
+
 
 except Exception as e:
     logger.error(f"Error al cargar el archivo de configuración: {e}")

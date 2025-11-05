@@ -34,7 +34,7 @@ def lanzar_bayesiana_xgb(fecha:str , semilla:int ):
     logger.info(f"Inicio de ejecucion del flujo : {name}")
 
     ## 0. load datos
-    df=cargar_datos(PATH_INPUT_DATA)
+    df=cargar_datos(FILE_INPUT_DATA)
     print(df.head())
                                 ## A - AGREGADO DE FEATURES
 

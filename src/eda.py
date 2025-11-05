@@ -10,9 +10,10 @@ import logging
 from src.config import PATH_OUTPUT_EDA
 
 logger = logging.getLogger(__name__)
-def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str) ->pl.DataFrame|pd.DataFrame:
+def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str , filtros_target:int|tuple=None) ->pl.DataFrame|pd.DataFrame:
     logger.info("Comienzo del eda de nunique por foto_mes")
     name_file = name + "_nuniques_por_mes.csv"
+
 
 
     drop_cols = ["foto_mes" ]
@@ -23,7 +24,15 @@ def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str) ->pl.DataFrame|pd.Da
 
     for c in cols:
         sql+=f', count(distinct({c})) as {c}_nunique'
+
     sql+=' from df group by foto_mes'
+
+    if filtros_target is not None:
+        if isinstance(filtros_target , tuple):
+            sql+=f' where clase_ternaria in {filtros_target}'
+        elif isinstance(filtros_target , int):
+            sql+=f' where clase_ternaria = {filtros_target}'
+
 
     con = duckdb.connect(database=":memory:")
     con.register("df",df)
@@ -39,7 +48,7 @@ def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str) ->pl.DataFrame|pd.Da
     return nuniques_por_mes
 
 
-def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str) ->pl.DataFrame|pd.DataFrame:
+def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str, filtros_target:int|tuple=None) ->pl.DataFrame|pd.DataFrame:
     logger.info("Comienzo del eda de media por foto_mes")
     
     name_file = name + "_medias_por_mes.csv"
@@ -71,6 +80,14 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str) ->pl.DataFrame|pd.DataF
         sql+=f', AVG({c}) as {c}_mean'
     sql+=' from df group by foto_mes'
 
+    if filtros_target is not None:
+        if isinstance(filtros_target , tuple):
+            sql+=f' where clase_ternaria in {filtros_target}'
+        elif isinstance(filtros_target , int):
+            sql+=f' where clase_ternaria = {filtros_target}'
+
+
+
     con = duckdb.connect(database=":memory:")
     con.register("df",df)
     medias_por_mes = con.execute(sql).df()
@@ -86,7 +103,7 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str) ->pl.DataFrame|pd.DataF
     
     return medias_por_mes
 
-def std_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
+def std_por_mes(df:pd.DataFrame|pl.DataFrame , filtros_target:int|tuple=None) ->pl.DataFrame|pd.DataFrame:
     logger.info("Comienzo del eda de std por foto_mes")
     if isinstance(df , pl.DataFrame):
         num_cols=df.select(pl.selectors.numeric()).columns
@@ -105,6 +122,13 @@ def std_por_mes(df:pd.DataFrame|pl.DataFrame ) ->pl.DataFrame|pd.DataFrame:
     for c in num_cols:
         sql+=f', STDDEV_SAMP({c}) as {c}_STD'
     sql+=' from df group by foto_mes'
+    
+    if filtros_target is not None:
+        if isinstance(filtros_target , tuple):
+            sql+=f' where clase_ternaria in {filtros_target}'
+        elif isinstance(filtros_target , int):
+            sql+=f' where clase_ternaria = {filtros_target}'
+
 
     con = duckdb.connect(database=":memory:")
     con.register("df",df)

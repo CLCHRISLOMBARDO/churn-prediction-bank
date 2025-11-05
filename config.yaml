@@ -1,9 +1,19 @@
 COMPETENCIA: 2
-N_EXPERIMENTO : 10
-# opciones : numeros | EDA 
-
-PROCESO_PPAL: "creacion_target_clase_ternaria"
+PROCESO_PPAL: "analisis_exploratorio"
 # opciones : bayesiana | experimento | prediccion_final | test | analisis_exploratorio | creacion_target_clase_ternaria
+
+configuracion_experimentos:
+  N_EXP : EDA
+# opciones : numeros | EDA 
+configuracion_bayesiana:
+  N_BAYESIANA: 2
+  UMBRAL: 0.025
+  GANANCIA: 780000
+  ESTIMULO: 20000
+  N_TRIALS: 35
+  N_BOOSTS: 1000
+  N_FOLDS: 5
+
 
 configuracion_semilla:
   SEMILLA: 773767
@@ -75,10 +85,3 @@ configuracion_competencia_2:
   MES_04: 202104
   MES_05: 202105
 
-configuracion_bayesiana:
-  UMBRAL: 0.025
-  GANANCIA: 780000
-  ESTIMULO: 20000
-  N_TRIALS: 35
-  N_BOOSTS: 1000
-  N_FOLDS: 5

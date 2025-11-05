@@ -30,7 +30,7 @@ n_trials=N_TRIALS
 creacion_directorios()
 fecha = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 test= "TEST_TEST_TEST_TEST"
-# ----------------------------Cambiar numero y proceso ppal -----------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
 competencia = COMPETENCIA
 proceso_ppal = PROCESO_PPAL
 n_experimento = N_EXPERIMENTO
@@ -54,7 +54,6 @@ def main():
 
     if proceso_ppal =="creacion_target_clase_ternaria":
         lanzar_creacion_clase_ternaria()
-    
     elif proceso_ppal=="analisis_exploratorio":
         lanzar_eda(competencia=competencia)
     elif proceso_ppal =="bayesiana":
@@ -64,8 +63,6 @@ def main():
         lanzar_experimento(test,semillas , n_experimento , proceso_ppal)
     elif (proceso_ppal =="experimento") | (proceso_ppal=="prediccion_final"):
         lanzar_experimento(fecha,semillas , n_experimento , proceso_ppal)
-
-
     return
 
 if __name__ =="__main__":

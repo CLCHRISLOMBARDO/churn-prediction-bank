@@ -41,6 +41,12 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
         min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 10, 1600)
         feature_fraction = trial.suggest_float('feature_fraction', 0.1, 1.0)
         bagging_fraction = trial.suggest_float('bagging_fraction', 0.1, 1.0)
+        max_depth = trial.suggest_int('max_depth', 3, 16)
+        min_child_samples = trial.suggest_int('min_child_samples', 5, 200)
+        min_child_weight = trial.suggest_float('min_child_weight', 1e-3, 100.0, log=True)
+        lambda_l1 = trial.suggest_float('lambda_l1', 1e-3, 100.0, log=True)
+        lambda_l2 = trial.suggest_float('lambda_l2', 1e-3, 100.0, log=True)
+        min_split_gain = trial.suggest_float('min_split_gain', 0.0, 2.0)
         # Agregar maxdepth
         # Agregar lo de regularizacion
 
@@ -57,6 +63,12 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
             'min_data_in_leaf': min_data_in_leaf,
             'feature_fraction': feature_fraction,
             'bagging_fraction': bagging_fraction,
+            'max_depth': max_depth,
+            'min_child_samples':min_child_samples,
+            'min_child_weight':min_child_weight,
+            'lambda_l1':lambda_l1,
+            'lambda_l2':lambda_l2,
+            'min_split_gain':min_split_gain,
             'seed': SEMILLA,
             'verbose': -1
         }
