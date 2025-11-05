@@ -25,14 +25,14 @@ def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str , filtros_target:int|
     for c in cols:
         sql+=f', count(distinct({c})) as {c}_nunique'
 
-    sql+=' from df group by foto_mes'
+    sql+=' from df'
 
     if filtros_target is not None:
         if isinstance(filtros_target , tuple):
             sql+=f' where clase_ternaria in {filtros_target}'
         elif isinstance(filtros_target , int):
             sql+=f' where clase_ternaria = {filtros_target}'
-
+    sql+=' group by foto_mes'
 
     con = duckdb.connect(database=":memory:")
     con.register("df",df)
@@ -78,7 +78,7 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str, filtros_target:int|tupl
 
     for c in num_cols:
         sql+=f', AVG({c}) as {c}_mean'
-    sql+=' from df group by foto_mes'
+    sql+=' from df '
 
     if filtros_target is not None:
         if isinstance(filtros_target , tuple):
@@ -86,7 +86,7 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str, filtros_target:int|tupl
         elif isinstance(filtros_target , int):
             sql+=f' where clase_ternaria = {filtros_target}'
 
-
+    sql += ' group by foto_mes'
 
     con = duckdb.connect(database=":memory:")
     con.register("df",df)
@@ -121,14 +121,14 @@ def std_por_mes(df:pd.DataFrame|pl.DataFrame , filtros_target:int|tuple=None) ->
 
     for c in num_cols:
         sql+=f', STDDEV_SAMP({c}) as {c}_STD'
-    sql+=' from df group by foto_mes'
+    sql+=' from df'
     
     if filtros_target is not None:
         if isinstance(filtros_target , tuple):
             sql+=f' where clase_ternaria in {filtros_target}'
         elif isinstance(filtros_target , int):
             sql+=f' where clase_ternaria = {filtros_target}'
-
+    sql +=' group by foto_mes'
 
     con = duckdb.connect(database=":memory:")
     con.register("df",df)
