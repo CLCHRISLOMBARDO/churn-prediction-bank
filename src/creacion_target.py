@@ -48,7 +48,7 @@ def creacion_clase_ternaria(df:pd.DataFrame | pl.DataFrame ) ->pd.DataFrame | pl
     con.register("df", df)
     df=con.execute(sql).df()
     con.close()
-    df.to_csv(output_file)
+    df.to_csv(output_file,index=False)
     contador_targets(df)
 
     logger.info(f"Fin de la creacion de target")
