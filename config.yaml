@@ -1,5 +1,5 @@
 COMPETENCIA: 2
-PROCESO_PPAL: "creacion_target_clase_ternaria"
+PROCESO_PPAL: "analisis_exploratorio"
 # opciones : bayesiana | experimento | prediccion_final | test | analisis_exploratorio | creacion_target_clase_ternaria
 
 configuracion_experimentos:
