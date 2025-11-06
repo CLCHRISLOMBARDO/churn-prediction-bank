@@ -33,9 +33,7 @@ def lgb_gan_eval(y_pred, data):
 def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, n_trials:int, name:str)-> Study:
     logger.info(f"Comienzo optimizacion hiperp binario: {name}")
 
-
     def objective(trial):
-
         num_leaves = trial.suggest_int('num_leaves', 8, 100)
         learning_rate = trial.suggest_float('learning_rate', 0.003, 0.1) 
         min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 10, 1600)
