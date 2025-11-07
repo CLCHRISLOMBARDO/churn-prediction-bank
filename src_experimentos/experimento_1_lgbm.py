@@ -10,7 +10,7 @@ from src.loader import cargar_datos
 from src.preprocesamiento import conversion_binario,split_train_test_apred
 from src.constr_lista_cols import contruccion_cols
 from src.feature_engineering import feature_engineering_lag,feature_engineering_delta,feature_engineering_max_min,feature_engineering_ratio,feature_engineering_linreg,feature_engineering_normalizacion,feature_engineering_drop_cols,feature_engineering_rank
-from src.lgbm_train_test import entrenamiento_lgbm,grafico_feature_importance,prediccion_test_lgbm ,umbral_optimo_calc,grafico_curvas_ganancia,evaluacion_public_private , graf_hist_ganancias,preparacion_ypred_kaggle
+from src.lgbm_train_test import entrenamiento_lgbm,grafico_feature_importance,prediccion_test_lgbm ,calc_estadisticas_ganancia,grafico_curvas_ganancia, grafico_hist_ganancia ,preparacion_ypred_kaggle
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 ## Carga de variables
 
@@ -21,7 +21,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
     n_semillas = len(semillas)
-    name=f"{fecha}_EXPERIMENTO_{numero}_{proceso_ppal}"
+    name=f"{fecha}_EXPERIMENTO_{numero}_{proceso_ppal}_{len(semillas)}_semillas"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name} con {n_semillas} semillas")
     
@@ -111,126 +111,78 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
 
     best_params_dict_sorted = sorted(best_params_dict , key=lambda x : x["ganancia_media_meseta"])
     top_models_bayesiana = best_params_dict_sorted[0:TOP_MODELS]
-    top_bp = {b["trial_number"]:b["params"] for b in top_models_bayesiana}
+    top_bp = {b["trial_number"]:{"params":b["params"],"best_iter_trial":b["best_iter_trial"]} for b in top_models_bayesiana}
     logger.info(f"Los mejores Trials de la Bayesiana {N_BAYESIANA} son : {top_bp.keys()}")
-    logger.info(f"Los mejores parametros del mejor modelo de la Bayesiana {N_BAYESIANA} son : {top_bp[list(top_bp.keys())[0]]}")
-        
+    logger.info(f"Los mejores parametros del mejor modelo de la Bayesiana {N_BAYESIANA} son : {top_bp[list(top_bp.keys())[0]]["params"]}")
+    logger.info(f"El mejor num de iteracion del mejor modelo de la Bayesiana {N_BAYESIANA} es : {top_bp[list(top_bp.keys())[0]]["best_iter_trial"]}")   
 ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04 
 
     if proceso_ppal =="experimento":
         logger.info(f"Entro en el proceso experimento !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        y_predicciones_top_models=[]
         for orden_trial , trial in enumerate(top_bp):
+            name_trial = name + f"_TRIAL_{trial}_TOP_{orden_trial}"
+            best_params_i = top_bp[trial]["params"]
+            best_iter_i = top_bp[trial]["best_iter_trial"]
+            logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con hiperparams {best_params_i}")
+            logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con best iter {best_iter_i}")
             y_predicciones_lista=[]
             y_pred_sorted_dict={}
             ganancia_acumulada_dict={}
-            umbrales_dict={}
+            estadisticas_ganancia_dict={}
+            for i,semilla in enumerate(semillas):
+                logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
+                # Entrenamiento de los modelos
+                name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train_lgbm"
+                model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
+                
+                # Grafico features importances
+                grafico_feature_importance(model_lgbm,X_train,name_semilla,output_path_feat_imp)
 
-            lista_df_ganancias_clientes_por_semilla_n_split_50=[]
-            lista_df_ganancias_prob_por_semilla_n_split_50=[]
+                # Predicciones en test para cada modelo
+                y_pred_lgbm=prediccion_test_lgbm(X_test ,model_lgbm)
 
-            lista_df_ganancias_clientes_por_semilla_n_split_1=[]
-            lista_df_ganancias_prob_por_semilla_n_split_1=[]
+                y_predicciones_lista.append(y_pred_lgbm)
 
-        for i,semilla in enumerate(semillas):
+                # Umbral optimo
+                if proceso_ppal == "experimento":
+                    guardar_umbral = False
+                else:
+                    guardar_umbral=True
 
-            logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones *****************************************")
-            # Entrenamiento de los modelos
-            name_1rst_train_lgbm=f"{name}_SEMILLA_{semilla}_1rst_train_lgbm"
-            model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_lgbm,best_params_lgbm ,name_1rst_train_lgbm,output_path_models,semilla)
+                estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
+                
+                estadisticas_ganancia_dict[semilla] = estadisticas_ganancia 
+                y_pred_sorted_dict[semilla] = y_pred_sorted
+                ganancia_acumulada_dict[semilla] = ganancia_acumulada
+
+            # Creacion de lqs predicciones medias a partir de los ensambles de las semillas
+            semilla = "ensamble_semillas"
+            logger.info("Comienzo del ensamblado de todas las semillas")
+            y_pred_df = np.vstack(y_predicciones_lista)
+            logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_df.shape}")
+            y_pred_ensamble = y_pred_df.mean(axis=0)
+            y_predicciones_top_models.append(y_pred_ensamble)
+            logger.info("Fin del ensamblado ")
             
-            # Grafico features importances
-            grafico_feature_importance(model_lgbm,X_train,name_1rst_train_lgbm,output_path_feat_imp)
-
-            # Predicciones en test 04 para cada modelo
-            y_pred_lgbm=prediccion_test_lgbm(X_test ,model_lgbm)
-
-            y_predicciones_lista.append(y_pred_lgbm)
-
-            # Umbral optimo
-            if proceso_ppal == "experimento":
-                guardar_umbral = False
-            else:
-                guardar_umbral=True
-
-            dict_calc_umbrales= umbral_optimo_calc(y_test_class , y_pred_ensamble ,name_1rst_train , output_path_umbrales , semilla, guardar_umbral )
-            
-            umbrales=dict_calc_umbrales["umbrales"]
-            umbrales_dict[semilla] = umbrales 
-
-            y_pred_sorted = dict_calc_umbrales["y_pred_sorted"]
+            name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train_lgbm"            
+            estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
+            estadisticas_ganancia_dict[semilla] = estadisticas_ganancia 
             y_pred_sorted_dict[semilla] = y_pred_sorted
-
-            ganancia_acumulada = dict_calc_umbrales["ganancia_acumulada"]
             ganancia_acumulada_dict[semilla] = ganancia_acumulada
+            if guardar_umbral == False:
+                try:
+                    with open(output_path_umbrales+f"{name_trial}.json", "w") as f:
+                        json.dump(estadisticas_ganancia_dict, f, indent=4)
+                except Exception as e:
+                    logger.error(f"Error al intentar guardar el dict de umbral como json --> {e}")
+                logger.info(f"Las estadisticas de las ganancias son : {estadisticas_ganancia}")
+                logger.info("Fin del calculo de las estadisticas de la ganancia")
 
-
-            # Evaluacion public private con n_split = 1 
-            df_long_cliente_semilla_i_n_split_1=evaluacion_public_private(X_test ,y_test_class,y_pred_ensamble,"n_cliente",umbrales["cliente"],semilla,1)
-            df_long_prob_semilla_i_n_split_1 = evaluacion_public_private(X_test ,y_test_class,y_pred_ensamble,"prob",umbrales["umbral_optimo"],semilla,1)
-
-            lista_df_ganancias_clientes_por_semilla_n_split_1.append(df_long_cliente_semilla_i_n_split_1)
-            lista_df_ganancias_prob_por_semilla_n_split_1.append(df_long_prob_semilla_i_n_split_1)
-
-
-            # Evaluacion public private con n_split = 50
-            df_long_cliente_semilla_i_n_split_50=evaluacion_public_private(X_test ,y_test_class,y_pred_ensamble,"n_cliente",umbrales["cliente"],semilla,50)
-            df_long_prob_semilla_i_n_split_50 = evaluacion_public_private(X_test ,y_test_class,y_pred_ensamble,"prob",umbrales["umbral_optimo"],semilla,50)
-
-            lista_df_ganancias_clientes_por_semilla_n_split_50.append(df_long_cliente_semilla_i_n_split_50)
-            lista_df_ganancias_prob_por_semilla_n_split_50.append(df_long_prob_semilla_i_n_split_50)
-
-
-        # Creacion de lqs predicciones medias a partir de los ensambles de las semillas
-        semilla = "ensamble_semillas"
-        logger.info("Comienzo del ensamblado de todas las semillas")
-        y_pred_df = np.vstack(y_predicciones_lista)
-        logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_df.shape}")
-        y_pred_ensamble = y_pred_df.mean(axis=0)
-        logger.info("Fin del ensamblado ")
-        name_1rst_train = f"{name}_ensambles_semillas_1rst_train_ensamble_xgb_lgbm"
-        dict_calc_umbrales= umbral_optimo_calc(y_test_class , y_pred_ensamble ,name_1rst_train , output_path_umbrales , semilla, guardar_umbral )
-
-        umbrales=dict_calc_umbrales["umbrales"]
-        umbrales_dict[semilla] = umbrales 
-
-        y_pred_sorted = dict_calc_umbrales["y_pred_sorted"]
-        y_pred_sorted_dict[semilla] = y_pred_sorted
-
-        ganancia_acumulada = dict_calc_umbrales["ganancia_acumulada"]
-        ganancia_acumulada_dict[semilla] = ganancia_acumulada
-
-
-        name=f"{fecha}_EXPERIMENTO_{numero}"
-        name_1rst_train = f"{name}_1rst_train_ensamble_xgb_lgbm"
-        if guardar_umbral == False:
-            try:
-                with open(output_path_umbrales+f"{name}.json", "w") as f:
-                    json.dump(umbrales_dict, f, indent=4)
-            except Exception as e:
-                logger.error(f"Error al intentar guardar el dict de umbral como json --> {e}")
-            logger.info(f"Los datos de umbrales moviles son : {umbrales}")
-            logger.info("Fin de la prediccion de umbral movil")
-
-        logger.info("Vamos a graficar la curva de ganancia con la y_pred_ensamble")
-        semillas_con_pred_ensamble = y_pred_sorted_dict.keys()
-        grafico_curvas_ganancia(y_pred_sorted_dict ,ganancia_acumulada_dict,umbrales_dict,semillas_con_pred_ensamble,name_1rst_train,output_path_graf_curva_ganancia)
-
-        # Graficos de histogramas con las semillas juntas con 1 split
-        df_long_cliente_n_split_1 = pd.concat(lista_df_ganancias_clientes_por_semilla_n_split_1,axis=0)
-        df_long_prob_n_split_1 = pd.concat(lista_df_ganancias_prob_por_semilla_n_split_1,axis=0)
-        graf_hist_ganancias(df_long_cliente_n_split_1,name+"_cliente_nsplits_1", output_path_graf_ganancia_hist_semillas , semillas)
-        graf_hist_ganancias(df_long_prob_n_split_1,name+"_prob_nsplits_1", output_path_graf_ganancia_hist_semillas ,semillas)
-
-        # Graficos en un histogramas con todas las semillas y los splits juntos
-        df_long_cliente_n_split_50 = pd.concat(lista_df_ganancias_clientes_por_semilla_n_split_50,axis=0)
-        df_long_prob_n_split_50 = pd.concat(lista_df_ganancias_prob_por_semilla_n_split_50,axis=0)
-        graf_hist_ganancias(df_long_cliente_n_split_50,name+"_cliente_nsplits_50", output_path_graf_ganancia_hist_total , semillas)
-        graf_hist_ganancias(df_long_prob_n_split_50,name+"_prob_nsplits_50", output_path_graf_ganancia_hist_total, semillas)
-
-        # Graficos en grillas de histograma, una por cada semilla con sus N particiones
-        graf_hist_ganancias(lista_df_ganancias_clientes_por_semilla_n_split_50,name+"_cliente_nsplits_50", output_path_graf_ganancia_hist_grilla , semillas)
-        graf_hist_ganancias(lista_df_ganancias_prob_por_semilla_n_split_50,name+"_prob_nsplits_50", output_path_graf_ganancia_hist_grilla,semillas)
-
+            logger.info("Vamos a graficar la curva de ganancia con y_pred_ensamble")
+            grafico_curvas_ganancia(y_pred_sorted_dict ,ganancia_acumulada_dict,estadisticas_ganancia_dict,name_trial,output_path_graf_curva_ganancia)
+            grafico_hist_ganancia(estadisticas_ganancia_dict , name_trial,output_path_graf_ganancia_hist_total)
+            
     
     elif proceso_ppal =="prediccion_final":
         y_predicciones_lista=[]

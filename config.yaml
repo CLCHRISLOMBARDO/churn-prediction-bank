@@ -1,14 +1,16 @@
 COMPETENCIA: 1
-PROCESO_PPAL: "test_baye"
-# opciones : bayesiana | experimento | prediccion_final | test_exp | test_baye | analisis_exploratorio | creacion_target_clase_ternaria
+
+# proceso_ppal : bayesiana  | test_baye | experimento |  test_exp| prediccion_final |analisis_exploratorio | creacion_target_clase_ternaria
+PROCESO_PPAL: "test_exp"
 
 configuracion_experimentos:
-  N_EXP : "2"
-# opciones : numeros | EDA 
+  # numero del experimento o EDA
+  N_EXP : "1"
+  # top models define los N mejores modelos de cada bayesiana. N=1 nos quedamos con el mejor 
   TOP_MODELS : 1
-# top models define los N mejores modelos de cada bayesiana. N=1 nos quedamos con el mejor 
 
 configuracion_bayesiana:
+ # Completar con la info de la bayesiana
   N_BAYESIANA: 2
   UMBRAL: 0.025
   GANANCIA: 780000
@@ -20,11 +22,13 @@ configuracion_bayesiana:
 
 
 configuracion_semilla:
+ # Completar con la info de las semillas
   SEMILLA: 773767
   SEMILLAS: [259621, 282917, 413417, 773767, 290827]
   N_SEMILLAS: 3
 
 configuracion_gcp:
+ # Completar con la info de la GCP
   IN_GCP: False
 
 configuracion_paths:

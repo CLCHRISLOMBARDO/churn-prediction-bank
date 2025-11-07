@@ -150,7 +150,7 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
 
         guardar_iteracion(trial,ganancia_media_meseta,cliente_optimo,ganancia_max,best_iter_promedio,y_preds_matrix,best_iters,name,fecha,semillas)
 
-        return float(ganancia_media_meseta) * len(MES_TRAIN)
+        return float(ganancia_media_meseta) * num_meses
         
     storage_name = "sqlite:///" + path_output_bayesian_db + "optimization_lgbm.db"
     study_name = f"study_{name}_{fecha}"    # VAria en numero de bayesiana y len(semillas)

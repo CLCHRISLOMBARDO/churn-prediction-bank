@@ -6,7 +6,7 @@ import seaborn as sns
 import lightgbm as lgb
 from sklearn.model_selection import StratifiedShuffleSplit
 
-
+from typing import Tuple
 import logging
 from time import time
 import datetime
@@ -109,9 +109,9 @@ def ganancia_umbral_cliente(y_pred:pd.Series , y_test_class:pd.Series , prop =1 
     return ganancia_sorted[:threshold_cliente].sum()/ prop
 
 
-def umbral_optimo_calc(y_test_class:pd.Series ,y_pred_lgbm:pd.Series ,name:str,output_path:str , semilla:int , guardar:bool)-> dict:
+def calc_estadisticas_ganancia(y_test_class:pd.Series ,y_pred_lgbm:pd.Series ,name:str,output_path:str , semilla:int , guardar:bool)-> Tuple[dict,pd.Series,np.ndarray]:
     name=f"{name}_umbral_optimo"
-    logger.info("Comienzo del calculo del umbral optimo")
+    logger.info(f"Comienzo del calculo de las estadisticas de la ganancia para la semilla {semilla}")
 
     ganancia = np.where(y_test_class=="BAJA+2" , ganancia_acierto,0) - np.where(y_test_class!="BAJA+2" , costo_estimulo,0)
     try:
@@ -120,62 +120,66 @@ def umbral_optimo_calc(y_test_class:pd.Series ,y_pred_lgbm:pd.Series ,name:str,o
 
         ganancia_sorted = ganancia[idx_sorted]
         ganancia_acumulada=np.cumsum(ganancia_sorted)
+        ganancia_max_acumulada = np.max(ganancia_acumulada)
+        indx_ganancia_max_acumulada = np.argmax(ganancia_acumulada)
+        umbral_optimo = y_pred_sorted[indx_ganancia_max_acumulada]
+        ganancia_media_meseta = np.mean(ganancia_acumulada[indx_ganancia_max_acumulada-500:indx_ganancia_max_acumulada+500 ])
 
-        max_ganancia_acumulada = np.max(ganancia_acumulada)
-
-        indx_max_ganancia_acumulada = np.where(ganancia_acumulada ==max_ganancia_acumulada)[0][0]
-
-        umbral_optimo = y_pred_sorted[indx_max_ganancia_acumulada]
+        
     except Exception as e:
         logger.error(f"Hubo un error por {e}")
         raise
 
     logger.info(f"Umbral_prob optimo = {umbral_optimo}")
-    logger.info(f"Numero de cliente optimo : {indx_max_ganancia_acumulada}")
-    logger.info(f"Ganancia maxima con el punto optimo : {max_ganancia_acumulada}")
-    umbrales = {
+    logger.info(f"Numero de cliente optimo : {indx_ganancia_max_acumulada}")
+    logger.info(f"Ganancia maxima con el punto optimo : {ganancia_max_acumulada}")
+    logger.info(f"Ganancia media meseta alrededor del punto optimo : {ganancia_media_meseta}")
+    estadisticas_ganancia = {
     "umbral_optimo": float(umbral_optimo),
-    "cliente": int(indx_max_ganancia_acumulada),
-    "ganancia_max": float(max_ganancia_acumulada),
+    "cliente": int(indx_ganancia_max_acumulada),
+    "ganancia_max": float(ganancia_max_acumulada),
+    "ganancia_media_meseta" : float(ganancia_media_meseta),
     "SEMILLA":semilla
     }
     if guardar :
         try:
             with open(output_path+f"{name}.json", "w") as f:
-                json.dump(umbrales, f, indent=4)
+                json.dump(estadisticas_ganancia, f, indent=4)
         except Exception as e:
-            logger.error(f"Error al intentar guardar el dict de umbral como json --> {e}")
-        logger.info(f"Los datos de umbrales moviles son : {umbrales}")
-        logger.info("Fin de la prediccion de umbral movil")
+            logger.error(f"Error al intentar guardar el dict de estadisticas de la ganancia como json --> {e}")
+        logger.info(f"Las estadisticas de la ganancia son : {estadisticas_ganancia}")
+        logger.info("Fin de la prediccion de Las estadisticas de la ganancia ")
     else:
         logger.info("No se guarda porque se va a guardar todos los umbrales despues del for")
-        logger.info("Fin de la prediccion de umbral movil")
+        logger.info("Fin del calculo de las estadisticas de la ganancia")
+    # resultados_ganancia = {"estadistica_ganancias":estadisticas_ganancia,"y_pred_sorted":y_pred_sorted ,"ganancia_acumulada": ganancia_acumulada }
+    return estadisticas_ganancia , y_pred_sorted , ganancia_acumulada
 
 
-    return {"umbrales":umbrales,"y_pred_sorted":y_pred_sorted ,"ganancia_acumulada": ganancia_acumulada }
-
-
-
-def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_acumulada:pd.Series|dict[pd.Series], umbrales:dict,semilla:list|int ,name:str, output_path:str):
+def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_acumulada:pd.Series|dict[pd.Series], estadisticas_ganancia_dict:dict,name:str, output_path:str):
     name=f"{name}_curvas_ganancia"
+    semillas =estadisticas_ganancia_dict.keys()
     piso=4000
     techo=20000
-    if isinstance(semilla,int) :
-        logger.info(f"Comienzo de los graficos de curva de ganancia con una semilla = {semilla}")
+    if isinstance(semillas,int) :
+        logger.info(f"Comienzo de los graficos de curva de ganancia con una semilla = {semillas}")
 
-        umbral_optimo= umbrales["umbral_optimo"]
-        indx_max_ganancia_acumulada = umbrales["cliente"]
-        max_ganancia_acumulada= umbrales["ganancia_max"]
+        umbral_optimo= estadisticas_ganancia_dict["umbral_optimo"]
+        indx_ganancia_max_acumulada = estadisticas_ganancia_dict["cliente"]
+        ganancia_max_acumulada= estadisticas_ganancia_dict["ganancia_max"]
+        ganancia_media_meseta = estadisticas_ganancia_dict["ganancia_media_meseta"]
+
 
         try:
             plt.figure(figsize=(10, 6))
-            plt.plot(y_pred_sorted[piso:techo] ,ganancia_acumulada[piso:techo] ,label=f"SEMILLA {semilla} ganancia max a {max_ganancia_acumulada} / punto de corte a {umbral_optimo}")
+            plt.plot(y_pred_sorted[piso:techo] ,ganancia_acumulada[piso:techo] ,label=f"SEMILLA {semillas} ganancia max a {max_ganancia_acumulada} / punto de corte a {umbral_optimo}")
             plt.xlabel('Predicción de probabilidad')
             plt.ylabel('Ganancia')
             plt.title("Curva Ganancia respecto a probabilidad")
             plt.axvline(x=0.025 , color="red" , linestyle="--" ,label="Punto de Corte a 0.025")
             plt.axvline(x=umbral_optimo , color="green" , linestyle="--")
-            plt.axhline(y=max_ganancia_acumulada , color="green" , linestyle="--")
+            plt.axhline(y=ganancia_max_acumulada , color="green" , linestyle="--")
+            plt.axhline(y=ganancia_media_meseta , color="orange" , linestyle="--")
             plt.legend()
             plt.savefig(output_path+f"{name}_probabilidad.png", bbox_inches='tight')
             logger.info("Creacion de los graficos Curva Ganancia respecto a probabilidad")
@@ -184,12 +188,13 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
 
         try:
             plt.figure(figsize=(10, 6))
-            plt.plot(range(piso,len(ganancia_acumulada[piso:techo])+piso) ,ganancia_acumulada[piso:techo] ,label=f"SEMILLA {semilla} ganancia max a {max_ganancia_acumulada} / punto de corte a {indx_max_ganancia_acumulada}")
+            plt.plot(range(piso,len(ganancia_acumulada[piso:techo])+piso) ,ganancia_acumulada[piso:techo] ,label=f"SEMILLA {semillas} ganancia max a {ganancia_max_acumulada} / punto de corte a {indx_ganancia_max_acumulada} / ganancia media meseta {ganancia_media_meseta}")
             plt.xlabel('Clientes')
             plt.ylabel('Ganancia')
             plt.title("Curva Ganancia con numero de clientes")
-            plt.axvline(x=indx_max_ganancia_acumulada , color="green" , linestyle="--" )
-            plt.axhline(y=max_ganancia_acumulada , color="green",linestyle="--" )
+            plt.axvline(x=indx_ganancia_max_acumulada , color="green" , linestyle="--" )
+            plt.axhline(y=ganancia_max_acumulada , color="green",linestyle="--" )
+            plt.axhline(y=ganancia_media_meseta , color="orange" , linestyle="--")
             plt.legend()
             plt.savefig(output_path+f"{name}_numero_cliente.png", bbox_inches='tight')
             logger.info("Creacion de los graficos Curva Ganancia respecto al cliente")
@@ -197,26 +202,32 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
             logger.error(f"Error al tratar de crear los graficos Curva Ganancia respecto a probabilidad --> {e}")
 
     else:
-        logger.info(f"Comienzo de los graficos de curva de ganancia con varias semillas = {semilla}")
+        logger.info(f"Comienzo de los graficos de curva de ganancia con varias semillas = {semillas}")
         plt.figure(figsize=(10, 6))
-        for i,s in enumerate(semilla) :
-            umbral_optimo=umbrales[s]["umbral_optimo"]
-            indx_max_ganancia_acumulada = umbrales[s]["cliente"]
-            max_ganancia_acumulada= umbrales[s]["ganancia_max"]
-
+        estadisticas_sorted=sorted(estadisticas_ganancia_dict,key= lambda x : x["ganancia_media_meseta"],reverse=True)
+        ganancia_top_n = estadisticas_sorted[list(estadisticas_sorted.keys())[5]]["ganancia_media_meseta"]
+        for i,s in enumerate(semillas) :
+            umbral_optimo=estadisticas_ganancia_dict[s]["umbral_optimo"]
+            indx_max_ganancia_acumulada = estadisticas_ganancia_dict[s]["cliente"]
+            ganancia_max_acumulada= estadisticas_ganancia_dict[s]["ganancia_max"]
+            ganancia_media_meseta= estadisticas_ganancia_dict[s]["ganancia_media_meseta"]
             y_pred_sorted_s=y_pred_sorted[s]
             ganancia_acumulada_s = ganancia_acumulada[s]
             if s == "ensamble_semillas":
                 alpha = 1
             else:
                 alpha=0.3
-            linea,=plt.plot(y_pred_sorted_s[piso:techo] ,ganancia_acumulada_s[piso:techo],alpha=alpha ,label=f"SEMILLA {s} ganancia max a {max_ganancia_acumulada} / punto de corte a {umbral_optimo}")
+            if (ganancia_media_meseta>= ganancia_top_n) | (s == "ensamble_semillas"):
+                linea,=plt.plot(y_pred_sorted_s[piso:techo] ,ganancia_acumulada_s[piso:techo],alpha=alpha ,label=f"SEMILLA {s}  ganancia media meseta a {ganancia_media_meseta} / ganancia max a {ganancia_max_acumulada} / punto de corte a {umbral_optimo}")
+            else :
+                linea,=plt.plot(y_pred_sorted_s[piso:techo] ,ganancia_acumulada_s[piso:techo],alpha=alpha)
+
             color=linea.get_color()
             if i==0:
                 plt.axvline(x=0.025 , color="red" , linestyle="--" ,label="Punto de Corte a 0.025" , alpha=0.3)
+            
             plt.axvline(x=umbral_optimo , color=color , linestyle="--")
-            plt.axhline(y=max_ganancia_acumulada , color=color , linestyle="--")
-
+            plt.axhline(y=ganancia_media_meseta , color=color , linestyle="--")
             plt.xlabel('Predicción de probabilidad')
             plt.ylabel('Ganancia')
             plt.title("Curva Ganancia respecto a probabilidad")
@@ -231,20 +242,28 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
             logger.error(f"Error al intentar guardar el grafico de curva de ganancia de prob por {e}")
             
         plt.figure(figsize=(10, 6))
-        for s in semilla :
-            umbral_optimo=umbrales[s]["umbral_optimo"]
-            indx_max_ganancia_acumulada = umbrales[s]["cliente"]
-            max_ganancia_acumulada= umbrales[s]["ganancia_max"]
+        for s in semillas :
+
+            umbral_optimo=estadisticas_ganancia_dict[s]["umbral_optimo"]
+            indx_max_ganancia_acumulada = estadisticas_ganancia_dict[s]["cliente"]
+            ganancia_max_acumulada= estadisticas_ganancia_dict[s]["ganancia_max"]
+            ganancia_media_meseta= estadisticas_ganancia_dict[s]["ganancia_media_meseta"]
             y_pred_sorted_s=y_pred_sorted[s]
             ganancia_acumulada_s = ganancia_acumulada[s]
             if s == "ensamble_semillas":
                 alpha = 1
             else:
                 alpha=0.3
-            linea,=plt.plot(range(piso,len(ganancia_acumulada_s[piso:techo])+piso) ,ganancia_acumulada_s[piso:techo] ,alpha=alpha,label=f"SEMILLA {s} ganancia max a {max_ganancia_acumulada} / punto de corte a {indx_max_ganancia_acumulada}")
+            
+            if (ganancia_media_meseta>= ganancia_top_n) | (s == "ensamble_semillas"):
+                linea,=plt.plot(range(piso,len(ganancia_acumulada_s[piso:techo])+piso) ,ganancia_acumulada_s[piso:techo] ,alpha=alpha,label=f"SEMILLA {s}  ganancia media meseta a {ganancia_media_meseta} / ganancia max a {ganancia_max_acumulada} / punto de corte a {indx_max_ganancia_acumulada}")
+            else :
+                linea,=plt.plot(range(piso,len(ganancia_acumulada_s[piso:techo])+piso) ,ganancia_acumulada_s[piso:techo] ,alpha=alpha)
+
             color=linea.get_color()
+
             plt.axvline(x=indx_max_ganancia_acumulada , color=color , linestyle="--" )
-            plt.axhline(y=max_ganancia_acumulada , color=color,linestyle="--" )
+            plt.axhline(y=ganancia_media_meseta , color=color,linestyle="--" )
             plt.xlabel('Clientes')
             plt.ylabel('Ganancia')
             plt.title("Curva Ganancia con numero de clientes")
@@ -258,10 +277,27 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
             plt.close()
         except Exception as e:
             logger.error(f"Error al intentar guardar el grafico de curva de ganancia con n_cliente por {e}")
-
     return
+def grafico_hist_ganancia(estadisticas_ganancia_dict:dict , name:str, output_path:str):
+    name=f"{name}_hist_ganancia"
+    ganancias = [s["ganancia_media_meseta"] for s in estadisticas_ganancia_dict]
+    plt.hist(ganancias)
+    plt.title(f"Histograma por semilla de : {name}")
+    plt.grid(True)
+    logger.info(f"Intento de guardado en {output_path}")
+    try:
+        plt.savefig(output_path+f"{name}.png", bbox_inches='tight')
+        plt.close()
+        logger.info(f"Guardado con exito en {output_path+f"{name}.png"}")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar por {e}")
 
 
+
+
+
+
+# Funciones para tener en cuenta el private y el public
 def evaluacion_public_private(X_test:pd.DataFrame , y_test_class:pd.Series , y_pred_model:pd.Series,umbral_mode:str,umbral:float|int,semilla:int,n_splits)->pd.DataFrame:
     logger.info(f"Comienzo de Calculo de las ganancias de public and private con {n_splits} splits")
     sss=StratifiedShuffleSplit(n_splits=n_splits,test_size=0.3,random_state=semilla)
@@ -293,7 +329,7 @@ def evaluacion_public_private(X_test:pd.DataFrame , y_test_class:pd.Series , y_p
     return df_lb_long
     
 
-def graf_hist_ganancias(df_lb_long:pd.DataFrame|list[pd.DataFrame] ,name:str ,output_path : str ,semillas:list[str]):
+def graf_hist_ganancias_public_private(df_lb_long:pd.DataFrame|list[pd.DataFrame] ,name:str ,output_path : str ,semillas:list[str]):
     logger.info("Comienzo del grafico de los histogramas")
     name=f"{name}_graf_ganancia_histograma"
     if isinstance(df_lb_long,pd.DataFrame):
