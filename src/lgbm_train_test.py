@@ -161,7 +161,7 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
     name=f"{name}_curvas_ganancia"
     piso=4000
     techo=20000
-    if (isinstance(y_pred_sorted,pd.Series)):
+    if not (isinstance(y_pred_sorted,dict)):
         logger.info(f"Comienzo de los graficos de curva de ganancia con una semilla : {estadisticas_ganancia_dict['SEMILLA']} ")
         umbral_optimo= estadisticas_ganancia_dict["umbral_optimo"]
         indx_ganancia_max_acumulada = estadisticas_ganancia_dict["cliente"]
@@ -170,7 +170,7 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
 
         try:
             plt.figure(figsize=(10, 6))
-            plt.plot(y_pred_sorted[piso:techo] ,ganancia_acumulada[piso:techo] ,label=f"SEMILLA {semillas} ganancia media meseta a {ganancia_media_meseta} /ganancia max a {ganancia_max_acumulada} / punto de corte a {umbral_optimo}")
+            plt.plot(y_pred_sorted[piso:techo] ,ganancia_acumulada[piso:techo] ,label=f" ganancia media meseta a {ganancia_media_meseta} /ganancia max a {ganancia_max_acumulada} / punto de corte a {umbral_optimo}")
             plt.xlabel('Predicción de probabilidad')
             plt.ylabel('Ganancia')
             plt.title("Curva Ganancia respecto a probabilidad")
@@ -186,7 +186,7 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
 
         try:
             plt.figure(figsize=(10, 6))
-            plt.plot(range(piso,len(ganancia_acumulada[piso:techo])+piso) ,ganancia_acumulada[piso:techo] ,label=f"SEMILLA {semillas} ganancia max a {ganancia_max_acumulada} / punto de corte a {indx_ganancia_max_acumulada} / ganancia media meseta {ganancia_media_meseta}")
+            plt.plot(range(piso,len(ganancia_acumulada[piso:techo])+piso) ,ganancia_acumulada[piso:techo] ,label=f"ganancia max a {ganancia_max_acumulada} / punto de corte a {indx_ganancia_max_acumulada} / ganancia media meseta {ganancia_media_meseta}")
             plt.xlabel('Clientes')
             plt.ylabel('Ganancia')
             plt.title("Curva Ganancia con numero de clientes")
@@ -200,8 +200,8 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
             logger.error(f"Error al tratar de crear los graficos Curva Ganancia respecto a probabilidad --> {e}")
 
     else:
-        logger.info(f"Comienzo de los graficos de curva de ganancia con varias semillas = {semillas}")
         semillas =estadisticas_ganancia_dict.keys()
+        logger.info(f"Comienzo de los graficos de curva de ganancia con varias semillas = {semillas}")
         plt.figure(figsize=(10, 6))
         valores_ordenados = sorted([v["ganancia_media_meseta"] for v in estadisticas_ganancia_dict.values()],reverse=True)
         ganancia_top_n = valores_ordenados[min(5, len(valores_ordenados) - 1)]

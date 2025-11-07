@@ -21,7 +21,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
     n_semillas = len(semillas)
-    name=f"{fecha}_EXPERIMENTO_{numero}_{proceso_ppal}_{len(semillas)}_semillas"
+    name=f"EXPERIMENTO_{numero}_{proceso_ppal}_{len(semillas)}_semillas"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name} con {n_semillas} semillas")
     
