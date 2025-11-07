@@ -34,18 +34,20 @@ try:
             comp      = cfg["configuracion_competencia_2"]
 
         # =================== Optimización LGBM ===================
-        N_BAYESIANA = bayes.get("N_BAYESIANA")
-        UMBRAL      = bayes.get("UMBRAL", 0.025)
-        GANANCIA    = bayes.get("GANANCIA", 780000)
-        ESTIMULO    = bayes.get("ESTIMULO", 20000)
-        N_TRIALS    = bayes.get("N_TRIALS", 35)
-        N_BOOSTS    = bayes.get("N_BOOSTS", 1000)
-        N_FOLDS     = bayes.get("N_FOLDS", 5)
+        N_BAYESIANA         = bayes.get("N_BAYESIANA")
+        UMBRAL              = bayes.get("UMBRAL", 0.025)
+        GANANCIA            = bayes.get("GANANCIA", 780000)
+        ESTIMULO            = bayes.get("ESTIMULO", 20000)
+        N_TRIALS            = bayes.get("N_TRIALS", 35)
+        N_BOOSTS            = bayes.get("N_BOOSTS", 1000)
+        N_FOLDS             = bayes.get("N_FOLDS", 5)
+        MES_VAL_BAYESIANA   = bayes.get("MES_VAL_BAYESIANA", 202103) 
 
         if PROCESO_PPAL =="bayesiana":
             N_EXPERIMENTO = bayes["N_BAYESIANA"]
         else:
             N_EXPERIMENTO = exp["N_EXP"]
+            TOP_MODELS = exp["TOP_MODELS"]
         
 
         # ================= Configuración General =================

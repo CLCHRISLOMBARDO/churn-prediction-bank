@@ -1,37 +1,87 @@
 #lgbm_optimizacion.py
 import pandas as pd
+import polars as pl
 import numpy as np
 import lightgbm as lgb
+import os
 
 from joblib import Parallel, delayed
 import optuna
 from optuna.study import Study
 from time import time
-
+from datetime import datetime
 import json
 import logging
 from optuna.samplers import TPESampler # Para eliminar el componente estocastico de optuna
 from optuna.visualization import plot_param_importances, plot_contour,  plot_slice, plot_optimization_history
 
-from src.config import GANANCIA,ESTIMULO,SEMILLA ,N_BOOSTS ,N_FOLDS
+from src.config import GANANCIA,ESTIMULO,SEMILLA ,N_BOOSTS ,N_FOLDS, MES_VAL_BAYESIANA, MES_TRAIN
 from src.config import  path_output_bayesian_db,path_output_bayesian_bestparams ,path_output_bayesian_best_iter ,path_output_bayesian_graf
 
-ganancia_acierto = GANANCIA
-costo_estimulo = ESTIMULO
 
 logger = logging.getLogger(__name__)
 
 
-def lgb_gan_eval(y_pred, data):
+def lgb_gan_eval_individual(y_pred, data):
+    logger.info("Calculo ganancia INDIVIDUAL")
     weight = data.get_weight()
-    ganancia = np.where(weight == 1.00002, ganancia_acierto, 0) - np.where(weight < 1.00002, costo_estimulo, 0)
+    ganancia = np.where(weight == 1.00002, GANANCIA, 0) - np.where(weight < 1.00002, ESTIMULO, 0)
+    logger.info(f"ganancia : {ganancia}")
     ganancia = ganancia[np.argsort(y_pred)[::-1]]
+    logger.info(f"ganancia sorted : {ganancia}")
     ganancia = np.cumsum(ganancia)
-
+    logger.info(f"ganancia acumulada : {ganancia}")
+    #con polars
+    # df_eval = pl.DataFrame({"y_pred":y_pred , "weight":weight})
+    # df_sorted = df_eval.sort("y_pred" , descending=True)
+    # df_sorted = df_sorted.with_columns([pl.when(pl.col('weight') == 1.00002).then(GANANCIA).otherwise(-ESTIMULO).alias('ganancia_individual')])
+    # df_sorted = df_sorted.with_columns([pl.col('ganancia_individual').cum_sum().alias('ganancia_acumulada')])
+    # ganancia_maxima = df_sorted.select(pl.col('ganancia_acumulada').max()).item()
+    # id_gan_max = df_sorted["ganancia_acumulada"].arg_max()
+    # media_meseta = df_sorted.slice(id_gan_max-500, 1000)['ganancia_acumulada'].mean()
+    logger.info(f"ganancia max acumulada : {np.max(ganancia)}")
+    logger.info(f"cliente optimo : {np.argmax(ganancia)}")
     return 'gan_eval', np.max(ganancia) , True
 
-def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, n_trials:int, name:str)-> Study:
+def lgb_gan_eval_ensamble(y_pred , data):
+    logger.info("Calculo ganancia ENSAMBLE")
+    weight = data.get_weight()
+    ganancia =np.where(weight == 1.00002 , GANANCIA, 0) - np.where(weight < 1.00002 , ESTIMULO ,0)
+    logger.info(f"ganancia : {ganancia}")
+    ganancia_sorted = ganancia[np.argsort(y_pred)[::-1]]
+    logger.info(f"ganancia sorted : {ganancia_sorted}")
+    ganancia_acumulada = np.cumsum(ganancia_sorted)
+    logger.info(f"ganancia acumulada : {ganancia_acumulada}")
+    ganancia_max = np.max(ganancia_acumulada)
+    idx_max_gan = np.argmax(ganancia_acumulada)
+    logger.info(f"ganancia max acumulada : {ganancia_max}")
+    logger.info(f"cliente oprimo : {idx_max_gan}")
+    ganancia_media_meseta = np.mean(ganancia_acumulada[idx_max_gan-500 : idx_max_gan+500])
+    logger.info(f"ganancia media meseta : {ganancia_media_meseta}")
+    return ganancia_media_meseta ,idx_max_gan ,ganancia_max
+
+def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd.Series|pl.Series,w_train:pd.Series|pl.Series, n_trials:int, name:str,fecha,semillas:list)-> Study:
     logger.info(f"Comienzo optimizacion hiperp binario: {name}")
+    if isinstance(X_train, pl.DataFrame):
+        X_train = X_train.to_pandas()
+    if isinstance(y_train_binaria, pl.Series):
+        y_train_binaria = y_train_binaria.to_pandas()
+    if isinstance(w_train, pl.Series):
+        w_train = w_train.to_pandas()
+
+    num_meses = len(MES_TRAIN)
+    f_val = X_train["foto_mes"] == MES_VAL_BAYESIANA
+
+    X_val = X_train.loc[f_val]
+    y_val_binaria = y_train_binaria[X_val.index]
+    w_val = w_train[X_val.index]
+
+    X_train = X_train.loc[~f_val]
+    y_train_binaria = y_train_binaria[X_train.index]
+    w_train = w_train[X_train.index]
+
+    logger.info(f"Meses train en bayesiana : {X_train['foto_mes'].unique()}")
+    logger.info(f"Meses validacion en bayesiana : {X_val['foto_mes'].unique()}")
 
     def objective(trial):
         num_leaves = trial.suggest_int('num_leaves', 8, 100)
@@ -61,42 +111,49 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
             'min_data_in_leaf': min_data_in_leaf,
             'feature_fraction': feature_fraction,
             'bagging_fraction': bagging_fraction,
+            'bagging_freq': 1 , # 
             'max_depth': max_depth,
             'min_child_samples':min_child_samples,
             'min_child_weight':min_child_weight,
             'lambda_l1':lambda_l1,
             'lambda_l2':lambda_l2,
             'min_split_gain':min_split_gain,
-            'seed': SEMILLA,
+            'extra_trees' : True,
             'verbose': -1
         }
-        train_data = lgb.Dataset(X_train,
-                                label=y_train_binaria,
-                                weight=w_train)
-        cv_results = lgb.cv(
-            params,
-            train_data,
-            num_boost_round=N_BOOSTS, 
-            #early_stopping_rounds= int(50 + 5 / learning_rate),
-            feval=lgb_gan_eval,
-            stratified=True,
-            nfold=N_FOLDS,
-            seed=SEMILLA,
-            callbacks=[
-                lgb.early_stopping(stopping_rounds=int(50 + 5/learning_rate), verbose=False),
-                lgb.log_evaluation(period=200),
-                ]
-        )
-        max_gan = max(cv_results['valid gan_eval-mean'])
-        best_iter = cv_results['valid gan_eval-mean'].index(max_gan) + 1
+        train_data = lgb.Dataset(X_train,label=y_train_binaria,weight=w_train)
+        val_data = lgb.Dataset(X_val,label=y_val_binaria,weight=w_val)
+        y_preds=[]
+        best_iters=[]
+        for semilla in semillas:
+            params['seed'] = semilla
+            model_i = lgb.train(
+                    params=params,
+                    train_set=train_data,
+                    num_boost_round=N_BOOSTS,
+                    valid_sets=[val_data],
+                    valid_names=['valid'],
+                    feval=lgb_gan_eval_individual,
+                    callbacks=[
+                        lgb.early_stopping(stopping_rounds=int(50 + 5/learning_rate), verbose=False),
+                        lgb.log_evaluation(period=200),
+                        ]
+                    )
+            y_pred_i = model_i.predict(X_val,num_iteration=model_i.best_iteration)
+            y_preds.append(y_pred_i)
+            best_iters.append(model_i.best_iteration)
+        y_preds_matrix = np.vstack(y_preds)
+        y_pred_ensamble = np.mean(y_preds_matrix , axis=0)
+        ganancia_media_meseta , cliente_optimo,ganancia_max = lgb_gan_eval_ensamble(y_pred_ensamble , val_data)
+        best_iter_promedio =  np.mean(best_iters)
 
-        # Guardamos cual es la mejor iteración del modelo
-        trial.set_user_attr("best_iter", best_iter)
 
-        return max_gan * N_FOLDS
-    
+        guardar_iteracion(trial,ganancia_media_meseta,cliente_optimo,ganancia_max,best_iter_promedio,y_preds_matrix,best_iters,name,fecha,semillas)
+
+        return float(ganancia_media_meseta) * len(MES_TRAIN)
+        
     storage_name = "sqlite:///" + path_output_bayesian_db + "optimization_lgbm.db"
-    study_name = f"study_{name}"    
+    study_name = f"study_{name}_{fecha}"    # VAria en numero de bayesiana y len(semillas)
 
 
     study = optuna.create_study(
@@ -109,44 +166,93 @@ def optim_hiperp_binaria(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train
 
     study.optimize(objective, n_trials=n_trials)
 
-    best_params = study.best_trial.params
-    best_iter=study.best_trial.user_attrs["best_iter"]
-    
-    # Guardo best iter
-    try:
-        with open(path_output_bayesian_best_iter + f"best_iter_{name}.json","w") as f:
-            json.dump(best_iter , f ,indent=4)
-        logger.info(f"best_iter_{name}.json guardado en {path_output_bayesian_best_iter} ")
-    except Exception as e:
-        logger.error(f"Error al tratar de guardar el json de best iter por el error :{e}")
 
-    # Guardo best params
-    try:
-        with open(path_output_bayesian_bestparams+f"best_params_{name}.json", "w") as f:
-            json.dump(best_params, f, indent=4) 
-        logger.info(f"best_params_{name}.json guardado en {path_output_bayesian_bestparams}")
-        logger.info(f"Finalizacion de optimizacion hiperp binario con study name {study_name}.")
-    except Exception as e:
-        logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
+
+    # best_params = study.best_trial.params
+    # best_iter=study.best_trial.user_attrs["best_iter"]
+    
+    # # Guardo best iter
+    # try:
+    #     with open(path_output_bayesian_best_iter + f"best_iter_{name}.json","w") as f:
+    #         json.dump(best_iter , f ,indent=4)
+    #     logger.info(f"best_iter_{name}.json guardado en {path_output_bayesian_best_iter} ")
+    # except Exception as e:
+    #     logger.error(f"Error al tratar de guardar el json de best iter por el error :{e}")
+
+    # # Guardo best params
+    # try:
+    #     with open(path_output_bayesian_bestparams+f"best_params_{name}.json", "w") as f:
+    #         json.dump(best_params, f, indent=4) 
+    #     logger.info(f"best_params_{name}.json guardado en {path_output_bayesian_bestparams}")
+    #     logger.info(f"Finalizacion de optimizacion hiperp binario con study name {study_name}.")
+    # except Exception as e:
+    #     logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
     return study
 
-def graficos_bayesiana(study:Study, name: str):
+
+def guardar_iteracion(trial,ganancia_media_meseta,cliente_optimo,ganancia_max,best_iter_medio,
+                      y_pred_i_lista , best_iters ,
+                       name,fecha,semillas ):
+    logger.info(f"Comienzo del guardado de la iteracion : {trial.number}")
+    
+    archivo = path_output_bayesian_bestparams + f"best_params_{name}.json"
+
+    iteracion_data = {
+        'trial_number': trial.number,
+        'params': trial.params,
+        'ganancia_media_meseta': float(ganancia_media_meseta),
+        'cliente_optimo':int(cliente_optimo),
+        'ganancia_max':float(ganancia_max),
+        'best_iter_trial':int(best_iter_medio),
+        # 'y_pred_i_lista':y_pred_i_lista,
+        'best_iters':best_iters,
+        'datetime': fecha,
+        'state': 'COMPLETE',  # Si llegamos aquí, el trial se completó exitosamente
+        'configuracion': {
+            'semilla': semillas,
+            'mes_train': MES_TRAIN,
+            'mes_validacion': MES_VAL_BAYESIANA}
+            }
+    # Cargar datos existentes si el archivo ya existe
+    if os.path.exists(archivo):
+        with open(archivo, 'r') as f:
+            try:
+                datos_existentes = json.load(f)
+                if not isinstance(datos_existentes, list):
+                    datos_existentes = []
+            except json.JSONDecodeError:
+                datos_existentes = []
+    else:
+        datos_existentes = []
+
+    # Agregar nueva iteración
+    datos_existentes.append(iteracion_data)
+
+    # Guardar todas las iteraciones en el archivo
+    with open(archivo, 'w') as f:
+        json.dump(datos_existentes, f, indent=2)
+
+    logger.info(f"Iteración {trial.number} guardada en {archivo}")
+    logger.info(f"Ganancia media meseta: {ganancia_media_meseta:,.0f}" + "---" + "Parámetros: {params}")
+
+
+def graficos_bayesiana(study:Study, fecha:str,name: str):
     logger.info(f"Comienzo de la creacion de graficos de {name}")
     try:
         fig1 = plot_optimization_history(study)
-        fig1.write_image(path_output_bayesian_graf+f"{name}_graficos_opt_history.png")
+        fig1.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_opt_history.png")
 
         fig2 = plot_param_importances(study)
-        fig2.write_image(path_output_bayesian_graf+f"{name}_graficos_param_importances.png")
+        fig2.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_param_importances.png")
 
         fig3 = plot_slice(study)
-        fig3.write_image(path_output_bayesian_graf+f"{name}_graficos_slice.png")
+        fig3.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_slice.png")
 
         fig4 = plot_contour(study)
-        fig4.write_image(path_output_bayesian_graf+f"{name}_graficos_contour_all.png")
+        fig4.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_contour_all.png")
 
         fig5 = plot_contour(study, params=["num_leaves", "learning_rate"])
-        fig5.write_image(path_output_bayesian_graf+f"{name}_graficos_contour_specific.png")
+        fig5.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_contour_specific.png")
 
         logger.info(f" Gráficos guardados en {path_output_bayesian_graf}")
     except Exception as e:
@@ -159,59 +265,6 @@ def _ganancia_prob(y_hat:pd.Series|np.ndarray , y:pd.Series|np.ndarray ,prop=1,c
     logger.info("comienzo funcion ganancia con threhold = 0.025")
     @np.vectorize
     def _ganancia_row(predicted , actual , threshold=0.025):
-        return (predicted>=threshold) * (ganancia_acierto if actual=="BAJA+2" else -costo_estimulo)
+        return (predicted>=threshold) * (GANANCIA if actual=="BAJA+2" else -ESTIMULO)
     logger.info("Finalizacion funcion ganancia con threhold = 0.025")
     return _ganancia_row(y_hat[:,class_index] ,y).sum() /prop
-
-
-# def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:int , name:str)-> Study:
-    
-#     logger.info("Inicio de optimizacion hiperp ternario")
-#     name ="ternaria"+name
-#     def objective(trial):
-#         max_depth = trial.suggest_int('max_depth', 2, 32)
-#         min_samples_split = trial.suggest_int('min_samples_split', 2, 2000)
-#         min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 200)
-#         max_features = trial.suggest_float('max_features', 0.05, 0.7)
-
-#         model = RandomForestClassifier(
-#             n_estimators=N_ESTIMATORS,
-#             max_depth=max_depth,
-#             min_samples_split=min_samples_split,
-#             min_samples_leaf=min_samples_leaf,
-#             max_features=max_features,
-#             max_samples=0.7,
-#             random_state=SEMILLA,
-#             n_jobs=12,
-#             oob_score=True
-#         )
-
-#         model.fit(X, y)
-
-#         return _ganancia_prob(model.oob_decision_function_, y)
-
-#     storage_name = "sqlite:///" + db_path + "optimization_tree.db"
-#     study_name = f"rf_ganancia_{name}"  
-
-#     study = optuna.create_study(
-#         direction="maximize",
-#         study_name=study_name,
-#         storage=storage_name,
-#         load_if_exists=True,
-#         sampler=TPESampler(seed=SEMILLA)
-#     )
-
-#     study.optimize(objective, n_trials=n_trials)
-
-#     best_params = study.best_trial.params
-    
-#     try:
-#         with open(bestparms_path+f"best_params_ganancia_{name}.json", "w") as f:
-#             json.dump(best_params, f, indent=4) 
-#             logger.info(f"best_params_ganancia_{name}.json guardado en outputs/optimizacion_rf/best_params/")
-#         logger.info("Finalizacion de optimizacion hiperp binario.")
-#     except Exception as e:
-#         logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
-#     return study
-
-

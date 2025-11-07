@@ -14,7 +14,6 @@ def conversion_binario(df:pd.DataFrame|np.ndarray) ->pd.DataFrame:
         clase_peso -> para pasar al optuna  con w 
         clase_ternaria -> ya estaba
         clase_binaria -> para todo con la y binaria
-
     """
     
     logger.info("Creacion label binario")

@@ -43,7 +43,6 @@ def xgb_gan_eval(preds: np.ndarray, dtrain: xgb.DMatrix):
     ganancia = np.where(weight == 1.00002, ganancia_acierto, 0) - np.where(weight < 1.00002, costo_estimulo, 0)
     ganancia = ganancia[np.argsort(preds)[::-1]]
     ganancia = np.cumsum(ganancia)
-    # xgb espera (nombre, valor)
     return 'gan_eval', float(np.max(ganancia))
 
 def optim_hiperp_binaria_xgb(X_train: pd.DataFrame,y_train_binaria: pd.Series,w_train: pd.Series,n_trials: int,name: str):

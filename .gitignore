@@ -1,5 +1,5 @@
 datasets/
-/env_bank
+env_bank/
 __pycache__/
 logss/
 outputs/

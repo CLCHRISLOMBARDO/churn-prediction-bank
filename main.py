@@ -57,9 +57,12 @@ def main():
     elif proceso_ppal=="analisis_exploratorio":
         lanzar_eda(competencia=competencia)
     elif proceso_ppal =="bayesiana":
-        lanzar_bayesiana_lgbm(fecha,SEMILLA)
-        lanzar_bayesiana_xgb(fecha,SEMILLA)
-    elif proceso_ppal =="test":
+        lanzar_bayesiana_lgbm(fecha,semillas,n_experimento,proceso_ppal)
+        # lanzar_bayesiana_xgb(fecha,semillas,proceso_ppal)
+    elif proceso_ppal =="test_baye":
+        lanzar_bayesiana_lgbm(test,semillas,n_experimento,proceso_ppal)
+        # lanzar_bayesiana_xgb(test,semillas,proceso_ppal)
+    elif proceso_ppal =="test_exp":
         lanzar_experimento(test,semillas , n_experimento , proceso_ppal)
     elif (proceso_ppal =="experimento") | (proceso_ppal=="prediccion_final"):
         lanzar_experimento(fecha,semillas , n_experimento , proceso_ppal)
