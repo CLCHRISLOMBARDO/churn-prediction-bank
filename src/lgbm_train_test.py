@@ -162,7 +162,7 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
     piso=4000
     techo=20000
     if (isinstance(y_pred_sorted,pd.Series)):
-        logger.info(f"Comienzo de los graficos de curva de ganancia con una semilla : {estadisticas_ganancia_dict["SEMILLA"]} ")
+        logger.info(f"Comienzo de los graficos de curva de ganancia con una semilla : {estadisticas_ganancia_dict['SEMILLA']} ")
         umbral_optimo= estadisticas_ganancia_dict["umbral_optimo"]
         indx_ganancia_max_acumulada = estadisticas_ganancia_dict["cliente"]
         ganancia_max_acumulada= estadisticas_ganancia_dict["ganancia_max"]
