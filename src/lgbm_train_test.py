@@ -70,6 +70,7 @@ def grafico_feature_importance(model_lgbm:lgb.Booster,X_train:pd.DataFrame,name:
     try:
         lgb.plot_importance(model_lgbm, figsize=(10, 20))
         plt.savefig(output_path+f"{name}_grafico.png", bbox_inches='tight')
+        plt.close()
     except Exception as e:
         logger.error(f"Error al intentar graficar los feat importances: {e}")
     logger.info("Fin del grafico de feature importance")
@@ -158,21 +159,18 @@ def calc_estadisticas_ganancia(y_test_class:pd.Series ,y_pred_lgbm:pd.Series ,na
 
 def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_acumulada:pd.Series|dict[pd.Series], estadisticas_ganancia_dict:dict,name:str, output_path:str):
     name=f"{name}_curvas_ganancia"
-    semillas =estadisticas_ganancia_dict.keys()
     piso=4000
     techo=20000
-    if isinstance(semillas,int) :
-        logger.info(f"Comienzo de los graficos de curva de ganancia con una semilla = {semillas}")
-
+    if (isinstance(y_pred_sorted,pd.Series)):
+        logger.info(f"Comienzo de los graficos de curva de ganancia con una semilla : {estadisticas_ganancia_dict["SEMILLA"]} ")
         umbral_optimo= estadisticas_ganancia_dict["umbral_optimo"]
         indx_ganancia_max_acumulada = estadisticas_ganancia_dict["cliente"]
         ganancia_max_acumulada= estadisticas_ganancia_dict["ganancia_max"]
         ganancia_media_meseta = estadisticas_ganancia_dict["ganancia_media_meseta"]
 
-
         try:
             plt.figure(figsize=(10, 6))
-            plt.plot(y_pred_sorted[piso:techo] ,ganancia_acumulada[piso:techo] ,label=f"SEMILLA {semillas} ganancia max a {max_ganancia_acumulada} / punto de corte a {umbral_optimo}")
+            plt.plot(y_pred_sorted[piso:techo] ,ganancia_acumulada[piso:techo] ,label=f"SEMILLA {semillas} ganancia media meseta a {ganancia_media_meseta} /ganancia max a {ganancia_max_acumulada} / punto de corte a {umbral_optimo}")
             plt.xlabel('Predicción de probabilidad')
             plt.ylabel('Ganancia')
             plt.title("Curva Ganancia respecto a probabilidad")
@@ -203,9 +201,11 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
 
     else:
         logger.info(f"Comienzo de los graficos de curva de ganancia con varias semillas = {semillas}")
+        semillas =estadisticas_ganancia_dict.keys()
         plt.figure(figsize=(10, 6))
-        estadisticas_sorted=sorted(estadisticas_ganancia_dict,key= lambda x : x["ganancia_media_meseta"],reverse=True)
-        ganancia_top_n = estadisticas_sorted[list(estadisticas_sorted.keys())[5]]["ganancia_media_meseta"]
+        valores_ordenados = sorted([v["ganancia_media_meseta"] for v in estadisticas_ganancia_dict.values()],reverse=True)
+        ganancia_top_n = valores_ordenados[min(5, len(valores_ordenados) - 1)]
+
         for i,s in enumerate(semillas) :
             umbral_optimo=estadisticas_ganancia_dict[s]["umbral_optimo"]
             indx_max_ganancia_acumulada = estadisticas_ganancia_dict[s]["cliente"]
@@ -278,17 +278,25 @@ def grafico_curvas_ganancia(y_pred_sorted:pd.Series|dict[pd.Series] , ganancia_a
         except Exception as e:
             logger.error(f"Error al intentar guardar el grafico de curva de ganancia con n_cliente por {e}")
     return
-def grafico_hist_ganancia(estadisticas_ganancia_dict:dict , name:str, output_path:str):
-    name=f"{name}_hist_ganancia"
-    ganancias = [s["ganancia_media_meseta"] for s in estadisticas_ganancia_dict]
-    plt.hist(ganancias)
-    plt.title(f"Histograma por semilla de : {name}")
-    plt.grid(True)
+def grafico_hist_ganancia(estadisticas_ganancia_dict: dict, name: str, output_path: str):
+    name = f"{name}_hist_ganancia"
+    ganancias = [v["ganancia_media_meseta"] for k,v in estadisticas_ganancia_dict.items() if k !="ensamble_semillas"]
+    logger.info(f"ganancias : {ganancias}")
+    # Crear figura
+    plt.figure(figsize=(8, 5))
+    sns.histplot(ganancias, bins=20, kde=True, color="skyblue", edgecolor="black")
+    
+    plt.title(f"Histograma por semilla de: {name}", fontsize=12)
+    plt.xlabel("Ganancia media meseta")
+    plt.ylabel("Frecuencia")
+    plt.grid(True, alpha=0.3)
+    
     logger.info(f"Intento de guardado en {output_path}")
     try:
-        plt.savefig(output_path+f"{name}.png", bbox_inches='tight')
+        plt.tight_layout()
+        plt.savefig(output_path + f"{name}.png", bbox_inches='tight')
         plt.close()
-        logger.info(f"Guardado con exito en {output_path+f"{name}.png"}")
+        logger.info(f"Guardado con éxito en {output_path+f'{name}.png'}")
     except Exception as e:
         logger.error(f"Error al intentar guardar por {e}")
 

@@ -26,6 +26,7 @@ try:
 
         COMPETENCIA =cfg["COMPETENCIA"]
         PROCESO_PPAL = cfg["PROCESO_PPAL"]
+        SUBSAMPLEO = cfg["SUBSAMPLEO"]
 
 
         if COMPETENCIA == 1:
@@ -35,6 +36,7 @@ try:
 
         # =================== Optimización LGBM ===================
         N_BAYESIANA         = bayes.get("N_BAYESIANA")
+        N_SEMILLAS_BAY      = bayes.get("N_SEMILLAS_BAY")
         UMBRAL              = bayes.get("UMBRAL", 0.025)
         GANANCIA            = bayes.get("GANANCIA", 780000)
         ESTIMULO            = bayes.get("ESTIMULO", 20000)
@@ -48,6 +50,7 @@ try:
         else:
             N_EXPERIMENTO = exp["N_EXP"]
             TOP_MODELS = exp["TOP_MODELS"]
+
         
 
         # ================= Configuración General =================

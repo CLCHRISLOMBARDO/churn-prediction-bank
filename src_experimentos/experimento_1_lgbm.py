@@ -27,7 +27,8 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
     
 
     # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import
-    if proceso_ppal =="experimento" :
+    if (proceso_ppal =="experimento") or (proceso_ppal =="test_exp") :
+        logger.info(f"LANZAMIENTO PARA EXP  CON {n_semillas} SEMILLAS")
         output_path_models = path_output_exp_model
         output_path_feat_imp = path_output_exp_feat_imp
         output_path_graf_ganancia_hist_semillas=path_output_exp_graf_gan_hist_semillas
@@ -37,7 +38,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
         output_path_umbrales=path_output_exp_umbral
         logger.info(f"LANZAMIENTO PARA EXPERIMENTO {numero} CON {n_semillas} SEMILLAS")
         
-    elif proceso_ppal == "prediccion_final":
+    elif (proceso_ppal == "prediccion_final") or (proceso_ppal =="test_prediccion_final"):
         logger.info(f"LANZAMIENTO PARA PREDICCION FINAL CON {n_semillas} SEMILLAS")
         output_path_models = path_output_finales_model
         output_path_feat_imp =path_output_finales_feat_imp
@@ -80,7 +81,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
     if proceso_ppal =="prediccion_final":
         MES_TRAIN.append(MES_TEST)
     df = conversion_binario(df)
-    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,0.4)
+    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
 
     # 4. Carga de mejores Hiperparametros
 
@@ -91,13 +92,16 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero_bayesiana_lgbm =N_BAYESIANA
     modelo_etiqueta="lgbm"
-    cantidad_semillas =len(semillas)
+    cantidad_semillas =N_SEMILLAS_BAY
     cantidad_trials= N_TRIALS
     cantidad_boosts = N_BOOSTS
 
     #"""-----------------------------------------------------------------------------------------------"""
-
-    name_best_params_file_lgbm=f"best_params_bayesiana_{numero_bayesiana_lgbm}_{modelo_etiqueta}_{cantidad_semillas}_SEMILLAS_{cantidad_trials}_TRIALS_{cantidad_boosts}_BOOSTS.json"
+    if( (proceso_ppal =="test_exp") or (proceso_ppal =="test_prediccion_final")):
+        proceso_bayesiana = "test_baye"
+    elif((proceso_ppal == "experimento" )or (proceso_ppal =="prediccion_final")):
+        proceso_bayesiana = "bayesiana"
+    name_best_params_file_lgbm=f"best_params_{proceso_bayesiana}_{numero_bayesiana_lgbm}_{modelo_etiqueta}_{cantidad_semillas}_SEMILLAS_{cantidad_trials}_TRIALS_{cantidad_boosts}_BOOSTS.json"
 
     try:
         with open(path_output_bayesian_bestparams+name_best_params_file_lgbm, "r") as f:
@@ -113,11 +117,11 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
     top_models_bayesiana = best_params_dict_sorted[0:TOP_MODELS]
     top_bp = {b["trial_number"]:{"params":b["params"],"best_iter_trial":b["best_iter_trial"]} for b in top_models_bayesiana}
     logger.info(f"Los mejores Trials de la Bayesiana {N_BAYESIANA} son : {top_bp.keys()}")
-    logger.info(f"Los mejores parametros del mejor modelo de la Bayesiana {N_BAYESIANA} son : {top_bp[list(top_bp.keys())[0]]["params"]}")
-    logger.info(f"El mejor num de iteracion del mejor modelo de la Bayesiana {N_BAYESIANA} es : {top_bp[list(top_bp.keys())[0]]["best_iter_trial"]}")   
+    logger.info(f"Los mejores parametros del mejor modelo de la Bayesiana {N_BAYESIANA} son : {top_bp[list(top_bp.keys())[0]]['params']}")
+    logger.info(f"El mejor num de iteracion del mejor modelo de la Bayesiana {N_BAYESIANA} es : {top_bp[list(top_bp.keys())[0]]['best_iter_trial']}")   
 ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04 
 
-    if proceso_ppal =="experimento":
+    if (proceso_ppal =="experimento" or proceso_ppal =="test_exp") :
         logger.info(f"Entro en el proceso experimento !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         y_predicciones_top_models=[]
         for orden_trial , trial in enumerate(top_bp):
@@ -145,12 +149,12 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
                 y_predicciones_lista.append(y_pred_lgbm)
 
                 # Umbral optimo
-                if proceso_ppal == "experimento":
+                if (proceso_ppal =="experimento" or proceso_ppal =="test_exp"):
                     guardar_umbral = False
                 else:
                     guardar_umbral=True
 
-                estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
+                estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_lgbm ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
                 
                 estadisticas_ganancia_dict[semilla] = estadisticas_ganancia 
                 y_pred_sorted_dict[semilla] = y_pred_sorted
@@ -182,9 +186,19 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
             logger.info("Vamos a graficar la curva de ganancia con y_pred_ensamble")
             grafico_curvas_ganancia(y_pred_sorted_dict ,ganancia_acumulada_dict,estadisticas_ganancia_dict,name_trial,output_path_graf_curva_ganancia)
             grafico_hist_ganancia(estadisticas_ganancia_dict , name_trial,output_path_graf_ganancia_hist_total)
-            
+        logger.info("Comienzo ensamblado de los top models")
+        name_final = name + "_ENSAMBLE_FINAL"
+        y_pred_ensamble_modelos_matrix = np.vstack(y_predicciones_top_models)
+        logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_ensamble_modelos_matrix.shape}")
+        y_pred_ensamble_final = y_pred_ensamble_modelos_matrix.mean(axis=0)
+        guardar_umbral = True
+        semilla = "ENSAMBLE_FINAL_TOP_MODELS"
+        estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble_final ,name_final , output_path_umbrales , semilla, guardar_umbral )
+        grafico_curvas_ganancia(y_pred_sorted ,ganancia_acumulada,estadisticas_ganancia,name_final,output_path_graf_curva_ganancia)
+                
+
     
-    elif proceso_ppal =="prediccion_final":
+    elif (proceso_ppal =="prediccion_final" or  proceso_ppal =="test_prediccion_final"):
         y_predicciones_lista=[]
         for i,semilla in enumerate(semillas):
             logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones *****************************************")

@@ -17,8 +17,8 @@ from src.creacion_target import lanzar_creacion_clase_ternaria
 from src_bayesianas.experimento_bayesiana_lgbm_2 import lanzar_bayesiana_lgbm
 from src_bayesianas.experimento_bayesiana_xgb_2 import lanzar_bayesiana_xgb
 
-from src_experimentos.experimento_10 import lanzar_experimento
 from src_experimentos.experimento_eda import lanzar_eda
+from src_experimentos.experimento_1_lgbm import lanzar_experimento
 
 
 
@@ -36,6 +36,7 @@ proceso_ppal = PROCESO_PPAL
 n_experimento = N_EXPERIMENTO
 study_name = f"_COMP_{competencia}_{proceso_ppal}_{n_experimento}"
 n_semillas = N_SEMILLAS
+n_semillas_bay = N_SEMILLAS_BAY
 # ---------------------------------------------------------------------------------------------------------------------------
 nombre_log=fecha+study_name
 # CONFIGURACION LOG LOCAL
@@ -48,6 +49,7 @@ def main():
     
     logger.info(f"Inicio de ejecucion del flujo : {nombre_log}")
     semillas = create_semilla(n_semillas=n_semillas)
+    semillas_bay = create_semilla(n_semillas=n_semillas_bay)
     logger.info(f"se crearon {len(semillas)} semillas")
     # CONFIGURACION LOG GLOBAL
     creacion_logg_global(fecha=fecha , competencia=competencia ,proceso_ppal=proceso_ppal,n_experimento=n_experimento,n_semillas=n_semillas)
@@ -57,12 +59,14 @@ def main():
     elif proceso_ppal=="analisis_exploratorio":
         lanzar_eda(competencia=competencia)
     elif proceso_ppal =="bayesiana":
-        lanzar_bayesiana_lgbm(fecha,semillas,n_experimento,proceso_ppal)
+        lanzar_bayesiana_lgbm(fecha,semillas_bay,n_experimento,proceso_ppal)
         # lanzar_bayesiana_xgb(fecha,semillas,proceso_ppal)
     elif proceso_ppal =="test_baye":
-        lanzar_bayesiana_lgbm(test,semillas,n_experimento,proceso_ppal)
+        lanzar_bayesiana_lgbm(test,semillas_bay,n_experimento,proceso_ppal)
         # lanzar_bayesiana_xgb(test,semillas,proceso_ppal)
     elif proceso_ppal =="test_exp":
+        lanzar_experimento(test,semillas , n_experimento , proceso_ppal)
+    elif proceso_ppal =="test_prediccion_final":
         lanzar_experimento(test,semillas , n_experimento , proceso_ppal)
     elif (proceso_ppal =="experimento") | (proceso_ppal=="prediccion_final"):
         lanzar_experimento(fecha,semillas , n_experimento , proceso_ppal)
