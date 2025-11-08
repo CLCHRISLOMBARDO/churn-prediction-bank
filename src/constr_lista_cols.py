@@ -6,11 +6,7 @@ import duckdb
 from src.config import  PATH_DATA_BASE_DB
 logger=logging.getLogger(__name__)
 
-def contruccion_cols()->list[list]:
-    sql="SELECT * FROM df LIMIT 1"
-    conn = duckdb.connect(PATH_DATA_BASE_DB)
-    df=conn.execute(sql).df()
-    conn.close()
+def contruccion_cols(df:pd.DataFrame)->list[list]:
     logger.info("Comienzo de la extraccion de la seleccion de las columnas")
     # Columnas categoricas y numericas
     cat_cols =[]

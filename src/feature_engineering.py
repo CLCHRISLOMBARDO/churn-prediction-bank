@@ -9,7 +9,7 @@ from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB
 logger = logging.getLogger(__name__)
 
 
-def feature_engineering_lag(columnas:list[str],cant_lag:int=1 ) -> pd.DataFrame:
+def feature_engineering_lag(df:pd.DataFrame ,columnas:list[str],cant_lag:int=1 ) -> pd.DataFrame:
     """
     Genera variables de lag para los atributos especificados utilizando SQL.
   
@@ -28,14 +28,16 @@ def feature_engineering_lag(columnas:list[str],cant_lag:int=1 ) -> pd.DataFrame:
         DataFrame con las variables de lag agregadas
     """
     logger.info(f"Comienzo Feature de lag")
-    sql="SELECT * FROM df LIMIT 5"
-    conn = duckdb.connect(PATH_DATA_BASE_DB)
-    df=conn.execute(sql).pl()
-    conn.close()
+
 
     # Armado de la consulta SQL
-    sql = "CREATE or REPLACE table df as "
 
+
+    if columnas[0]+"_lag_1" in df.columns:
+        logger.info("Ya se hizo lags")
+        return
+    logger.info("Todavia no se hizo lags")
+    sql = "CREATE or REPLACE table df as "
     sql +="(SELECT *"
     for attr in columnas:
         if attr in df.columns:
@@ -70,22 +72,26 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
     pd.DataFrame
         DataFrame con las variables de lag agregadas
     """
+    if "delta_1_"+columnas[0] in df.columns:
+        logger.info("Ya se hizo deltas")
+        return
+    logger.info("Todavia no se hizo deltas")
     logger.info(f"Comienzo feature de delta.  df shape: {df.shape}")
-    sql="SELECT *"
+    sql = "CREATE or REPLACE table df as "
+    sql+="(SELECT *"
     for attr in columnas:
         if attr in df.columns:
             for i in range(1,cant_lag+1):
                 sql+= f", {attr}-{attr}_lag_{i} as delta_{i}_{attr}"
         else:
             print(f"No se encontro el atributo {attr} en df")
-    sql+=" FROM df"
+    sql+=" FROM df)"
 
-    con = duckdb.connect(database=":memory:")
-    con.register("df", df)
-    df=con.execute(sql).df()
-    con.close()
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
     logger.info(f"ejecucion delta finalizada.  df shape: {df.shape}")
-    return df
+    return 
 
 def feature_engineering_max_min(df:pd.DataFrame|np.ndarray , columnas:list[str]) -> pd.DataFrame|np.ndarray:
     """

@@ -7,6 +7,7 @@ import json
 
 from src.config import *
 from src.loader import cargar_datos
+from src.configuracion_inicial import creacion_df_small
 from src.preprocesamiento import conversion_binario,split_train_test_apred
 from src.constr_lista_cols import contruccion_cols
 from src.feature_engineering import feature_engineering_lag,feature_engineering_delta,feature_engineering_max_min,feature_engineering_ratio,feature_engineering_linreg,feature_engineering_normalizacion,feature_engineering_drop_cols,feature_engineering_rank
@@ -47,23 +48,23 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
     ## 0. load datos
     # df=cargar_datos(FILE_INPUT_DATA)
     # print(df.head())
-
-    
+    df_chiquito=creacion_df_small()
 
                             ## A - AGREGADO DE FEATURES
 
     # 1. Contruccion de las columnas
     # cols_a_dropear=["mprestamos_personales","cprestamos_personales"]
     # df = feature_engineering_drop_cols(df , cols_a_dropear)
-    columnas=contruccion_cols()
+
+    columnas=contruccion_cols(df_chiquito)
     cols_lag_delta_max_min_regl=columnas[0]
     cols_ratios=columnas[1]
     
     # 2. Feature Engineering
     # df = feature_engineering_rank(df,["mcuentas_saldo"])
     # df=feature_engineering_drop_cols(df,["mcuentas_saldo"])    
-    feature_engineering_lag(cols_lag_delta_max_min_regl,3)
-    # df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
+    feature_engineering_lag(df_chiquito,cols_lag_delta_max_min_regl,3)
+    feature_engineering_delta(df_chiquito,cols_lag_delta_max_min_regl,3)
     # df=feature_engineering_ratio(df,cols_ratios)
     # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
 
