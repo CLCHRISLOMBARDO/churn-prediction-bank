@@ -45,27 +45,27 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
    
 
     ## 0. load datos
-    df=cargar_datos(FILE_INPUT_DATA)
-    print(df.head())
+    # df=cargar_datos(FILE_INPUT_DATA)
+    # print(df.head())
 
     
 
                             ## A - AGREGADO DE FEATURES
 
     # 1. Contruccion de las columnas
-    cols_a_dropear=["mprestamos_personales","cprestamos_personales"]
-    df = feature_engineering_drop_cols(df , cols_a_dropear)
-    columnas=contruccion_cols(df)
+    # cols_a_dropear=["mprestamos_personales","cprestamos_personales"]
+    # df = feature_engineering_drop_cols(df , cols_a_dropear)
+    columnas=contruccion_cols()
     cols_lag_delta_max_min_regl=columnas[0]
     cols_ratios=columnas[1]
     
     # 2. Feature Engineering
     # df = feature_engineering_rank(df,["mcuentas_saldo"])
     # df=feature_engineering_drop_cols(df,["mcuentas_saldo"])    
-    df=feature_engineering_lag(df,cols_lag_delta_max_min_regl,2)
-    df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
-    df=feature_engineering_ratio(df,cols_ratios)
-    df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
+    feature_engineering_lag(cols_lag_delta_max_min_regl,3)
+    # df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
+    # df=feature_engineering_ratio(df,cols_ratios)
+    # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
 
                                  ## B - ELIMINACION DE FEATURES
     # 1. Contruccion de las columnas
@@ -75,7 +75,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
 
     # ## 2. Feat engin
     # df=feature_engineering_drop_cols(df,cols_dropear)
-
+    return
 
     #3. spliteo train - test - apred - Subsampleo
     if proceso_ppal =="prediccion_final":

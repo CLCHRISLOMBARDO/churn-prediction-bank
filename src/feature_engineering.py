@@ -9,7 +9,7 @@ from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB
 logger = logging.getLogger(__name__)
 
 
-def feature_engineering_lag(df:pd.DataFrame , columnas:list[str],cant_lag:int=1 ) -> pd.DataFrame:
+def feature_engineering_lag(columnas:list[str],cant_lag:int=1 ) -> pd.DataFrame:
     """
     Genera variables de lag para los atributos especificados utilizando SQL.
   
@@ -27,24 +27,30 @@ def feature_engineering_lag(df:pd.DataFrame , columnas:list[str],cant_lag:int=1 
     pd.DataFrame
         DataFrame con las variables de lag agregadas
     """
-    logger.info(f"Comienzo Feature de lag. df shape: {df.shape}")
+    logger.info(f"Comienzo Feature de lag")
+    sql="SELECT * FROM df LIMIT 5"
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    df=conn.execute(sql).pl()
+    conn.close()
 
     # Armado de la consulta SQL
-    sql="SELECT *"
+    sql = "CREATE or REPLACE table df as "
+
+    sql +="(SELECT *"
     for attr in columnas:
         if attr in df.columns:
             for i in range(1,cant_lag+1):
                 sql+= f",lag({attr},{i}) OVER (PARTITION BY numero_de_cliente ORDER BY foto_mes) AS {attr}_lag_{i}"
         else:
             print(f"No se encontro el atributo {attr} en df")
-    sql+=" FROM df"
+    sql+=" FROM df)"
 
     # Ejecucion de la consulta SQL
     conn = duckdb.connect(PATH_DATA_BASE_DB)
     conn.execute(sql)
     conn.close()
-    logger.info(f"ejecucion lag finalizada.  df shape: {df.shape}")
-    return df
+    logger.info(f"ejecucion lag finalizada")
+    return
 
 def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=1 ) -> pd.DataFrame:
     """

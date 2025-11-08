@@ -3,7 +3,7 @@ COMPETENCIA: 2
 # proceso_ppal : bayesiana  | test_baye | experimento |  test_exp
 #| prediccion_final | test_prediccion_final |analisis_exploratorio 
 #| creacion_target_clase_ternaria | feat_eng
-PROCESO_PPAL: "creacion_target_clase_ternaria"
+PROCESO_PPAL: "experimento"
 SUBSAMPLEO : 0.4
 configuracion_experimentos:
   # numero del experimento o EDA
@@ -36,7 +36,7 @@ configuracion_semilla:
 
 configuracion_gcp:
  # Completar con la info de la GCP
-  IN_GCP: False
+  IN_GCP: True
 
 configuracion_paths:
   place_path:
