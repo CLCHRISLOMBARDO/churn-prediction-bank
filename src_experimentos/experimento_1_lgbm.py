@@ -218,8 +218,12 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
                 logger.info(f"Comienzo de la predicciones de apred  : {X_apred['foto_mes'].unique()} para cada modelo")
                 y_pred_lgbm=prediccion_test_lgbm(X_apred ,model_lgbm)
                 y_predicciones_lista.append(y_pred_lgbm)
-
-            estadisticas_ganancia_file = name_trial+".json"
+            
+            if proceso_ppal =="prediccion_final" :
+                proceso_experimento = "experimento"
+            elif proceso_ppal =="test_prediccion_final":
+                proceso_experimento = "test_exp"
+            estadisticas_ganancia_file =f"EXPERIMENTO_{numero}_{proceso_experimento}_{len(semillas)}_semillas"+ f"_TRIAL_{trial}_TOP_{orden_trial}.json"
             file = path_output_exp_umbral+estadisticas_ganancia_file 
             logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
             try :
@@ -240,10 +244,15 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
             logger.info("Fin del ensamblado del semillero ")
             # Predicciones en test 04 para cada modelo
             y_apred_trial_i = preparacion_ypred_kaggle(y_apred, y_pred_ensamble_trial_i ,cliente_optimo_trial , name_trial ,path_output_prediccion_final)
-            y_apred_top_models.append(y_apred_trial_i["prediction"].values)
-        name_final = name + "_ENSAMBLE_FINAL"
-        estadisticas_ganancia_file = name_final+"_umbral_optimo.json"
+            y_apred_top_models.append(y_pred_ensamble_trial_i)
+        name_final = name + "_ENSAMBLE_FINAL"        
+        if proceso_ppal =="prediccion_final" :
+            proceso_experimento = "experimento"
+        elif proceso_ppal =="test_prediccion_final":
+            proceso_experimento = "test_exp"
+        estadisticas_ganancia_file =f"EXPERIMENTO_{numero}_{proceso_experimento}_{len(semillas)}_semillas"+ f"_ENSAMBLE_FINAL_umbral_optimo.json"
         file = path_output_exp_umbral+estadisticas_ganancia_file 
+
         logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
         try :
             with open(file, "r") as f:

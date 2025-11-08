@@ -53,3 +53,7 @@
 {"fecha": "2025-11-07_19-16-21", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": "1", "n_semillas": 6, "in_gcp": false}
 {"fecha": "2025-11-07_19-27-17", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": "1", "n_semillas": 6, "in_gcp": false}
 {"fecha": "2025-11-07_19-38-35", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": "1", "n_semillas": 6, "in_gcp": false}
+{"fecha": "2025-11-08_10-38-03", "competencia": 1, "proceso_ppal": "test_prediccion_final", "n_experimento": "1", "n_semillas": 6, "in_gcp": false}
+{"fecha": "2025-11-08_11-04-08", "competencia": 1, "proceso_ppal": "test_prediccion_final", "n_experimento": "1", "n_semillas": 6, "in_gcp": false}
+{"fecha": "2025-11-08_12-05-35", "competencia": 1, "proceso_ppal": "test_prediccion_final", "n_experimento": "1", "n_semillas": 6, "in_gcp": false}
+{"fecha": "2025-11-08_12-23-21", "competencia": 1, "proceso_ppal": "test_prediccion_final", "n_experimento": "1", "n_semillas": 6, "in_gcp": false}
