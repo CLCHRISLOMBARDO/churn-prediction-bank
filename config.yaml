@@ -1,9 +1,10 @@
 COMPETENCIA: 2
 
-# proceso_ppal : bayesiana  | test_baye | experimento |  test_exp
+# proceso_ppal : 
+# bayesiana  | test_baye | experimento |  test_exp
 #| prediccion_final | test_prediccion_final |analisis_exploratorio 
 #| creacion_target_clase_ternaria | feat_eng
-PROCESO_PPAL: "experimento"
+PROCESO_PPAL: "creacion_target_clase_ternaria"
 SUBSAMPLEO : 0.4
 configuracion_experimentos:
   # numero del experimento o EDA
