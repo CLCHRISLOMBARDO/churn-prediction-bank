@@ -4,7 +4,7 @@ COMPETENCIA: 2
 # bayesiana  | test_baye | experimento |  test_exp
 #| prediccion_final | test_prediccion_final |analisis_exploratorio 
 #| creacion_target_clase_ternaria | feat_eng
-PROCESO_PPAL: "creacion_target_clase_ternaria"
+PROCESO_PPAL: "experimento"
 SUBSAMPLEO : 0.4
 configuracion_experimentos:
   # numero del experimento o EDA
