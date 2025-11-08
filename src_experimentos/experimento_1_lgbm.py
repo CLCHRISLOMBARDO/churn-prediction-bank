@@ -199,16 +199,24 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
 
     
     elif (proceso_ppal =="prediccion_final" or  proceso_ppal =="test_prediccion_final"):
-        y_predicciones_lista=[]
-        for i,semilla in enumerate(semillas):
-            logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones *****************************************")
-            # Carga del umbral optimo de todas las tiradas : 
+        y_predicciones_top_models=[]
+        for orden_trial , trial in enumerate(top_bp):
+            name_trial = name + f"_TRIAL_{trial}_TOP_{orden_trial}"
+            best_params_i = top_bp[trial]["params"]
+            best_iter_i = top_bp[trial]["best_iter_trial"]
+            logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con hiperparams {best_params_i}")
+            logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con best iter {best_iter_i}")
+            y_predicciones_lista=[]
+            for i,semilla in enumerate(semillas):
+                logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
+                name_semilla=f"{name_trial}_SEMILLA_{semilla}_final_train"
+                model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
+                # Grafico features importances
+                grafico_feature_importance(model_lgbm,X_train,name_semilla,output_path_feat_imp)
 
-    #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
-            # fecha_name_umbral='2025-10-10_13-53-26'
-            # fecha_name_umbral='TEST_TEST_TEST_TEST'
-            fecha_name_umbral='2025-11-02_14-57-33'
-            numero_umbral='10'
+                # Predicciones en test para cada modelo
+                y_pred_lgbm=prediccion_test_lgbm(X_apred ,model_lgbm)
+                y_predicciones_lista.append(y_pred_lgbm)
     #"""----------------------------------------------------------------------------------------------"""
             umbrales_file=f"{fecha_name_umbral}_EXPERIMENTO_{numero_umbral}.json"
             file = path_output_exp_umbral+umbrales_file 
@@ -237,17 +245,12 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
             name_final_train_lgbm=f"{name}_SEMILLA_{semilla}_final_train_lgbm"
             model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_lgbm,best_params_lgbm ,name_final_train_lgbm,output_path_models,semilla)
             
-            name_final_train_xgb=f"{name}_SEMILLA_{semilla}_final_train_xgb"
-            model_xgb= entrenamiento_xgb(X_train, y_train_binaria,w_train ,best_iter_xgb,best_params_xgb ,name_final_train_xgb,output_path_models,semilla)
-        
             # Grafico features importances
             grafico_feature_importance(model_lgbm,X_train,name_final_train_lgbm,output_path_feat_imp)
-            grafico_feature_importance_xgb(model_xgb,X_train,name_final_train_xgb,output_path_feat_imp)
 
             # Predicciones en test 04 para cada modelo
             logger.info(f"Comienzo de la predicciones de apred  : {X_apred['foto_mes'].unique()} para cada modelo")
             y_pred_lgbm=prediccion_test_lgbm(X_apred ,model_lgbm)
-            y_pred_xgb=prediccion_test_xgb(X_apred ,model_xgb)
             logger.info(f"Fin de la prediccion de apred : {X_apred['foto_mes'].unique()} para cada modelo")
 
             logger.info(f"Comienzo del ensamble de ambos modelos")
