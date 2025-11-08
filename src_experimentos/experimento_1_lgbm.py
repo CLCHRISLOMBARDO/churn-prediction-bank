@@ -113,7 +113,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
         raise
     
 
-    best_params_dict_sorted = sorted(best_params_dict , key=lambda x : x["ganancia_media_meseta"])
+    best_params_dict_sorted = sorted(best_params_dict , key=lambda x : x["ganancia_media_meseta"] ,reverse=True)
     top_models_bayesiana = best_params_dict_sorted[0:TOP_MODELS]
     top_bp = {b["trial_number"]:{"params":b["params"],"best_iter_trial":b["best_iter_trial"]} for b in top_models_bayesiana}
     logger.info(f"Los mejores Trials de la Bayesiana {N_BAYESIANA} son : {top_bp.keys()}")
@@ -199,7 +199,7 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
 
     
     elif (proceso_ppal =="prediccion_final" or  proceso_ppal =="test_prediccion_final"):
-        y_predicciones_top_models=[]
+        y_apred_top_models=[]
         for orden_trial , trial in enumerate(top_bp):
             name_trial = name + f"_TRIAL_{trial}_TOP_{orden_trial}"
             best_params_i = top_bp[trial]["params"]
@@ -215,55 +215,52 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
                 grafico_feature_importance(model_lgbm,X_train,name_semilla,output_path_feat_imp)
 
                 # Predicciones en test para cada modelo
+                logger.info(f"Comienzo de la predicciones de apred  : {X_apred['foto_mes'].unique()} para cada modelo")
                 y_pred_lgbm=prediccion_test_lgbm(X_apred ,model_lgbm)
                 y_predicciones_lista.append(y_pred_lgbm)
-    #"""----------------------------------------------------------------------------------------------"""
-            umbrales_file=f"{fecha_name_umbral}_EXPERIMENTO_{numero_umbral}.json"
-            file = path_output_exp_umbral+umbrales_file 
-            logger.info(f"Comienzo de la carga de los datos de umbrales {umbrales_file}")            
+
+            estadisticas_ganancia_file = name_trial+".json"
+            file = path_output_exp_umbral+estadisticas_ganancia_file 
+            logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
             try :
                 with open(file, "r") as f:
-                    data_ganancias = json.load(f)
-                logger.info(f"Carga de los datos umbrales {umbrales_file} exitosa")
+                    estadisticas_ganancia = json.load(f)
+                logger.info(f"Carga de los datos umbrales {estadisticas_ganancia_file} exitosa")
 
             except Exception as e:
-                logger.error(f"Error al tratar de cargar umbrales {umbrales_file} por {e}")
+                logger.error(f"Error al tratar de cargar umbrales {estadisticas_ganancia_file} por {e}")
                 raise
             logger.info("Calculo del cliente optimo mean")
-            # clientes_optimos = []
-            # for semilla_gan in data_ganancias.keys():
-            #     clientes_optimos.append(data_ganancias[semilla_gan]["cliente"])
-            # cliente_optimo_mean = np.mean(clientes_optimos)
-
-            cliente_optimo_mean = data_ganancias["ensamble_semillas"]["cliente"]
-
-
-            logger.info(f"Cliente optimo mean = {cliente_optimo_mean}")
-            #entrenamiento de los modelos
-            logger.info(f"Comienzo de los entrenamientos del modelo  : {X_apred['foto_mes'].unique()} para cada modelo")
-
-            name_final_train_lgbm=f"{name}_SEMILLA_{semilla}_final_train_lgbm"
-            model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_lgbm,best_params_lgbm ,name_final_train_lgbm,output_path_models,semilla)
-            
-            # Grafico features importances
-            grafico_feature_importance(model_lgbm,X_train,name_final_train_lgbm,output_path_feat_imp)
-
+            cliente_optimo_trial = estadisticas_ganancia["ensamble_semillas"]["cliente"]
+            logger.info(f"Cliente optimo del semillero del trial {trial} = {cliente_optimo_trial}")
+            logger.info(f"Comienzo del ensamble del semillero")
+            y_pred_matrix = np.vstack(y_predicciones_lista)
+            logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_matrix.shape}")
+            y_pred_ensamble_trial_i = y_pred_matrix.mean(axis=0)
+            logger.info("Fin del ensamblado del semillero ")
             # Predicciones en test 04 para cada modelo
-            logger.info(f"Comienzo de la predicciones de apred  : {X_apred['foto_mes'].unique()} para cada modelo")
-            y_pred_lgbm=prediccion_test_lgbm(X_apred ,model_lgbm)
-            logger.info(f"Fin de la prediccion de apred : {X_apred['foto_mes'].unique()} para cada modelo")
+            y_apred_trial_i = preparacion_ypred_kaggle(y_apred, y_pred_ensamble_trial_i ,cliente_optimo_trial , name_trial ,path_output_prediccion_final)
+            y_apred_top_models.append(y_apred_trial_i["prediction"].values)
+        name_final = name + "_ENSAMBLE_FINAL"
+        estadisticas_ganancia_file = name_final+"_umbral_optimo.json"
+        file = path_output_exp_umbral+estadisticas_ganancia_file 
+        logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
+        try :
+            with open(file, "r") as f:
+                estadisticas_ganancia = json.load(f)
+            logger.info(f"Carga de los datos umbrales {estadisticas_ganancia_file} exitosa")
 
-            logger.info(f"Comienzo del ensamble de ambos modelos")
-            y_pred_ensamble_i = (y_pred_lgbm+y_pred_xgb)/2
-            y_predicciones_lista.append(y_pred_ensamble_i)
-        logger.info("Comienzo del ensamblado de todas las semillas")
-        y_pred_df = np.vstack(y_predicciones_lista)
-        logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_df.shape}")
-        y_pred_ensamble = y_pred_df.mean(axis=0)
-        logger.info("Fin del ensamblado ")
-        # Predicciones en test 04 para cada modelo
-        y_apred=preparacion_ypred_kaggle(y_apred, y_pred_ensamble ,cliente_optimo_mean , name ,path_output_prediccion_final)
-
+        except Exception as e:
+            logger.error(f"Error al tratar de cargar umbrales {estadisticas_ganancia_file} por {e}")
+            raise
+        logger.info("Calculo del cliente optimo mean")
+        cliente_optimo = estadisticas_ganancia["cliente"]
+        logger.info(f"Cliente optimo del ensamble de los top models = {cliente_optimo}")
+        logger.info(f"Comienzo del ensamble del semillero")
+        y_pred_ensamble_modelos_matrix = np.vstack(y_apred_top_models)
+        logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_ensamble_modelos_matrix.shape}")
+        y_pred_ensamble_final = y_pred_ensamble_modelos_matrix.mean(axis=0)
+        y_apred_ensamble_top_models = preparacion_ypred_kaggle(y_apred, y_pred_ensamble_final ,cliente_optimo , name_final ,path_output_prediccion_final)
 
 logger.info(f">>> Ejecucion finalizada. Revisar logs para mas detalles.")
 
