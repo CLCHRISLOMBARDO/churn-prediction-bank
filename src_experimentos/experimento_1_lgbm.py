@@ -136,19 +136,19 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
             estadisticas_ganancia_dict={}
             for i,semilla in enumerate(semillas):
                 logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
-                # Entrenamiento de los modelos
+                # Entrenamiento de los modelos --------
                 name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train_lgbm"
                 model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
                 
-                # Grafico features importances
+                # Grafico features importances -------
                 grafico_feature_importance(model_lgbm,X_train,name_semilla,output_path_feat_imp)
 
-                # Predicciones en test para cada modelo
+                # Predicciones en test para cada modelo -------------
                 y_pred_lgbm=prediccion_test_lgbm(X_test ,model_lgbm)
 
                 y_predicciones_lista.append(y_pred_lgbm)
 
-                # Umbral optimo
+                # Estadistica de ganancias -----------
                 if (proceso_ppal =="experimento" or proceso_ppal =="test_exp"):
                     guardar_umbral = False
                 else:
