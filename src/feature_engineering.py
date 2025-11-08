@@ -85,10 +85,15 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
     for attr in columnas_sin_lags:
         if attr in df.columns:
             for i in range(1,cant_lag+1):
-                sql+= f", {attr}-{attr}_lag_{i} as delta_{i}_{attr}"
+                sql += (
+                f", TRY_CAST({attr} AS DOUBLE) "
+                f"- TRY_CAST({attr}_lag_{i} AS DOUBLE) AS delta_{i}_{attr}")
+                # sql+= f", {attr}-{attr}_lag_{i} as delta_{i}_{attr}"
         else:
             print(f"No se encontro el atributo {attr} en df")
     sql+=" FROM df)"
+
+    
 
     conn = duckdb.connect(PATH_DATA_BASE_DB)
     conn.execute(sql)
