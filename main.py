@@ -14,8 +14,8 @@ from src.configuracion_inicial import creacion_directorios,creacion_logg_local ,
 from src.generadora_semillas import create_semilla
 from src.creacion_target import lanzar_creacion_clase_ternaria
 
-from src_bayesianas.experimento_bayesiana_lgbm_2 import lanzar_bayesiana_lgbm
-from src_bayesianas.experimento_bayesiana_xgb_2 import lanzar_bayesiana_xgb
+from src_bayesianas.bayesiana_lgbm_2 import lanzar_bayesiana_lgbm
+from src_bayesianas.bayesiana_xgb_2 import lanzar_bayesiana_xgb
 
 from src_experimentos.experimento_eda import lanzar_eda
 from src_experimentos.experimento_1_lgbm import lanzar_experimento

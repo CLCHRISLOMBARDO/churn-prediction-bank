@@ -9,6 +9,7 @@ def creacion_directorios():
     os.makedirs(PATH_LOGS,exist_ok=True)
     os.makedirs(PATH_LOG_GLOBAL,exist_ok=True)
             #OUTPUT PATHS
+    os.makedirs(PATH_OUTPUT_DATA,exist_ok=True)
     os.makedirs(PATH_OUTPUT_BAYESIAN,exist_ok=True)
     os.makedirs(PATH_OUTPUT_FINALES,exist_ok=True)
     os.makedirs(PATH_OUTPUT_EXPERIMENTOS,exist_ok=True)

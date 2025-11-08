@@ -5,8 +5,9 @@ import duckdb
 import logging
 
 #### FALTA AGREGAR LOS PUNTOS DE CONTROL PARA VISUALIZAR QUE ESTEN BIEN
-
+from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB
 logger = logging.getLogger(__name__)
+
 
 def feature_engineering_lag(df:pd.DataFrame , columnas:list[str],cant_lag:int=1 ) -> pd.DataFrame:
     """
@@ -39,11 +40,9 @@ def feature_engineering_lag(df:pd.DataFrame , columnas:list[str],cant_lag:int=1 
     sql+=" FROM df"
 
     # Ejecucion de la consulta SQL
-    con = duckdb.connect(database=":memory:")
-    con.register("df", df)
-    df=con.execute(sql).df()
-    con.close()
-
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
     logger.info(f"ejecucion lag finalizada.  df shape: {df.shape}")
     return df
 

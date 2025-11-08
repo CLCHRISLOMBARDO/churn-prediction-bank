@@ -1,7 +1,9 @@
-COMPETENCIA: 1
+COMPETENCIA: 2
 
-# proceso_ppal : bayesiana  | test_baye | experimento |  test_exp| prediccion_final | test_prediccion_final |analisis_exploratorio | creacion_target_clase_ternaria
-PROCESO_PPAL: "test_prediccion_final"
+# proceso_ppal : bayesiana  | test_baye | experimento |  test_exp
+#| prediccion_final | test_prediccion_final |analisis_exploratorio 
+#| creacion_target_clase_ternaria | feat_eng
+PROCESO_PPAL: "creacion_target_clase_ternaria"
 SUBSAMPLEO : 0.4
 configuracion_experimentos:
   # numero del experimento o EDA
@@ -9,10 +11,11 @@ configuracion_experimentos:
   # top models define los N mejores modelos de cada bayesiana. N=1 nos quedamos con el mejor 
   TOP_MODELS : 3
 
+configuracion_feat_eng:
+  N_FE : 1
 
 configuracion_bayesiana:
  # Completar con la info de la bayesiana
-
   N_BAYESIANA: 2
   N_SEMILLAS_BAY : 3
   UMBRAL: 0.025
@@ -44,6 +47,7 @@ configuracion_paths:
 
   path_inputs : 
     PATH_INPUT_DATA : "datasets/"
+    PATH_DATA_BASE_DB : "datasets/base_de_datos.duckdb"
   path_outputs:
     PATH_OUTPUT: "outputs/"
     PATH_OUTPUT_DATA: "outputs/data_outputs/"
@@ -87,7 +91,7 @@ configuracion_competencia_1:
 
 configuracion_competencia_2:
   FILE_INPUT_DATA: "datasets/competencia_02.csv"
-  FILE_INPUT_DATA_CRUDO: "datasets/competencia_02_crudo.csv.gz"
+  FILE_INPUT_DATA_CRUDO: "datasets/datasets_competencia_02_crudo.csv.gz"
   MES_TRAIN: [202101, 202102, 202103]
   MES_TEST: [202104]
   MES_A_PREDECIR: 202106

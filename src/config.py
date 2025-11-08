@@ -45,7 +45,7 @@ try:
         N_FOLDS             = bayes.get("N_FOLDS", 5)
         MES_VAL_BAYESIANA   = bayes.get("MES_VAL_BAYESIANA", 202103) 
 
-        if PROCESO_PPAL =="bayesiana":
+        if PROCESO_PPAL =="bayesiana" or PROCESO_PPAL =="test_baye":
             N_EXPERIMENTO = bayes["N_BAYESIANA"]
         else:
             N_EXPERIMENTO = exp["N_EXP"]
@@ -67,6 +67,7 @@ try:
             PLACE_PATHS = paths["place_path"]["LOCAL_PATH"]
 
         # ================= Rutas de INPUT / LOG ==================
+        PATH_DATA_BASE_DB =  PLACE_PATHS + inp["PATH_DATA_BASE_DB"]
         PATH_INPUT_DATA = PLACE_PATHS + inp["PATH_INPUT_DATA"]
         FILE_INPUT_DATA = PLACE_PATHS + comp["FILE_INPUT_DATA"]
         FILE_INPUT_DATA_CRUDO = PLACE_PATHS + comp["FILE_INPUT_DATA_CRUDO"]
