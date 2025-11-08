@@ -75,11 +75,14 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
     if "delta_1_"+columnas[0] in df.columns:
         logger.info("Ya se hizo deltas")
         return
+    logger.info(f"columnas con lags ? : {len(columnas)}")
+    columnas_sin_lags = [c for c in  columnas if "lag_" not in c]
+    logger.info(f"sacamos columnas sin lags ?: {len(columnas_sin_lags)}")
     logger.info("Todavia no se hizo deltas")
-    logger.info(f"Comienzo feature de delta.  df shape: {df.shape}")
+    logger.info(f"Comienzo feature de delta")
     sql = "CREATE or REPLACE table df as "
     sql+="(SELECT *"
-    for attr in columnas:
+    for attr in columnas_sin_lags:
         if attr in df.columns:
             for i in range(1,cant_lag+1):
                 sql+= f", {attr}-{attr}_lag_{i} as delta_{i}_{attr}"
