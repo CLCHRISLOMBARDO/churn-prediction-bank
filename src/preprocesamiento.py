@@ -12,50 +12,32 @@ logger = logging.getLogger(__name__)
 
 def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
-    
-    # TRAIN DATA
-    sql_train = f"""
-    WITH clientes_train AS (
-        SELECT numero_de_cliente, clase_ternaria, foto_mes
-        FROM df
-        WHERE foto_mes IN {tuple(mes_train)}
-    ),
-    clientes_minoritarios AS (
-        SELECT DISTINCT numero_de_cliente
-        FROM clientes_train
-        WHERE clase_ternaria <> 'Continua'
-    ),
-    clientes_mayoritarios AS (
-        SELECT DISTINCT numero_de_cliente
-        FROM clientes_train
-        WHERE clase_ternaria = 'Continua'
-    ),
-    clientes_mayoritarios_sample AS (
-        SELECT numero_de_cliente
-        FROM clientes_mayoritarios
-        USING SAMPLE {subsampleo}% (REPEATABLE ({semilla}))
-    ),
-    clientes_finales AS (
-        SELECT numero_de_cliente FROM clientes_minoritarios
-        UNION
-        SELECT numero_de_cliente FROM clientes_mayoritarios_sample
-    )
-    SELECT df.*
-    FROM df
-    JOIN clientes_finales USING (numero_de_cliente)
-    WHERE foto_mes IN {tuple(mes_train)};
-    """
+    mes_train_sql = f"{mes_train[0]}"
+    for m in mes_train[1:]:    
+        mes_train_sql += f",{m}"
+    mes_test_sql = f"{mes_test[0]}"
+    for m in mes_test[1:]:    
+        mes_test_sql += f",{m}"
+    mes_apred_sql = f"{mes_apred}"
+   
+    sql_train=f"""select *
+                from df
+                where foto_mes IN ({mes_train_sql})"""
     sql_test=f"""select *
                 from df
-                where foto_mes IN {tuple(mes_test)}"""
+                where foto_mes IN ({mes_test_sql})"""
     sql_apred=f"""select *
                 from df
-                where foto_mes = {mes_apred}"""
+                where foto_mes = {mes_apred_sql}"""
+    
     conn=duckdb.connect(PATH_DATA_BASE_DB)
     train_data = conn.execute(sql_train).df()
     test_data = conn.execute(sql_test).df()
     apred_data = conn.execute(sql_apred).df()
     conn.close()
+    if subsampleo is not None:
+        train_data=undersampling(train_data , subsampleo,semilla)
+
     # TRAIN
     X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria'], axis=1)
     y_train_binaria = train_data['clase_binaria']

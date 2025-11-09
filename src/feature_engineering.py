@@ -10,29 +10,37 @@ logger = logging.getLogger(__name__)
 
 
 def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) :
-    columnas_faltantes = [c for c in columnas if c not in df.columns]
-    if len(columnas_faltantes)>0:
-        logger.error(f"{columnas_faltantes} no esta en el df columns")
-        raise
-    logger.info(f"Comienzo dropeo de {len(columnas)} columnas.")
+    if columnas is None:
+        logger.info(f"No se realiza el dropeo de columnas. Solo la creacion de la tabla df")
+    else:
+        logger.info(f"Comienzo dropeo de {len(columnas)} columnas.")
+    
+   
     sql = "create or replace table df as "
     if columnas is None:
-        sql+="SELECT *"
+        sql+="""SELECT *
+                from df_completo"""
     else:
         sql+= "SELECT * EXCLUDE("
-    for i,c in enumerate(columnas):
-        if i==0:
-            sql+=f" {c}"
-        else:
-            sql+=f",{c}"
-    sql+= ") from df_completo"
+        for i,c in enumerate(columnas):
+            if i==0:
+                sql+=f" {c}"
+            else:
+                sql+=f",{c}"
+        sql+= ") from df_completo"
+    
+    # columnas_faltantes = [c for c in columnas if c not in df.columns]
+    # if len(columnas_faltantes)>0:
+    #     logger.error(f"{columnas_faltantes} no esta en el df columns")
+    #     raise
+ 
     try:
         conn=duckdb.connect(PATH_DATA_BASE_DB)
         conn.execute(sql)
         conn.close()
-        logger.info(f"Fin del dropeo de {len(columnas)} columnas.")
+        logger.info(f"Fin del dropeo de columnas.")
     except Exception as e:
-        logger.error(f"Error al intentar borrar las colunas --> {e}")
+        logger.error(f"Error al intentar crear en la base de datos --> {e}")
         raise
     return
 

@@ -41,9 +41,6 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
         output_path_feat_imp =path_output_finales_feat_imp
    
 
-   
-
-
     #3. spliteo train - test - apred - Subsampleo
     if proceso_ppal =="prediccion_final":
         MES_TRAIN.append(MES_TEST)

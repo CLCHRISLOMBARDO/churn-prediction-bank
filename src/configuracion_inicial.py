@@ -70,7 +70,7 @@ def creacion_logg_global(fecha:str, competencia:str, proceso_ppal:str, n_experim
         f.write(json.dumps(registro) + "\n")
 
 def creacion_df_small()->pd.DataFrame:
-    sql="SELECT * FROM df LIMIT 1"
+    sql="SELECT * FROM df_completo LIMIT 1"
     conn = duckdb.connect(PATH_DATA_BASE_DB)
     df=conn.execute(sql).df()
     conn.close()

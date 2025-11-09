@@ -14,7 +14,7 @@ def contruccion_cols(df:pd.DataFrame)->list[list]:
     palabras_features_excluir=["_lag","delta","slope","max_","min_","ratio"]
     columnas_cleaned=[c for c in df.columns if not any(p in c for p in palabras_features_excluir)]
     
-    col_drops=["numero_de_cliente","foto_mes","active_quarter","clase_ternaria","cliente_edad","cliente_antiguedad"
+    col_drops=["numero_de_cliente","foto_mes","active_quarter","clase_ternaria","clase_binaria","clase_peso","cliente_edad","cliente_antiguedad"
            ,"Visa_fultimo_cierre","Visa_fultimo_cierre","Master_fultimo_cierre","Visa_Fvencimiento",
            "Master_Fvencimiento"]
     for c in columnas_cleaned:

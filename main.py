@@ -49,7 +49,10 @@ elif proceso_ppal == "experimento" or proceso_ppal =="test_exp":
 elif proceso_ppal =="bayesiana" or proceso_ppal =="test_baye":
     numero_proceso = n_bayesiana
     n_semillas = n_semillas_bay
-study_name = f"_COMP_{competencia}_{proceso_ppal}_{numero_proceso}"
+try:
+    study_name = f"_COMP_{competencia}_{proceso_ppal}_{numero_proceso}"
+except Exception as e:
+    study_name = f"_COMP_{competencia}_{proceso_ppal}"
 nombre_log=fecha+study_name
 # CONFIGURACION LOG LOCAL
 creacion_logg_local(nombre_log=nombre_log)
@@ -67,7 +70,10 @@ def main():
         logger.error(f"No es un error, pero no  se crearon semillas porque estamos en el proceso {proceso_ppal}. : {e}")
 
     # CONFIGURACION LOG GLOBAL
-    creacion_logg_global(fecha=fecha , competencia=competencia ,proceso_ppal=proceso_ppal,n_experimento=n_experimento,n_semillas=n_semillas)
+    try:
+        creacion_logg_global(fecha=fecha , competencia=competencia ,proceso_ppal=proceso_ppal,n_experimento=n_experimento,n_semillas=n_semillas)
+    except:
+        creacion_logg_global(fecha=fecha , competencia=competencia ,proceso_ppal=proceso_ppal,n_experimento=n_experimento,n_semillas=[])
 
     if proceso_ppal =="creacion_target_clase_ternaria":
         lanzar_creacion_clase_ternaria_binaria_peso()
@@ -76,10 +82,10 @@ def main():
     elif proceso_ppal =="feat_eng":
         lanzar_feat_eng(fecha,n_fe ,proceso_ppal)
     elif proceso_ppal =="bayesiana":
-        lanzar_bayesiana_lgbm(fecha,semillas,n_experimento,proceso_ppal)
+        lanzar_bayesiana_lgbm(fecha,semillas,n_bayesiana,proceso_ppal)
         # lanzar_bayesiana_xgb(fecha,semillas,proceso_ppal)
     elif proceso_ppal =="test_baye":
-        lanzar_bayesiana_lgbm(test,semillas,n_experimento,proceso_ppal)
+        lanzar_bayesiana_lgbm(test,semillas,n_bayesiana,proceso_ppal)
         # lanzar_bayesiana_xgb(test,semillas,proceso_ppal)
     elif proceso_ppal =="test_exp":
         lanzar_experimento(test,semillas , n_experimento , proceso_ppal)
