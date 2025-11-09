@@ -133,32 +133,42 @@ def feature_engineering_ratio(df:pd.DataFrame|pd.Series, columnas:list[list[str]
     conn.close()
 
     logger.info(f"ejecucion ratio finalizada.")
-    return df
+    return 
 
 def feature_engineering_linreg(df : pd.DataFrame|np.ndarray , columnas:list[str]) ->pd.DataFrame|np.ndarray:
-    logger.info(f"Comienzo feature reg lineal. df shape: {df.shape}")
-    sql="SELECT *"
-    try:
+    logger.info(f"Comienzo feature reg lineal")
 
+    if any("slope" in c for c in df.columns):
+        logger.info("Ya se hizo slope")
+        return
+    logger.info("Todavia no se hizo slope")
+    sql = "Create or replace table df as "
+    sql+="(SELECT *"
+    try:
         for attr in columnas:
             if attr in df.columns:
                 sql+=f", regr_slope({attr} , cliente_antiguedad ) over ventana_3 as slope_{attr}"
             else :
                 print(f"no se encontro el atributo {attr}")
-        sql+=" FROM df window ventana_3 as (partition by numero_de_cliente order by foto_mes rows between 3 preceding and current row)"
+        sql+=" FROM df window ventana_3 as (partition by numero_de_cliente order by foto_mes rows between 3 preceding and current row))"
     except Exception as e:
         logger.error(f"Error en la regresion lineal : {e}")
         raise
-    con = duckdb.connect(database=":memory:")
-    con.register("df", df)
-    df=con.execute(sql).df()
-    con.close()
-    logger.info(f"ejecucion reg lineal finalizada. df shape: {df.shape}")
-    return df
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"ejecucion reg lineal finalizada")
+    return 
 
 def feature_engineering_max_min_2(df : pd.DataFrame|np.ndarray , columnas:list[str]) ->pd.DataFrame|np.ndarray:
     logger.info(f"Comienzo feature max min. df shape: {df.shape}")
-    sql="SELECT *"
+    palabras_max_min=["max_","min_"]
+    if any(any(p in c for p in palabras_max_min) for c in df.columns):
+        logger.info("Ya se hizo max min")
+        return
+    
+    sql="CREATE or REPLACE table df as "
+    sql+="(SELECT *"
     try:
 
         for attr in columnas:
@@ -166,16 +176,15 @@ def feature_engineering_max_min_2(df : pd.DataFrame|np.ndarray , columnas:list[s
                 sql+=f", max({attr}  ) over ventana_3 as max_{attr} ,min({attr}) over ventana_3 as min_{attr}"
             else :
                 print(f"no se encontro el atributo {attr}")
-        sql+=" FROM df window ventana_3 as (partition by numero_de_cliente order by foto_mes rows between 3 preceding and current row)"
+        sql+=" FROM df window ventana_3 as (partition by numero_de_cliente order by foto_mes rows between 3 preceding and current row))"
     except Exception as e:
         logger.error(f"Error en la max min : {e}")
         raise
-    con = duckdb.connect(database=":memory:")
-    con.register("df", df)
-    df=con.execute(sql).df()
-    con.close()
-    logger.info(f"ejecucion max min finalizada. df shape: {df.shape}")
-    return df
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"ejecucion max min finalizada. ")
+    return 
 
 def feature_engineering_normalizacion(df:pd.DataFrame , columnas:list[str]) -> pd.DataFrame:
     logger.info(f"Comienzo de la normalizacion de las cols seleccionadas , df shape {df.shape}")
