@@ -33,13 +33,13 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     feature_engineering_ratio(df_chiquito,cols_ratios)
     feature_engineering_linreg(df_chiquito , cols_lag_delta_max_min_regl,VENTANA)
     feature_engineering_max_min(df_chiquito,cols_lag_delta_max_min_regl ,VENTANA)
+    
 
     #DROPEO DE COLULNAS
     # cols_a_dropear=["mcuentas_saldo"]
     feature_engineering_drop_cols(df_chiquito,columnas=None)
-    
-    # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
-    # df = feature_engineering_rank(df,["mcuentas_saldo"])
+
+    logger.info("================ FIN DEL PROCESO DE FEAT ENG =============================")
 
 
 

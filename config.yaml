@@ -7,7 +7,9 @@ COMPETENCIA: 2
     # feat_eng
     # prediccion_final | test_prediccion_final |
 PROCESO_PPAL: "experimento"
-SUBSAMPLEO : 0.4
+# SUSBAMPLEO EN PORCENTAJE
+SUBSAMPLEO : 10.0
+
 
 configuracion_semilla:
  # Completar con la info de las semillas
@@ -16,7 +18,7 @@ configuracion_semilla:
 
 configuracion_feat_eng : 
   N_FE : 1
-  VENTANA: 4
+  VENTANA: 2
 configuracion_experimentos:
   N_EXPERIMENTO : 1
   N_SEMILLAS_EXP : 6

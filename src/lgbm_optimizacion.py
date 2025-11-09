@@ -153,7 +153,7 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
         return float(ganancia_media_meseta) * num_meses
         
     storage_name = "sqlite:///" + path_output_bayesian_db + "optimization_lgbm.db"
-    study_name = f"study_{name}_{fecha}"    # VAria en numero de bayesiana y len(semillas)
+    study_name = f"study_{name}"    # VAria en numero de bayesiana y len(semillas)
 
 
     study = optuna.create_study(
