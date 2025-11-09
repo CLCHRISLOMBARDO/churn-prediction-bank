@@ -11,18 +11,21 @@ def contruccion_cols(df:pd.DataFrame)->list[list]:
     # Columnas categoricas y numericas
     cat_cols =[]
     num_cols=[]
+    palabras_features_excluir=["_lag","delta","slope","max_","min_","ratio"]
+    columnas_cleaned=[c for c in df.columns if not any(p in c for p in palabras_features_excluir)]
+    
     col_drops=["numero_de_cliente","foto_mes","active_quarter","clase_ternaria","cliente_edad","cliente_antiguedad"
            ,"Visa_fultimo_cierre","Visa_fultimo_cierre","Master_fultimo_cierre","Visa_Fvencimiento",
            "Master_Fvencimiento"]
-    for c in df.columns:
+    for c in columnas_cleaned:
         if (df[c].nunique() <= 5):
             cat_cols.append(c)
         else:
             num_cols.append(c)
-    lista_t=[c for c in list(map(lambda x : x if x[0]=='t' and x not in col_drops else np.nan ,df.columns )) if pd.notna(c)]
-    lista_c=[c for c in list(map(lambda x : x if x[0]=='c' and x not in col_drops else np.nan ,df.columns )) if pd.notna(c)]
-    lista_m=[c for c in list(map(lambda x : x if x[0]=='m' and x not in col_drops else np.nan ,df.columns )) if pd.notna(c)]
-    lista_r=[c for c in df.columns if c not in (lista_t + lista_c + lista_m +col_drops )]
+    lista_t=[c for c in list(map(lambda x : x if x[0]=='t' and x not in col_drops else np.nan ,columnas_cleaned )) if pd.notna(c)]
+    lista_c=[c for c in list(map(lambda x : x if x[0]=='c' and x not in col_drops else np.nan ,columnas_cleaned )) if pd.notna(c)]
+    lista_m=[c for c in list(map(lambda x : x if x[0]=='m' and x not in col_drops else np.nan ,columnas_cleaned )) if pd.notna(c)]
+    lista_r=[c for c in columnas_cleaned if c not in (lista_t + lista_c + lista_m +col_drops )]
 
 
     # # Columnas lags y delta
