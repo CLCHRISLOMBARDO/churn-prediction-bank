@@ -64,5 +64,21 @@ def contrs_cols_dropear_feat_imp(df:pd.DataFrame , file:str , threshold:float)->
 
     return cols_dropear
     
+def get_cols_a_dropear(df: pd.DataFrame, columnas_base: list[str]) -> list[str]:
+    """
+    A partir de columnas base (ej: 'mrentabilidad'), detecta también
+    columnas derivadas como:
+      - mrentabilidad_lag_1, mrentabilidad_lag_2, ...
+      - delta_mrentabilidad
+      - max_mrentabilidad
+      - min_mrentabilidad
+      - slope_mrentabilidad
+    """
+    # patrones que van antes o después del nombre base
+     # ej: delta_mrentabilidad
+
+    cols_a_dropear = list({c for c in df.columns for col_drop in columnas_base if c.startswith(col_drop)})
+    
+    return cols_a_dropear
 
 

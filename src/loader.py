@@ -18,3 +18,5 @@ def cargar_datos(path:str)->pd.DataFrame|None:
         raise
     
 
+    
+

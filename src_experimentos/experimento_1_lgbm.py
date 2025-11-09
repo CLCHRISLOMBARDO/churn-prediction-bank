@@ -6,11 +6,7 @@ import logging
 import json
 
 from src.config import *
-from src.loader import cargar_datos
-from src.configuracion_inicial import creacion_df_small
-from src.preprocesamiento import conversion_binario,split_train_test_apred
-from src.constr_lista_cols import contruccion_cols
-from src.feature_engineering import feature_engineering_lag,feature_engineering_delta,feature_engineering_max_min,feature_engineering_ratio,feature_engineering_linreg,feature_engineering_normalizacion,feature_engineering_drop_cols,feature_engineering_rank
+from src.preprocesamiento import split_train_test_apred
 from src.lgbm_train_test import entrenamiento_lgbm,grafico_feature_importance,prediccion_test_lgbm ,calc_estadisticas_ganancia,grafico_curvas_ganancia, grafico_hist_ganancia ,preparacion_ypred_kaggle
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 ## Carga de variables
@@ -45,44 +41,13 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
         output_path_feat_imp =path_output_finales_feat_imp
    
 
-    ## 0. load datos
-    # df=cargar_datos(FILE_INPUT_DATA)
-    # print(df.head())
-    df_chiquito=creacion_df_small()
+   
 
-                            ## A - AGREGADO DE FEATURES
-
-    # 1. Contruccion de las columnas
-    # cols_a_dropear=["mprestamos_personales","cprestamos_personales"]
-    # df = feature_engineering_drop_cols(df , cols_a_dropear)
-
-    columnas=contruccion_cols(df_chiquito)
-    cols_lag_delta_max_min_regl=columnas[0]
-    cols_ratios=columnas[1]
-    
-    # 2. Feature Engineering
-    # df = feature_engineering_rank(df,["mcuentas_saldo"])
-    # df=feature_engineering_drop_cols(df,["mcuentas_saldo"])    
-    feature_engineering_lag(df_chiquito,cols_lag_delta_max_min_regl,3)
-    feature_engineering_delta(df_chiquito,cols_lag_delta_max_min_regl,3)
-    # df=feature_engineering_ratio(df,cols_ratios)
-    # df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
-
-                                 ## B - ELIMINACION DE FEATURES
-    # 1. Contruccion de las columnas
-    # feat_imp_file_name='2025-10-05_11-38-34_final_train_lgbm_data_frame_feat_imp.xlsx'
-    # feat_imp_file=feat_imp_path+feat_imp_file_name
-    #cols_dropear=contrs_cols_dropear_feat_imp(df,feat_imp_file,0.02)
-
-    # ## 2. Feat engin
-    # df=feature_engineering_drop_cols(df,cols_dropear)
-    return
 
     #3. spliteo train - test - apred - Subsampleo
     if proceso_ppal =="prediccion_final":
         MES_TRAIN.append(MES_TEST)
-    df = conversion_binario(df)
-    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(df,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
+    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(n_experimento,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
 
     # 4. Carga de mejores Hiperparametros
 
