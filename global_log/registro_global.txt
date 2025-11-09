@@ -70,3 +70,4 @@
 {"fecha": "2025-11-08_20-16-22", "competencia": 2, "proceso_ppal": "experimento", "n_experimento": "1", "n_semillas": 6, "in_gcp": true}
 {"fecha": "2025-11-08_21-00-19", "competencia": 2, "proceso_ppal": "experimento", "n_experimento": "1", "n_semillas": 6, "in_gcp": true}
 {"fecha": "2025-11-08_21-10-45", "competencia": 2, "proceso_ppal": "experimento", "n_experimento": "1", "n_semillas": 6, "in_gcp": true}
+{"fecha": "2025-11-09_02-12-05", "competencia": 2, "proceso_ppal": "experimento", "n_experimento": "1", "n_semillas": 6, "in_gcp": true}
