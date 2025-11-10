@@ -9,17 +9,17 @@ from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB
 logger = logging.getLogger(__name__)
 
 
-def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) :
+def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str] , tabla:str="df_completo") :
     if columnas is None:
         logger.info(f"No se realiza el dropeo de columnas. Solo la creacion de la tabla df")
     else:
-        logger.info(f"Comienzo dropeo de {len(columnas)} columnas.")
+        logger.info(f"Comienzo dropeo de {len(columnas)} columnas en la tabla {tabla}.")
     
    
     sql = "create or replace table df as "
     if columnas is None:
-        sql+="""SELECT *
-                from df_completo"""
+        sql+=f"""SELECT *
+                from {tabla}"""
     else:
         sql+= "SELECT * EXCLUDE("
         for i,c in enumerate(columnas):
@@ -27,7 +27,7 @@ def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) :
                 sql+=f" {c}"
             else:
                 sql+=f",{c}"
-        sql+= ") from df_completo"
+        sql+= f") from {tabla}"
     
     # columnas_faltantes = [c for c in columnas if c not in df.columns]
     # if len(columnas_faltantes)>0:
@@ -43,7 +43,30 @@ def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) :
         logger.error(f"Error al intentar crear en la base de datos --> {e}")
         raise
     return
+def feature_engineering_percentil(df:pd.DataFrame , columnas:list[str],bins:int=20):
+    logger.info("Comienzo de la transformacion en percentil")
 
+    if any( c.endswith("_percentil") for c in df.columns):
+        logger.info("Ya se realizo percentil")
+        return
+    logger.info("Todavia no se realizo percentil")
+    sql ="""CREATE or REPLACE table df_completo as """
+    sql += f""" select *""" 
+    for c in columnas:
+        if c in df.columns:
+            sql += f""", ntile({bins}) OVER (partition by foto_mes order by {c} ) as {c}_percentil"""
+        else:
+            logger.warning(f"No se encontro la columna {c} en el df")
+    
+    sql += " from df_completo"
+    
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info("Finalizacion del feature percentil")
+    return
+
+    
 def feature_engineering_lag(df:pd.DataFrame ,columnas:list[str],orden_lag:int=1 ):
     """
     Genera variables de lag para los atributos especificados utilizando SQL.

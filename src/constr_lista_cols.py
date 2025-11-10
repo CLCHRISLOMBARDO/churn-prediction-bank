@@ -3,15 +3,17 @@ import pandas as pd
 import numpy as np
 import logging
 import duckdb
+from typing import Tuple
+
 from src.config import  PATH_DATA_BASE_DB
 logger=logging.getLogger(__name__)
 
-def contruccion_cols(df:pd.DataFrame)->list[list]:
+def contruccion_cols(df:pd.DataFrame)->Tuple[list,list,list]:
     logger.info("Comienzo de la extraccion de la seleccion de las columnas")
     # Columnas categoricas y numericas
     cat_cols =[]
     num_cols=[]
-    palabras_features_excluir=["_lag","delta","slope","max_","min_","ratio"]
+    palabras_features_excluir=["_lag","delta","slope","_max","_min","ratio"]
     columnas_cleaned=[c for c in df.columns if not any(p in c for p in palabras_features_excluir)]
     
     col_drops=["numero_de_cliente","foto_mes","active_quarter","clase_ternaria","clase_binaria","clase_peso","cliente_edad","cliente_antiguedad"
@@ -29,7 +31,9 @@ def contruccion_cols(df:pd.DataFrame)->list[list]:
 
 
     # # Columnas lags y delta
-    cols_lag_delta_max_min_regl=lista_m + lista_c+ lista_r
+    cols_lag_delta_max_min_regl=lista_m + lista_c+ lista_r +lista_t
+    cols_percentil =  lista_m + [c for c in lista_r if "_m" in c]
+
 
     # # Columnas para regresion lineal y max-min
     # lista_regl_max_min = lista_m + lista_c+ lista_r+lista_r
@@ -50,21 +54,10 @@ def contruccion_cols(df:pd.DataFrame)->list[list]:
     logger.info(f"columnas para ratios :")
     logger.info("Finalizacion de la construccion de las columnas")
 
-    return [cols_lag_delta_max_min_regl ,cols_ratios ]
+    return cols_percentil,cols_lag_delta_max_min_regl ,cols_ratios 
 
-
-def contrs_cols_dropear_feat_imp(df:pd.DataFrame , file:str , threshold:float)->list[str]:
-    logger.info(f"Comienzo de la seleccion de columnas a dropear")
-    importance_df=pd.read_excel(file)
-    f = importance_df["importance_%"]<=threshold
-    cols_menos_importantes=list(importance_df.loc[f,'feature'].unique())
-    cols_no_dropear=["foto_mes","numero_de_cliente"]
-    cols_dropear=[c for c in  cols_menos_importantes if c not in cols_no_dropear]
-    logger.info(f"Fin de la seleccion de columnas a dropear. Se eliminaran {len(cols_dropear)} columnas")
-
-    return cols_dropear
     
-def get_cols_a_dropear(df: pd.DataFrame, columnas_base: list[str]) -> list[str]:
+def cols_a_dropear_variable_entera(df: pd.DataFrame, columnas_base: list[str]) -> list[str]:
     """
     A partir de columnas base (ej: 'mrentabilidad'), detecta también
     columnas derivadas como:
@@ -82,3 +75,24 @@ def get_cols_a_dropear(df: pd.DataFrame, columnas_base: list[str]) -> list[str]:
     return cols_a_dropear
 
 
+def cols_a_dropear_variable_por_feat(df: pd.DataFrame, columnas_variables: list[str] , columnas_features:list[str]) -> list[str]:
+    cols_a_dropear =[]
+    for cv in columnas_variables:
+        for cf in columnas_features:
+            cols_a_dropear.append(cv+cf)
+    cols_a_dropear = [c for c in cols_a_dropear if c in df.columns]
+    return cols_a_dropear
+
+
+
+
+def contrs_cols_dropear_feat_imp(df:pd.DataFrame , file:str , threshold:float)->list[str]:
+    logger.info(f"Comienzo de la seleccion de columnas a dropear")
+    importance_df=pd.read_excel(file)
+    f = importance_df["importance_%"]<=threshold
+    cols_menos_importantes=list(importance_df.loc[f,'feature'].unique())
+    cols_no_dropear=["foto_mes","numero_de_cliente"]
+    cols_dropear=[c for c in  cols_menos_importantes if c not in cols_no_dropear]
+    logger.info(f"Fin de la seleccion de columnas a dropear. Se eliminaran {len(cols_dropear)} columnas")
+
+    return cols_dropear

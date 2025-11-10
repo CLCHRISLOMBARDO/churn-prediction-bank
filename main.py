@@ -17,7 +17,7 @@ from src_feateng.feat_eng_1 import lanzar_feat_eng
 from src_bayesianas.bayesiana_lgbm_2 import lanzar_bayesiana_lgbm
 
 from src_experimentos.experimento_eda import lanzar_eda
-from src_experimentos.experimento_1_lgbm import lanzar_experimento
+from src_experimentos.experimento_1_lgbm_edited import lanzar_experimento
 
 
 

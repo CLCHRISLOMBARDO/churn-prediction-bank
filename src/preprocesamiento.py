@@ -10,22 +10,28 @@ from src.config import SUBSAMPLEO
 logger = logging.getLogger(__name__)
 
 
-def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
+def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
     mes_train_sql = f"{mes_train[0]}"
     for m in mes_train[1:]:    
         mes_train_sql += f",{m}"
-    mes_test_sql = f"{mes_test[0]}"
-    for m in mes_test[1:]:    
-        mes_test_sql += f",{m}"
-    mes_apred_sql = f"{mes_apred}"
-   
     sql_train=f"""select *
                 from df
                 where foto_mes IN ({mes_train_sql})"""
-    sql_test=f"""select *
-                from df
-                where foto_mes IN ({mes_test_sql})"""
+    if isinstance(mes_test,list):
+        mes_test_sql = f"{mes_test[0]}"
+        for m in mes_test[1:]:    
+            mes_test_sql += f",{m}"
+        sql_test=f"""select *
+                    from df
+                    where foto_mes IN ({mes_test_sql})"""
+    elif isinstance(mes_test,int):
+        mes_test_sql = f"{mes_test}"
+        sql_test=f"""select *
+                    from df
+                    where foto_mes = {mes_test_sql}"""
+        
+    mes_apred_sql = f"{mes_apred}"
     sql_apred=f"""select *
                 from df
                 where foto_mes = {mes_apred_sql}"""

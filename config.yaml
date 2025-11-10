@@ -6,9 +6,9 @@ COMPETENCIA: 1
     # bayesiana  | test_baye 
     # experimento |  test_exp
     # prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "prediccion_final"
+PROCESO_PPAL: "test_exp"
 # SUSBAMPLEO EN PORCENTAJE
-SUBSAMPLEO : 0.1
+SUBSAMPLEO : 0.4
 
 
 configuracion_semilla:
@@ -29,7 +29,7 @@ configuracion_bayesiana:
   N_SEMILLAS_BAY : 3
   N_TRIALS: 3
   N_BOOSTS: 1000
-  MES_VAL_BAYESIANA: 202105
+  MES_VAL_BAYESIANA: 202103
   UMBRAL: 0.025
   GANANCIA: 780000
   ESTIMULO: 20000
@@ -37,7 +37,7 @@ configuracion_bayesiana:
 
 configuracion_gcp:
  # Completar con la info de la GCP
-  IN_GCP: True
+  IN_GCP: False
 
 configuracion_paths:
   place_path:
