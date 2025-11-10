@@ -43,8 +43,15 @@ def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_p
 
     #3. spliteo train - test - apred - Subsampleo
     if proceso_ppal =="prediccion_final":
-        MES_TRAIN.append(MES_TEST)
-    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(n_experimento,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
+        if isinstance(MES_TEST , list):
+            mes_train=MES_TRAIN+MES_TEST
+        elif isinstance(MES_TEST, int):
+            mes_train=MES_TRAIN.append(MES_TEST)
+            
+        mes_train=list(set(mes_train))
+    else:
+        mes_train = MES_TRAIN
+    X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(n_experimento,mes_train,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
 
     # 4. Carga de mejores Hiperparametros
 

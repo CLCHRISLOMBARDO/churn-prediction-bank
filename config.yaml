@@ -6,9 +6,9 @@ COMPETENCIA: 1
     # bayesiana  | test_baye 
     # experimento |  test_exp
     # prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "test_exp"
+PROCESO_PPAL: "prediccion_final"
 # SUSBAMPLEO EN PORCENTAJE
-SUBSAMPLEO : 0.4
+SUBSAMPLEO : 0.1
 
 
 configuracion_semilla:
@@ -29,7 +29,7 @@ configuracion_bayesiana:
   N_SEMILLAS_BAY : 3
   N_TRIALS: 3
   N_BOOSTS: 1000
-  MES_VAL_BAYESIANA: 202103
+  MES_VAL_BAYESIANA: 202105
   UMBRAL: 0.025
   GANANCIA: 780000
   ESTIMULO: 20000
@@ -37,7 +37,7 @@ configuracion_bayesiana:
 
 configuracion_gcp:
  # Completar con la info de la GCP
-  IN_GCP: False
+  IN_GCP: True
 
 configuracion_paths:
   place_path:
@@ -94,7 +94,7 @@ configuracion_competencia_2:
   FILE_INPUT_DATA: "datasets/competencia_02.csv"
   FILE_INPUT_DATA_CRUDO: "datasets/competencia_02_crudo.csv.gz"
   MES_TRAIN: [202101, 202102, 202103]
-  MES_TEST: [202104 ,202106]
+  MES_TEST: [202104]
   MES_A_PREDECIR: 202108
   MES_01: 202101
   MES_02: 202102
