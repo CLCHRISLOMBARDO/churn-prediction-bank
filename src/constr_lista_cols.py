@@ -49,6 +49,49 @@ def contruccion_cols(df:pd.DataFrame)->Tuple[list,list,list]:
 
     return cols_percentil,cols_lag_delta_max_min_regl ,cols_ratios 
 
+def cols_conteo_servicios_productos(df:pd.DataFrame)->Tuple[list,list,list,list,list,list,list,list]:
+    dict_prod_serv={
+    "master_visa_productos" : ["Master_msaldototal","Master_mconsumototal","Master_mpagado","Master_mlimitecompra",
+    "Visa_msaldototal","Visa_mconsumototal","Visa_mpagado","Visa_mlimitecompra"],
+
+    "cuentas_productos" : ['mcuenta_corriente','mcaja_ahorro','mcaja_ahorro_dolares','mcuentas_saldo',
+                        'mcuenta_corriente_adicional','mcaja_ahorro_adicional'],
+    "tarjetas_productos" :[c for c in df.columns if 'tarjeta' in c and c[0]=="m"],
+    "prestamos_productos" : [c for c in df.columns if 'prest' in c and c[0]=="m"],
+    "inversiones_productos" : ['mplazo_fijo_pesos','mplazo_fijo_dolares',
+                            'minversion1_pesos','minversion1_dolares','minversion2'],
+    "digitales_productos" : [c for c in df.columns if c[0]=="t"],
+    "servicios_productos" : ['mpagodeservicios','mpagomiscuentas','mcuenta_debitos_automaticos'
+                          ,'mforex_buy','mforex_sell','mtransferencias_recibidas','mtransferencias_emitidas',
+                          'mextraccion_autoservicio','mcheques_depositados','mcheques_emitidos','mcajeros_propios_descuentos'],
+    "seguros_productos" : [c for c in df.columns if 'segur' in c]}
+    return dict_prod_serv
+
+def cols_beneficios_presion_economica(df:pd.DataFrame):
+    ganancias_gastos={"ganancias" : [
+    # Ingresos por sueldo
+    "mpayroll","mpayroll2",
+    # Ahorro e inversiones (indican colchón financiero)
+    "mplazo_fijo_pesos","mplazo_fijo_dolares","minversion1_pesos","minversion1_dolares","minversion2",
+    # Plata que entra por transferencias
+    "mtransferencias_recibidas",
+    # Beneficios/descuentos (mejoran la situación neta)
+    "mcajeros_propios_descuentos","mtarjeta_visa_descuentos","mtarjeta_master_descuentos"],
+    
+    "gastos": [# Comisiones y costos directos
+    "mcomisiones","mcomisiones_mantenimiento","mcomisiones_otras",
+    # Débitos y pagos de servicios (egresos automáticos)
+    "mcuenta_debitos_automaticos","mpagodeservicios","mpagomiscuentas",
+    # Deuda / préstamos (presión financiera)
+    "mprestamos_personales","mprestamos_prendarios","mprestamos_hipotecarios","mpasivos_margen",
+    # Egresos por movimientos
+    "mtransferencias_emitidas","mextraccion_autoservicio",
+    "mcheques_emitidos","mcheques_depositados_rechazados","mcheques_emitidos_rechazados",
+    # Uso de cajeros/ATM (generalmente salida de plata)
+    "matm","matm_other"]
+    }
+    return ganancias_gastos
+
 
 def cols_a_dropear_variable_originales_o_corregidas(df: pd.DataFrame, a_eliminar : str = "originales") -> list[str]:
     """

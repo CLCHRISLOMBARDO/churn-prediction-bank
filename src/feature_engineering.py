@@ -99,7 +99,7 @@ def feature_engineering_correccion_variables_por_mes_por_media(df:pd.DataFrame ,
     return
 
     
-    
+
 
 def feature_engineering_percentil(df:pd.DataFrame , columnas:list[str],bins:int=20):
     logger.info("Comienzo de la transformacion en percentil")
@@ -124,7 +124,82 @@ def feature_engineering_percentil(df:pd.DataFrame , columnas:list[str],bins:int=
     logger.info("Finalizacion del feature percentil")
     return
 
-    
+def suma_de_prod_servs( df:pd.DataFrame,columnas:list  ,prod_serv:str):
+    logger.info(f"Comienzo de la suma de productos y servicios : {prod_serv}")
+
+    nombre_columna = f"suma_de_{prod_serv}"
+
+    if nombre_columna in df.columns:
+        logger.info(f"Ya se realizo la suma para: {prod_serv}")
+        return
+    logger.info("Todavia no se realizo suma de productos y servicios")
+
+
+    sql="create or replace table df_completo as "
+    sql+="select * "
+    for i,c in enumerate(columnas) :
+        if i==0:
+            sql+=f",if({c}>0, 1,0)"
+        else:
+            sql+=f"+ if({c}>0,1,0)"
+    sql+=f" as {nombre_columna}"
+    sql+=" from df_completo"
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"Fin de la suma de productos y servicios {prod_serv}")
+    return
+def suma_ganancias_gastos(df:pd.DataFrame,cols_ganancias:list ,cols_gastos:list):
+    logger.info(f"Comienzo de las sumas y ratio ganancias y gastos")
+
+    nombre_ganancia = "monto_ganancias"
+    nombre_gasto = "monto_gastos"
+
+    if nombre_ganancia in df.columns or nombre_gasto in df.columns:
+        logger.info(f"Ya se realizo la suma de ganancias y gastos")
+        return
+
+    logger.info("Todavia no se realizo las sumas y ratios de ganancias y gastos")
+
+    sql="create or replace table df_completo as "
+    sql+= "select * "
+    for i,c in enumerate(cols_ganancias) :
+        if i==0:
+            sql+=f",{c}"
+        else:
+            sql+=f"+{c}"
+    sql+=f" as {nombre_ganancia}"
+
+    for i,c in enumerate(cols_gastos) :
+        if i==0:
+            sql+=f",{c}"
+        else:
+            sql+=f"+{c}"
+    sql+=f" as {nombre_gasto}"
+    sql+=" from df_completo"
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"Fin de la suma de productos de ganancias y gastos")
+    return
+
+def ratios_ganancia_gastos(df:pd.DataFrame):
+
+    logger.info("Comienzo del ratio ganancia_gasto")
+    if "ganancia_gasto_ratio" in df.columns:
+        logger.info("Ya se realizo el ratio ganancia gasto")
+        return
+    logger.info("Todavia no se realizo el ratio ganancia gasto")
+    sql="create or replace table df_completo as "
+    sql+=" select *"
+    sql+=f", if(monto_gastos is NULL OR monto_gastos =0 ,NULL,monto_ganancias/monto_gastos) as ganancia_gasto_ratio "
+    sql+=" from df_completo"
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"Fin del ratio de productos de ganancias y gastos")
+    return
+
 def feature_engineering_lag(df:pd.DataFrame ,columnas:list[str],orden_lag:int=1 ):
     
     logger.info(f"Comienzo Feature de lag")
