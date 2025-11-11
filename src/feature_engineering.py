@@ -139,9 +139,9 @@ def suma_de_prod_servs( df:pd.DataFrame,columnas:list  ,prod_serv:str):
     sql+="select * "
     for i,c in enumerate(columnas) :
         if i==0:
-            sql+=f",if({c}>0, 1,0)"
+            sql+=f",if(try_cast({c} as double)>0, 1,0)"
         else:
-            sql+=f"+ if({c}>0,1,0)"
+            sql+=f"+ if(try_cast({c} as double)>0,1,0)"
     sql+=f" as {nombre_columna}"
     sql+=" from df_completo"
     conn=duckdb.connect(PATH_DATA_BASE_DB)
@@ -165,16 +165,16 @@ def suma_ganancias_gastos(df:pd.DataFrame,cols_ganancias:list ,cols_gastos:list)
     sql+= "select * "
     for i,c in enumerate(cols_ganancias) :
         if i==0:
-            sql+=f",{c}"
+            sql+=f",try_cast({c} as double)"
         else:
-            sql+=f"+{c}"
+            sql+=f"+try_cast({c} as double)"
     sql+=f" as {nombre_ganancia}"
 
     for i,c in enumerate(cols_gastos) :
         if i==0:
-            sql+=f",{c}"
+            sql+=f",try_cast({c} as double)"
         else:
-            sql+=f"+{c}"
+            sql+=f"+try_cast({c} as double)"
     sql+=f" as {nombre_gasto}"
     sql+=" from df_completo"
     conn=duckdb.connect(PATH_DATA_BASE_DB)
