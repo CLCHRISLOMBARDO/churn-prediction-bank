@@ -8,6 +8,19 @@ import logging
 from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB
 logger = logging.getLogger(__name__)
 
+def copia_tabla_vm_a_buckert():
+    # A ELIMINAR
+    logger.info("Copia de la tabla df_completo (en otro .duckdb) a df (en PATH_DATA_BASE_DB)")
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(f"ATTACH '/home/christian_lombardo14/buckets/b1/datasets/base_de_datos.duckdb' AS db_origen;")
+    conn.execute("""
+        CREATE OR REPLACE TABLE df_completo AS
+        SELECT * FROM db_origen.df_completo
+    """)
+    conn.execute("DETACH db_origen;")
+    conn.close()
+    logger.info("Finalizada la copia de la tabla df_completo a df")
+
 def copia_tabla():
     logger.info(f"Copia de la tabla df_completo a df")
     sql = "create or replace table df as "
