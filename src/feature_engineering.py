@@ -317,14 +317,14 @@ def feature_engineering_linreg(df : pd.DataFrame|np.ndarray , columnas:list[str]
         return
     logger.info("Todavia no se hizo slope")
     sql = "Create or replace table df_completo as "
-    sql+="(SELECT *"
+    sql+="SELECT *"
     try:
         for attr in columnas:
             if attr in df.columns:
-                sql+=f", regr_slope(try_cast({attr} as double) , try_cast(cliente_antiguedad, as double) ) over ventana_{ventana} as {attr}_slope"
+                sql+=f", regr_slope(try_cast({attr} as double) , try_cast(cliente_antiguedad as double) ) over ventana_{ventana} as {attr}_slope"
             else :
                 print(f"no se encontro el atributo {attr}")
-        sql+=f" FROM df_completo window ventana_{ventana} as (partition by numero_de_cliente order by foto_mes rows between {ventana} preceding and current row))"
+        sql+=f" FROM df_completo window ventana_{ventana} as (partition by numero_de_cliente order by foto_mes rows between {ventana} preceding and current row)"
     except Exception as e:
         logger.error(f"Error en la regresion lineal : {e}")
         raise
