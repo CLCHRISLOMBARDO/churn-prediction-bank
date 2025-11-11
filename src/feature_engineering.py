@@ -205,7 +205,7 @@ def ratios_ganancia_gastos(df:pd.DataFrame):
     logger.info("Todavia no se realizo el ratio ganancia gasto")
     sql="create or replace table df_completo as "
     sql+=" select *"
-    sql+=f", if(monto_gastos is NULL OR monto_gastos =0 ,NULL,monto_ganancias/monto_gastos) as ganancia_gasto_ratio "
+    sql+=f", if(monto_gastos is NULL ,NULL,monto_ganancias/(monto_gastos+1)) as ganancia_gasto_ratio "
     sql+=" from df_completo"
     conn=duckdb.connect(PATH_DATA_BASE_DB)
     conn.execute(sql)
