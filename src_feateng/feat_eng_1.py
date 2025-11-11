@@ -18,9 +18,10 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name}")
 
-    # COPIA PARA EL BUCKETS A ELIMINAR
+    # COPIA PARA EL BUCKETS A ELIMINAR ======================================
     copia_tabla_vm_a_buckert()
     return
+    # =========================================
     #DROPEO INICIAL DE MESES
 
     meses_a_dropear=[202106]
