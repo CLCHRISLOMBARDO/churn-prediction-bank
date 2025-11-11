@@ -27,8 +27,9 @@ def contador_targets():
         from df_completo
         group by foto_mes"""
     conn = duckdb.connect(PATH_DATA_BASE_DB)
-    logger.info(conn.execute(sql))
+    contador=conn.execute(sql).df()
     conn.close()
+    logger.info(f"Contador clase ternaria : {contador}")
     logger.info("Fin control de la cantidad de los targets")
 
 
@@ -57,18 +58,18 @@ def creacion_clase_ternaria() :
 
 def conversion_binario():
     conn=duckdb.connect(PATH_DATA_BASE_DB)
-    logger.info("Comienzo de la creacion clase binaria")
-    sql_creacion="create or replace table df_completo as "
-    sql_creacion += """ SELECT *, 
-                if(clase_ternaria= 'BAJA+2' ,1.00002 ,
-                    if(clase_ternaria = 'BAJA+1' , 1.00001,1.0)) as clase_peso ,
-                if(clase_ternaria = 'Continua' ,0 ,1) as clase_binaria
-                from df_completo"""
-    conn.execute(sql_creacion)
+    # logger.info("Comienzo de la creacion clase binaria")
+    # sql_creacion="create or replace table df_completo as "
+    # sql_creacion += """ SELECT *, 
+    #             if(clase_ternaria= 'BAJA+2' ,1.00002 ,
+    #                 if(clase_ternaria = 'BAJA+1' , 1.00001,1.0)) as clase_peso ,
+    #             if(clase_ternaria = 'Continua' ,0 ,1) as clase_binaria
+    #             from df_completo"""
+    # conn.execute(sql_creacion)
     
     sql_contador="""SELECT foto_mes,
-            COUNT(*) FILTER( where clase_peso = 1.0002) as peso_baja_2,
-            COUNT(*) FILTER(where clase_peso = 1.0001) as peso_baja_1,
+            COUNT(*) FILTER( where clase_peso = 1.00002) as peso_baja_2,
+            COUNT(*) FILTER(where clase_peso = 1.00001) as peso_baja_1,
             COUNT(*) FILTER(where clase_peso = 1.0) as peso_continua,
             COUNT(*) FILTER(where clase_binaria =1) as binaria_bajas,
             COUNT(*) FILTER(where clase_binaria =0) as binaria_continua
@@ -83,8 +84,8 @@ def conversion_binario():
 
 def lanzar_creacion_clase_ternaria_binaria_peso():
     logger.info("Lanzamiento de la creacion de la clase ternaria, binaria y clase peso target")
-    create_data_base()
-    creacion_clase_ternaria()
+    # create_data_base()
+    # creacion_clase_ternaria()
     contador_targets()
     conversion_binario()
     return 
