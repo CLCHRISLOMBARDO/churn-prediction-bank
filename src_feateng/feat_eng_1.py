@@ -17,12 +17,16 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     name=f"FEAT_ENG_{numero}_{proceso_ppal}_VENTANA_{VENTANA}"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name}")
+    #DROPEO INICIAL DE MESES
+    # df_completo_chiquito=creacion_df_small("df")
+    # meses_a_dropear=[202106]
+    # feature_engineering_drop_meses(meses_a_dropear)
     
 
     # CORRECCION DE VARIABLES POR MES POR MEDIA
-    df_completo_chiquito=creacion_df_small("df_completo")
-    variable_meses_dict={"mrentabilidad":"(202106,202105)"}
-    feature_engineering_correccion_variables_por_mes_por_media(df_completo_chiquito,variable_meses_dict)
+    # df_completo_chiquito=creacion_df_small("df_completo")
+    # variable_meses_dict={"mrentabilidad":"(202106,202105)"}
+    # feature_engineering_correccion_variables_por_mes_por_media(df_completo_chiquito,variable_meses_dict)
 
     # PERCENTIL
     df_completo_chiquito=creacion_df_small("df_completo") # Para agregar las columnas de las corregidas
@@ -46,9 +50,9 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     # ------------- a partir de aca se trabaja con df------------------------#
 
     #DROPEO DE COLUMNAS ORIGINALES O CORREGIDAS
-    df_completo_chiquito=creacion_df_small("df")
-    cols_a_dropear_corr =cols_a_dropear_variable_originales_o_corregidas(df_completo_chiquito ,a_eliminar="originales")
-    feature_engineering_drop_cols(df_completo_chiquito, columnas=cols_a_dropear_corr)
+    # df_completo_chiquito=creacion_df_small("df")
+    # cols_a_dropear_corr =cols_a_dropear_variable_originales_o_corregidas(df_completo_chiquito ,a_eliminar="originales")
+    # feature_engineering_drop_cols(df_completo_chiquito, columnas=cols_a_dropear_corr)
 
     #DROPEO DE COLUMNAS ORIGINALES/CORREGIDAS O PERCENTILES
     df_completo_chiquito=creacion_df_small("df")
@@ -68,8 +72,8 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
 
     #DROPEO DE MESES
     # df_completo_chiquito=creacion_df_small("df")
-    meses_a_dropear=[202106]
-    feature_engineering_drop_meses(meses_a_dropear)
+    # meses_a_dropear=[202106]
+    # feature_engineering_drop_meses(meses_a_dropear)
 
 
 

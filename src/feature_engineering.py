@@ -20,11 +20,11 @@ def copia_tabla():
     logger.info(f"Finalizada la Copia de la tabla df_completo a df")
     
 
-def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) :
+def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str],tabla_origen:str="df",tabla_nueva:str="df") :
     logger.info(f"Comienzo del dropeo de las variables : {columnas}")
 
-    sql = "create or replace table df as "
-    logger.info(f"Comienzo dropeo de {len(columnas)} columnas en la tabla df.")
+    sql = f"create or replace table {tabla_nueva} as "
+    logger.info(f"Comienzo dropeo de {len(columnas)} columnas en la tabla {tabla_nueva}.")
     sql+= "SELECT * EXCLUDE("
     for i,c in enumerate(columnas):
         if c in df.columns:
@@ -34,7 +34,7 @@ def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) :
                 sql+=f",{c}"
         else:
             logger.warning(f"No se encontro la columna {c} en la tabla")
-    sql+= f") from df"
+    sql+= f") from {tabla_origen}"
     try:
         conn=duckdb.connect(PATH_DATA_BASE_DB)
         conn.execute(sql)
@@ -44,16 +44,16 @@ def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) :
         logger.error(f"Error al intentar crear en la base de datos --> {e}")
         raise
     return
-def feature_engineering_drop_meses( meses_a_dropear:list):
+def feature_engineering_drop_meses( meses_a_dropear:list ,tabla_origen:str="df",tabla_nueva:str="df"):
     logger.info(f"Comienzo del dropeo de los meses {meses_a_dropear}")
     query_meses = f"({meses_a_dropear[0]}"
     for m in meses_a_dropear[1:]:
         query_meses+= f", {m}"
     query_meses+= ")"
 
-    sql = f"create or replace table df as "
+    sql = f"create or replace table {tabla_nueva} as "
     sql += f"""select *
-                from df
+                from {tabla_origen}
                 where foto_mes not in {query_meses}"""
     conn=duckdb.connect(PATH_DATA_BASE_DB)
     conn.execute(sql)
