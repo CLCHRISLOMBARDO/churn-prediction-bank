@@ -92,7 +92,7 @@ configuracion_competencia_1:
 
 configuracion_competencia_2:
   FILE_INPUT_DATA: "datasets/competencia_02.csv"
-  FILE_INPUT_DATA_CRUDO: "datasets/competencia_02_crudo.csv.gz"
+  FILE_INPUT_DATA_CRUDO: "/home/christian_lombardo14/buckets/b1/datasets/competencia_02_crudo.csv.gz"
   MES_TRAIN: [202101, 202102, 202103,202104,202105,202106,202107]
   MES_TEST: [202104]
   MES_A_PREDECIR: 202108
