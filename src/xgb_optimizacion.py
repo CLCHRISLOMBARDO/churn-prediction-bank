@@ -85,20 +85,19 @@ def optim_hiperp_binaria_xgb(X_train: pd.DataFrame| pl.DataFrame,y_train_binaria
     
 
     def objective(trial: optuna.trial.Trial) -> float:
-        # Espacio de búsqueda (equivalentes comunes en XGB)
         max_depth         = trial.suggest_int('max_depth', 3, 12)
         eta               = trial.suggest_float('eta', 0.01, 0.2)                
         min_child_weight  = trial.suggest_float('min_child_weight', 1.0, 20.0)
         subsample         = trial.suggest_float('subsample', 0.5, 1.0)
         colsample_bytree  = trial.suggest_float('colsample_bytree', 0.5, 1.0)
         gamma             = trial.suggest_float('gamma', 0.0, 10.0)
-        reg_lambda        = trial.suggest_float('lambda', 0.0, 20.0)              # L2
-        reg_alpha         = trial.suggest_float('alpha', 0.0, 10.0)               # L1
+        reg_lambda        = trial.suggest_float('lambda', 0.0, 20.0)              
+        reg_alpha         = trial.suggest_float('alpha', 0.0, 10.0)              
 
         params = {
             'objective': 'binary:logistic',
-            'eval_metric': 'logloss',              # se ignora para selección de best; usamos feval custom
-            'tree_method': 'hist',                 # rápido y estable
+            'eval_metric': 'logloss',             
+            'tree_method': 'hist',                
             'max_depth': max_depth,
             'eta': eta,
             'min_child_weight': min_child_weight,
@@ -137,18 +136,8 @@ def optim_hiperp_binaria_xgb(X_train: pd.DataFrame| pl.DataFrame,y_train_binaria
         ganancia_media_meseta, cliente_optimo, ganancia_max = xgb_gan_eval_ensamble(y_pred_ensamble,dval)
         best_iter_promedio = float(np.mean(best_iters))
         guardar_iteracion(trial,ganancia_media_meseta,cliente_optimo,ganancia_max,best_iter_promedio,y_preds_matrix,best_iters,name,fecha,semillas)
-
-        
-
-        # mejor valor y mejor iter
-        max_gan = cv_results[test_col].max()
-        best_iter = int(cv_results[test_col].idxmax()) + 1  # 1-based
-
-        # guardamos en user_attrs del trial
-        trial.set_user_attr("best_iter", best_iter)
-
-        # Devolvemos la métrica a maximizar (no hace falta multiplicar por N_FOLDS en XGB)
-        return float(max_gan) * N_FOLDS
+        return float(ganancia_media_meseta) * num_meses
+    
 
     storage_name = "sqlite:///" + path_output_bayesian_db + "optimization_xgb.db"
     study_name = f"study_{name}"
@@ -158,30 +147,9 @@ def optim_hiperp_binaria_xgb(X_train: pd.DataFrame| pl.DataFrame,y_train_binaria
         study_name=study_name,
         storage=storage_name,
         load_if_exists=True,
-        # sampler=optuna.samplers.TPESampler(seed=SEMILLA),  # opcional
     )
 
     study.optimize(objective, n_trials=n_trials)
-
-    best_params = study.best_trial.params
-    best_iter   = study.best_trial.user_attrs["best_iter"]
-
-    # Guardar best_iter
-    try:
-        with open(path_output_bayesian_best_iter + f"best_iter_{name}.json", "w") as f:
-            json.dump(best_iter, f, indent=4)
-        logger.info(f"best_iter_{name}.json guardado en {path_output_bayesian_best_iter}")
-    except Exception as e:
-        logger.error(f"Error al tratar de guardar el json de best iter: {e}")
-
-    # Guardar best params
-    try:
-        with open(path_output_bayesian_bestparams + f"best_params_{name}.json", "w") as f:
-            json.dump(best_params, f, indent=4)
-        logger.info(f"best_params_{name}.json guardado en {path_output_bayesian_bestparams}")
-        logger.info(f"Finalización de optimización XGB con study name {study_name}.")
-    except Exception as e:
-        logger.error(f"Error al tratar de guardar el json de los best parameters: {e}")
 
     return study
 
