@@ -7,7 +7,7 @@ import logging
 logger =logging.getLogger(__name__)
 
 def create_data_base():
-    logger.info(f"Creacion de la base de datos en : {FILE_INPUT_DATA_CRUDO}")
+    logger.info(f"Creacion de la base de datos en : {PATH_DATA_BASE_DB}")
     sql = f"""
     create or replace table df_completo as 
     select *
