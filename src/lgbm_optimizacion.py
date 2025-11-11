@@ -28,9 +28,7 @@ def lgb_gan_eval_individual(y_pred, data):
     ganancia = np.where(weight == 1.00002, GANANCIA, 0) - np.where(weight < 1.00002, ESTIMULO, 0)
     logger.info(f"ganancia : {ganancia}")
     ganancia = ganancia[np.argsort(y_pred)[::-1]]
-    logger.info(f"ganancia sorted : {ganancia}")
     ganancia = np.cumsum(ganancia)
-    logger.info(f"ganancia acumulada : {ganancia}")
     #con polars
     # df_eval = pl.DataFrame({"y_pred":y_pred , "weight":weight})
     # df_sorted = df_eval.sort("y_pred" , descending=True)
@@ -49,13 +47,11 @@ def lgb_gan_eval_ensamble(y_pred , data):
     ganancia =np.where(weight == 1.00002 , GANANCIA, 0) - np.where(weight < 1.00002 , ESTIMULO ,0)
     logger.info(f"ganancia : {ganancia}")
     ganancia_sorted = ganancia[np.argsort(y_pred)[::-1]]
-    logger.info(f"ganancia sorted : {ganancia_sorted}")
     ganancia_acumulada = np.cumsum(ganancia_sorted)
-    logger.info(f"ganancia acumulada : {ganancia_acumulada}")
     ganancia_max = np.max(ganancia_acumulada)
     idx_max_gan = np.argmax(ganancia_acumulada)
     logger.info(f"ganancia max acumulada : {ganancia_max}")
-    logger.info(f"cliente oprimo : {idx_max_gan}")
+    logger.info(f"cliente optimo : {idx_max_gan}")
     ganancia_media_meseta = np.mean(ganancia_acumulada[idx_max_gan-500 : idx_max_gan+500])
     logger.info(f"ganancia media meseta : {ganancia_media_meseta}")
     return ganancia_media_meseta ,idx_max_gan ,ganancia_max
@@ -166,27 +162,6 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
 
     study.optimize(objective, n_trials=n_trials)
 
-
-
-    # best_params = study.best_trial.params
-    # best_iter=study.best_trial.user_attrs["best_iter"]
-    
-    # # Guardo best iter
-    # try:
-    #     with open(path_output_bayesian_best_iter + f"best_iter_{name}.json","w") as f:
-    #         json.dump(best_iter , f ,indent=4)
-    #     logger.info(f"best_iter_{name}.json guardado en {path_output_bayesian_best_iter} ")
-    # except Exception as e:
-    #     logger.error(f"Error al tratar de guardar el json de best iter por el error :{e}")
-
-    # # Guardo best params
-    # try:
-    #     with open(path_output_bayesian_bestparams+f"best_params_{name}.json", "w") as f:
-    #         json.dump(best_params, f, indent=4) 
-    #     logger.info(f"best_params_{name}.json guardado en {path_output_bayesian_bestparams}")
-    #     logger.info(f"Finalizacion de optimizacion hiperp binario con study name {study_name}.")
-    # except Exception as e:
-    #     logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
     return study
 
 
