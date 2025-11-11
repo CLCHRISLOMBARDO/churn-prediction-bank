@@ -1,13 +1,7 @@
 #main.py
-import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-import os
 import datetime 
 import logging
-import json
-import lightgbm as lgb
-import optuna
 
 from src.config import *
 from src.configuracion_inicial import creacion_directorios,creacion_logg_local , creacion_logg_global
@@ -17,7 +11,9 @@ from src_feateng.feat_eng_1 import lanzar_feat_eng
 from src_bayesianas.bayesiana_lgbm_2 import lanzar_bayesiana_lgbm
 from src_bayesianas.bayesiana_xgb_2 import lanzar_bayesiana_xgb
 from src_experimentos.experimento_eda import lanzar_eda
-from src_experimentos.experimento_1_lgbm_edited import lanzar_experimento
+from src_experimentos.experimento_1_lgbm_edited import lanzar_experimento_lgbm
+from src_experimentos.experimento_1_xgb_edited import lanzar_experimento_xgb
+
 
 
 
@@ -45,10 +41,10 @@ model_bay = MODEL_BAY
 # ---------------------------------------------------------------------------------------------------------------------------
 if proceso_ppal =="feat_eng":
     numero_proceso = n_fe
-elif proceso_ppal == "experimento" or proceso_ppal =="test_exp":
+elif proceso_ppal in ["experimento", "test_exp","prediccion_final","test_prediccion_final"]:
     numero_proceso = n_experimento
     n_semillas = n_semillas_exp
-elif proceso_ppal =="bayesiana" or proceso_ppal =="test_baye":
+elif proceso_ppal in ["bayesiana","test_baye"]:
     numero_proceso = n_bayesiana
     n_semillas = n_semillas_bay
 try:
@@ -93,13 +89,18 @@ def main():
             lanzar_bayesiana_lgbm(test,semillas,n_bayesiana,proceso_ppal)
         elif model_bay =="xgb":
             lanzar_bayesiana_xgb(test,semillas,n_bayesiana,proceso_ppal)
-    elif proceso_ppal =="test_exp":
-        if model_exp ==
-        lanzar_experimento(test,semillas , n_experimento , proceso_ppal)
-    elif proceso_ppal =="test_prediccion_final":
-        lanzar_experimento(test,semillas , n_experimento , proceso_ppal)
-    elif (proceso_ppal =="experimento") | (proceso_ppal=="prediccion_final"):
-        lanzar_experimento(fecha,semillas , n_experimento , proceso_ppal)
+    elif (proceso_ppal =="test_exp") or (proceso_ppal=="test_prediccion_final"):
+        if model_exp =="lgbm":
+            lanzar_experimento_lgbm(test,semillas , n_experimento , proceso_ppal)
+        elif model_exp =="xgb":
+            lanzar_experimento_xgb(test,semillas , n_experimento , proceso_ppal)
+    
+    elif (proceso_ppal =="experimento") or (proceso_ppal=="prediccion_final"):
+        if model_exp =="lgbm":
+            lanzar_experimento_lgbm(fecha,semillas , n_experimento , proceso_ppal)
+        elif model_exp =="xgb":
+            lanzar_experimento_xgb(fecha,semillas , n_experimento , proceso_ppal)
+
     return
 
 if __name__ =="__main__":

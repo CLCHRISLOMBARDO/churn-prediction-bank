@@ -14,7 +14,7 @@ from src.lgbm_train_test import calc_estadisticas_ganancia,grafico_curvas_gananc
 
 logger=logging.getLogger(__name__)
 
-def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_ppal:str ="experimento"): 
+def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proceso_ppal:str ="experimento"): 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""

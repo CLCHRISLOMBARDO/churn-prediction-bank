@@ -13,7 +13,7 @@ from src.lgbm_train_test import entrenamiento_lgbm,grafico_feature_importance,pr
 
 logger=logging.getLogger(__name__)
 
-def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_ppal:str ="experimento"): 
+def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proceso_ppal:str ="experimento"): 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""

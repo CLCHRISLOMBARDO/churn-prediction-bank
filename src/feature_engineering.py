@@ -8,18 +8,32 @@ import logging
 from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB
 logger = logging.getLogger(__name__)
 
-def copia_tabla_vm_a_buckert():
-    # A ELIMINAR
-    logger.info("Copia de la tabla df_completo (en otro .duckdb) a df (en PATH_DATA_BASE_DB)")
+def copia_tabla_local_a_bucket():
+    """
+    Copia la tabla df_completo desde la base local (PATH_DATA_BASE_DB)
+    hacia la base ubicada en el bucket.
+    """
+    logger.info("Inicio de la copia de df_completo desde local a bucket")
+
     conn = duckdb.connect(PATH_DATA_BASE_DB)
-    conn.execute(f"ATTACH '/home/christian_lombardo14/buckets/b1/datasets/base_de_datos.duckdb' AS db_origen;")
-    conn.execute("""
-        CREATE OR REPLACE TABLE df_completo AS
-        SELECT * FROM db_origen.df_completo
-    """)
-    conn.execute("DETACH db_origen;")
-    conn.close()
-    logger.info("Finalizada la copia de la tabla df_completo a df")
+    try:
+        # Adjuntamos la base del bucket
+        conn.execute("""
+            ATTACH '/home/christian_lombardo14/buckets/b1/datasets/base_de_datos.duckdb' AS db_destino;
+        """)
+
+        # Copiamos la tabla local hacia la base en el bucket
+        conn.execute("""
+            CREATE OR REPLACE TABLE db_destino.df_completo AS
+            SELECT * FROM df_completo;
+        """)
+
+        conn.execute("DETACH db_destino;")
+        logger.info("✅ Copia completada: df_completo (local) → df_completo (bucket)")
+    except Exception as e:
+        logger.error(f"❌ Error durante la copia local → bucket: {e}")
+    finally:
+        conn.close()
 
 def copia_tabla():
     logger.info(f"Copia de la tabla df_completo a df")
