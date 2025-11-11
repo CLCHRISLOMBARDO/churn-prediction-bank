@@ -1,4 +1,4 @@
-COMPETENCIA: 1
+COMPETENCIA: 2
 # proceso_ppal : 
     # creacion_target_clase_ternaria
     # analisis_exploratorio 
@@ -18,7 +18,7 @@ configuracion_semilla:
 
 configuracion_feat_eng : 
   N_FE : 1
-  VENTANA: 2
+  VENTANA: 3
 configuracion_experimentos:
   N_EXPERIMENTO : 1
   N_SEMILLAS_EXP : 6
@@ -93,7 +93,7 @@ configuracion_competencia_1:
 configuracion_competencia_2:
   FILE_INPUT_DATA: "datasets/competencia_02.csv"
   FILE_INPUT_DATA_CRUDO: "datasets/competencia_02_crudo.csv.gz"
-  MES_TRAIN: [202101, 202102, 202103]
+  MES_TRAIN: [202101, 202102, 202103,202104,202105,202106,202107]
   MES_TEST: [202104]
   MES_A_PREDECIR: 202108
   MES_01: 202101
