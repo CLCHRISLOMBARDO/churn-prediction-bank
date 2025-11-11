@@ -202,25 +202,24 @@ def guardar_iteracion(trial,ganancia_media_meseta,cliente_optimo,ganancia_max,be
 
 
 
-def graficos_bayesiana(study:Study, name: str):
+def graficos_bayesiana(study:Study, fecha:str,name: str):
     logger.info(f"Comienzo de la creacion de graficos de {name}")
     try:
         fig1 = plot_optimization_history(study)
-        fig1.write_image(path_output_bayesian_graf+f"{name}_graficos_opt_history.png")
+        fig1.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_opt_history.png")
 
         fig2 = plot_param_importances(study)
-        fig2.write_image(path_output_bayesian_graf+f"{name}_graficos_param_importances.png")
+        fig2.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_param_importances.png")
 
         fig3 = plot_slice(study)
-        fig3.write_image(path_output_bayesian_graf+f"{name}_graficos_slice.png")
+        fig3.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_slice.png")
 
         fig4 = plot_contour(study)
-        fig4.write_image(path_output_bayesian_graf+f"{name}_graficos_contour_all.png")
+        fig4.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_contour_all.png")
 
         fig5 = plot_contour(study, params=["num_leaves", "learning_rate"])
-        fig5.write_image(path_output_bayesian_graf+f"{name}_graficos_contour_specific.png")
+        fig5.write_image(path_output_bayesian_graf+f"{fecha}_{name}_graficos_contour_specific.png")
 
         logger.info(f" Gráficos guardados en {path_output_bayesian_graf}")
     except Exception as e:
         logger.error(f"Error al generar las gráficas: {e}")
-

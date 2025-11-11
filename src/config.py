@@ -49,9 +49,11 @@ try:
         N_EXPERIMENTO       = exp["N_EXPERIMENTO"]
         N_SEMILLAS_EXP      = exp["N_SEMILLAS_EXP"]
         TOP_MODELS          = exp["TOP_MODELS"]
+        MODEL_EXP           = exp["MODEL_EXP"]
 
         # =================== Optimización LGBM ===================
         N_BAYESIANA         = bayes.get("N_BAYESIANA")
+        MODEL_BAY           = bayes.get("MODEL_BAY")
         N_SEMILLAS_BAY      = bayes.get("N_SEMILLAS_BAY")
         N_TRIALS            = bayes.get("N_TRIALS", 35)
         N_BOOSTS            = bayes.get("N_BOOSTS", 1000)

@@ -15,7 +15,7 @@ from src.generadora_semillas import create_semilla
 from src.creacion_target import lanzar_creacion_clase_ternaria_binaria_peso
 from src_feateng.feat_eng_1 import lanzar_feat_eng
 from src_bayesianas.bayesiana_lgbm_2 import lanzar_bayesiana_lgbm
-
+from src_bayesianas.bayesiana_xgb_2 import lanzar_bayesiana_xgb
 from src_experimentos.experimento_eda import lanzar_eda
 from src_experimentos.experimento_1_lgbm_edited import lanzar_experimento
 
@@ -37,9 +37,11 @@ n_fe = N_FE
 # Conf exp
 n_experimento = N_EXPERIMENTO
 n_semillas_exp = N_SEMILLAS_EXP
+model_exp = MODEL_EXP
 # Conf bay
 n_bayesiana = N_BAYESIANA
 n_semillas_bay=N_SEMILLAS_BAY
+model_bay = MODEL_BAY
 # ---------------------------------------------------------------------------------------------------------------------------
 if proceso_ppal =="feat_eng":
     numero_proceso = n_fe
@@ -82,12 +84,17 @@ def main():
     elif proceso_ppal =="feat_eng":
         lanzar_feat_eng(fecha,n_fe ,proceso_ppal)
     elif proceso_ppal =="bayesiana":
-        lanzar_bayesiana_lgbm(fecha,semillas,n_bayesiana,proceso_ppal)
-        # lanzar_bayesiana_xgb(fecha,semillas,proceso_ppal)
+        if model_bay =="lgbm":
+            lanzar_bayesiana_lgbm(fecha,semillas,n_bayesiana,proceso_ppal)
+        elif model_bay =="xgb":
+            lanzar_bayesiana_xgb(fecha,semillas,n_bayesiana,proceso_ppal)
     elif proceso_ppal =="test_baye":
-        lanzar_bayesiana_lgbm(test,semillas,n_bayesiana,proceso_ppal)
-        # lanzar_bayesiana_xgb(test,semillas,proceso_ppal)
+        if model_bay =="lgbm":
+            lanzar_bayesiana_lgbm(test,semillas,n_bayesiana,proceso_ppal)
+        elif model_bay =="xgb":
+            lanzar_bayesiana_xgb(test,semillas,n_bayesiana,proceso_ppal)
     elif proceso_ppal =="test_exp":
+        if model_exp ==
         lanzar_experimento(test,semillas , n_experimento , proceso_ppal)
     elif proceso_ppal =="test_prediccion_final":
         lanzar_experimento(test,semillas , n_experimento , proceso_ppal)

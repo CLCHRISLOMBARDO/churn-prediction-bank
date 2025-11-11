@@ -23,6 +23,7 @@ configuracion_experimentos:
   N_EXPERIMENTO : 1
   N_SEMILLAS_EXP : 6
   TOP_MODELS : 3
+  MODEL_EXP : "xgb" #| "lgbm"
 
 configuracion_bayesiana:
   N_BAYESIANA: 2
@@ -34,6 +35,7 @@ configuracion_bayesiana:
   GANANCIA: 780000
   ESTIMULO: 20000
   N_FOLDS: 5
+  MODEL_BAY : "xgb" #| "lgbm"
 
 configuracion_gcp:
  # Completar con la info de la GCP

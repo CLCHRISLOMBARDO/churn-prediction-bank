@@ -8,11 +8,8 @@ import logging
 import json
 import lightgbm as lgb
 from src.config import *
-from src.loader import cargar_datos
-from src.constr_lista_cols import contruccion_cols , contrs_cols_dropear_feat_imp
 from src.preprocesamiento import split_train_test_apred
 from src.lgbm_optimizacion import optim_hiperp_binaria , graficos_bayesiana
-from src.lgbm_train_test import  entrenamiento_lgbm , prediccion_test_lgbm,grafico_feature_importance ,evaluacion_public_private
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 
 
