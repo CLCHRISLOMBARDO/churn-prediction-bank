@@ -21,47 +21,7 @@ costo_estimulo=ESTIMULO
 
 logger = logging.getLogger(__name__)
 
-def entrenamiento_lgbm_old(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, best_iter:int, best_parameters:dict[str, object],name:str,output_path:str,semilla:int)->lgb.Booster:
-    # name es para identificar 1rt_train o final_train
-    name=f"{name}_model_lgbm"
-    logger.info(f"Comienzo del entrenamiento del lgbm : {name} en el mes train : {X_train['foto_mes'].unique()}")
-        
-    best_iter = best_iter
-    print(f"Mejor cantidad de árboles para el mejor model {best_iter}")
-    params = {
-        'objective': 'binary',
-        'boosting_type': 'gbdt',
-        'first_metric_only': True,
-        'boost_from_average': True,
-        'feature_pre_filter': False,
-        'max_bin': 31,
-        'num_leaves': best_parameters['num_leaves'],
-        'learning_rate': best_parameters['learning_rate'],
-        'min_data_in_leaf': best_parameters['min_data_in_leaf'],
-        'feature_fraction': best_parameters['feature_fraction'],
-        'bagging_fraction': best_parameters['bagging_fraction'],
-        'seed': semilla,
-        'verbose': 0
-    }
 
-    train_data = lgb.Dataset(X_train,
-                            label=y_train_binaria,
-                            weight=w_train)
-
-    model_lgbm = lgb.train(params,
-                    train_data,
-                    num_boost_round=best_iter)
-
-    logger.info(f"comienzo del guardado en {output_path}")
-    try:
-        filename=output_path+f'{name}.txt'
-        model_lgbm.save_model(filename )                         
-        logger.info(f"Modelo {name} guardado en {filename}")
-        logger.info(f"Fin del entrenamiento del LGBM en el mes train : {X_train['foto_mes'].unique()}")
-    except Exception as e:
-        logger.error(f"Error al intentar guardar el modelo {name}, por el error {e}")
-        return
-    return model_lgbm
 
 def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, best_iter:int, best_parameters:dict[str, object],name:str,output_path:str,semilla:int)->lgb.Booster:
     name=f"{name}_model_lgbm"
