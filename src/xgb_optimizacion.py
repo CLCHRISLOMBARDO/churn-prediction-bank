@@ -39,7 +39,6 @@ def xgb_gan_eval(preds: np.ndarray, dtrain: xgb.DMatrix):
     preds: probabilidades (porque usamos binary:logistic)
     """
     weight = dtrain.get_weight()
-    # misma lógica que en LGBM
     ganancia = np.where(weight == 1.00002, ganancia_acierto, 0) - np.where(weight < 1.00002, costo_estimulo, 0)
     ganancia = ganancia[np.argsort(preds)[::-1]]
     ganancia = np.cumsum(ganancia)
