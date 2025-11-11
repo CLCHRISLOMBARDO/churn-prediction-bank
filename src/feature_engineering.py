@@ -8,41 +8,99 @@ import logging
 from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB
 logger = logging.getLogger(__name__)
 
-
-def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str] , tabla:str="df_completo") :
-    if columnas is None:
-        logger.info(f"No se realiza el dropeo de columnas. Solo la creacion de la tabla df")
-    else:
-        logger.info(f"Comienzo dropeo de {len(columnas)} columnas en la tabla {tabla}.")
-    
-   
+def copia_tabla():
+    logger.info(f"Copia de la tabla df_completo a df")
     sql = "create or replace table df as "
-    if columnas is None:
-        sql+=f"""SELECT *
-                from {tabla}"""
-    else:
-        sql+= "SELECT * EXCLUDE("
-        for i,c in enumerate(columnas):
+    sql+=f"""SELECT *
+            from df_completo"""
+    logger.info(f"Fin de la Copia de la tabla df_completo a df")
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"Finalizada la Copia de la tabla df_completo a df")
+    
+
+def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str]) :
+    logger.info(f"Comienzo del dropeo de las variables : {columnas}")
+
+    sql = "create or replace table df as "
+    logger.info(f"Comienzo dropeo de {len(columnas)} columnas en la tabla df.")
+    sql+= "SELECT * EXCLUDE("
+    for i,c in enumerate(columnas):
+        if c in df.columns:
             if i==0:
                 sql+=f" {c}"
             else:
                 sql+=f",{c}"
-        sql+= f") from {tabla}"
-    
-    # columnas_faltantes = [c for c in columnas if c not in df.columns]
-    # if len(columnas_faltantes)>0:
-    #     logger.error(f"{columnas_faltantes} no esta en el df columns")
-    #     raise
- 
+        else:
+            logger.warning(f"No se encontro la columna {c} en la tabla")
+    sql+= f") from df"
     try:
         conn=duckdb.connect(PATH_DATA_BASE_DB)
         conn.execute(sql)
         conn.close()
-        logger.info(f"Fin del dropeo de columnas.")
+        logger.info(f"Fin del dropeo de las variables : {columnas}.")
     except Exception as e:
         logger.error(f"Error al intentar crear en la base de datos --> {e}")
         raise
     return
+def feature_engineering_drop_meses( meses_a_dropear:list):
+    logger.info(f"Comienzo del dropeo de los meses {meses_a_dropear}")
+    query_meses = f"({meses_a_dropear[0]}"
+    for m in meses_a_dropear[1:]:
+        query_meses+= f", {m}"
+    query_meses+= ")"
+
+    sql = f"create or replace table df as "
+    sql += f"""select *
+                from df
+                where foto_mes not in {query_meses}"""
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"Fin del dropeo de los meses {meses_a_dropear}")
+    return
+
+
+def feature_engineering_correccion_variables_por_mes_por_media(df:pd.DataFrame , variable_meses_dict : dict):
+    """ Funcion para corregir las variables en los meses que estan feos
+    Hay que mandarle el diccionario de la siguiente forma :
+    variable_meses_dict={
+    "mrentabilidad":"(202106 , 202107)",
+    "cpayroll":"(202107,202108)"} 
+
+    Esto va a agregar una columna nueva llamada variable_corregida , en donde sea igual a la media de lso valores anterior y posterior, o si el mes esta bien, deja el valor por defecto
+    """
+    logger.info(f"Comienzo de la Correccion de las variables por media por mes de {variable_meses_dict}")
+    variables_no_corregidas = {k:v for k,v in variable_meses_dict.items() if f"{k}_corregida" not in df.columns}
+    variables_ya_corregidas = {k:v for k,v in variable_meses_dict.items() if f"{k}_corregida" in df.columns}
+    if len(variables_no_corregidas)==0:
+        logger.info(f"Ya se realizo la correcion de las variables y meses indicados : {variable_meses_dict}")
+        return
+    elif len(variables_no_corregidas)==len(variable_meses_dict):
+        logger.info(f"Nunca se realizo la correcion de las variables y meses indicados : {variable_meses_dict}")
+    elif len(variables_no_corregidas) < len(variable_meses_dict):
+        logger.info(f"ya se realizo la correcion de las variables y meses indicados : {variables_ya_corregidas}")
+        logger.info(f"Pero nunca se realizo la correcion de las variables y meses indicados : {variables_no_corregidas}")
+
+        
+    sql="create or replace table df_completo as "
+    sql+="select *"
+    for var,meses in variables_no_corregidas.items():
+        sql+=f""", if(foto_mes IN {meses} , 
+                (lag({var},1) over (partition by numero_de_cliente order by foto_mes) +  lead({var},1) over (partition by numero_de_cliente order by foto_mes))/2.0, 
+                {var}) as {var}_corregida"""
+    sql+=" from df_completo"
+    
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"Fin de la correccion de las variables por la media por mes de {variable_meses_dict}")
+    return
+
+    
+    
+
 def feature_engineering_percentil(df:pd.DataFrame , columnas:list[str],bins:int=20):
     logger.info("Comienzo de la transformacion en percentil")
 
@@ -68,27 +126,9 @@ def feature_engineering_percentil(df:pd.DataFrame , columnas:list[str],bins:int=
 
     
 def feature_engineering_lag(df:pd.DataFrame ,columnas:list[str],orden_lag:int=1 ):
-    """
-    Genera variables de lag para los atributos especificados utilizando SQL.
-  
-    Parameters:
-    -----------
-    df : pd.DataFrame
-        DataFrame con los datos
-    columnas : list
-        Lista de atributos para los cuales generar lags. Si es None, no se generan lags.
-    cant_lag : int, default=1
-        Cantidad de lags a generar para cada atributo
-  
-    Returns:
-    --------
-    pd.DataFrame
-        DataFrame con las variables de lag agregadas
-    """
+    
     logger.info(f"Comienzo Feature de lag")
 
-
-    # Armado de la consulta SQL
     orden_lag_ya_realizado=1
     marca_nueva_real=0
     while marca_nueva_real ==0 and orden_lag_ya_realizado <= orden_lag:
@@ -120,23 +160,7 @@ def feature_engineering_lag(df:pd.DataFrame ,columnas:list[str],orden_lag:int=1 
     return
 
 def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],orden_delta:int=1 ) :
-    """
-    Genera variables de delta para los atributos especificados utilizando SQL.
-  
-    Parameters:
-    -----------
-    df : pd.DataFrame
-        DataFrame con los datos
-    columnas : list
-        Lista de atributos para los cuales generar lags. Si es None, no se generan lags.
-    cant_lag : int, default=1
-        Cantidad de delta a generar para cada atributo
-  
-    Returns:
-    --------
-    pd.DataFrame
-        DataFrame con las variables de lag agregadas
-    """
+    
     logger.info(f"Comienzo feature de delta")
     orden_delta_ya_realizado=1
     marca_nueva_real=0
@@ -262,87 +286,87 @@ def feature_engineering_max_min(df : pd.DataFrame|np.ndarray , columnas:list[str
     return 
 
 
-def feature_engineering_rank(df: pd.DataFrame, columnas: list[str]) -> pd.DataFrame:
-    """
-    Genera variables de ranking para los atributos especificados utilizando SQL.
+# def feature_engineering_rank(df: pd.DataFrame, columnas: list[str]) -> pd.DataFrame:
+#     """
+#     Genera variables de ranking para los atributos especificados utilizando SQL.
 
-    Parameters:
-    -----------
-    df : pd.DataFrame
-        DataFrame con los datos
-    columnas : list[str]
-        Lista de atributos para los cuales generar rankings.
+#     Parameters:
+#     -----------
+#     df : pd.DataFrame
+#         DataFrame con los datos
+#     columnas : list[str]
+#         Lista de atributos para los cuales generar rankings.
 
-    Returns:
-    --------
-    pd.DataFrame
-        DataFrame con las variables de ranking agregadas
-    """
+#     Returns:
+#     --------
+#     pd.DataFrame
+#         DataFrame con las variables de ranking agregadas
+#     """
 
-    if not columnas:
-        raise ValueError("La lista de columnas no puede estar vacía")
+#     if not columnas:
+#         raise ValueError("La lista de columnas no puede estar vacía")
 
-    columnas_validas = [col for col in columnas if col in df.columns]
-    if not columnas_validas:
-        raise ValueError("Ninguna de las columnas especificadas existe en el DataFrame")
+#     columnas_validas = [col for col in columnas if col in df.columns]
+#     if not columnas_validas:
+#         raise ValueError("Ninguna de las columnas especificadas existe en el DataFrame")
 
-    logger.info(f"Realizando feature engineering RANK para {len(columnas_validas)} columnas: {columnas_validas}")
+#     logger.info(f"Realizando feature engineering RANK para {len(columnas_validas)} columnas: {columnas_validas}")
 
-    logger.info(f"Antes del ranking : la media de la columna {columnas_validas[0]} en 04 es de {df.loc[df['foto_mes']==202104,columnas_validas[0]].mean()}")
+#     logger.info(f"Antes del ranking : la media de la columna {columnas_validas[0]} en 04 es de {df.loc[df['foto_mes']==202104,columnas_validas[0]].mean()}")
 
-    rank_expressions = [
-        f"PERCENT_RANK() OVER (PARTITION BY foto_mes ORDER BY {col}) AS {col}_rank"
-        for col in columnas_validas
-    ]
+#     rank_expressions = [
+#         f"PERCENT_RANK() OVER (PARTITION BY foto_mes ORDER BY {col}) AS {col}_rank"
+#         for col in columnas_validas
+#     ]
 
-    sql = f"""
-    SELECT *,
-           {', '.join(rank_expressions)}
-    FROM df_completo
-    """
+#     sql = f"""
+#     SELECT *,
+#            {', '.join(rank_expressions)}
+#     FROM df_completo
+#     """
 
-    con = duckdb.connect(PATH_DATA_BASE_DB)
-    con.execute(sql)
-    con.close()
-    logger.info(f"Despues del ranking : la media de la columna {columnas_validas[0]} ")
-    logger.info(f"Feature engineering completado")
-    return 
+#     con = duckdb.connect(PATH_DATA_BASE_DB)
+#     con.execute(sql)
+#     con.close()
+#     logger.info(f"Despues del ranking : la media de la columna {columnas_validas[0]} ")
+#     logger.info(f"Feature engineering completado")
+#     return 
     
 
 
-def feature_engineering_max_min_2(df:pd.DataFrame|np.ndarray , columnas:list[str]) -> pd.DataFrame|np.ndarray:
-    """
-    Genera variables de max y min para los atributos especificados por numero de cliente  utilizando SQL.
+# def feature_engineering_max_min_2(df:pd.DataFrame|np.ndarray , columnas:list[str]) -> pd.DataFrame|np.ndarray:
+#     """
+#     Genera variables de max y min para los atributos especificados por numero de cliente  utilizando SQL.
   
-    Parameters:
-    -----------
-    df : pd.DataFrame
-        DataFrame con los datos
-    columnas : list
-        Lista de atributos para los cuales generar min y max. Si es None, no se generan lags.
-    cant_lag : int, default=1
-        Cantidad de delta a generar para cada atributo
+#     Parameters:
+#     -----------
+#     df : pd.DataFrame
+#         DataFrame con los datos
+#     columnas : list
+#         Lista de atributos para los cuales generar min y max. Si es None, no se generan lags.
+#     cant_lag : int, default=1
+#         Cantidad de delta a generar para cada atributo
   
-    Returns:
-    --------
-    pd.DataFrame
-        DataFrame con las variables de lag agregadas
-    """
-    logger.info(f"Comienzo feature max min. df shape: {df.shape}")
+#     Returns:
+#     --------
+#     pd.DataFrame
+#         DataFrame con las variables de lag agregadas
+#     """
+#     logger.info(f"Comienzo feature max min. df shape: {df.shape}")
       
-    sql="SELECT *"
-    for attr in columnas:
-        if attr in df.columns:
-            sql+=f", MAX({attr}) OVER (PARTITION BY numero_de_cliente) as MAX_{attr}, MIN({attr}) OVER (PARTITION BY numero_de_cliente) as MIN_{attr}"
-        else:
-            print(f"El atributo {attr} no se encuentra en el df")
+#     sql="SELECT *"
+#     for attr in columnas:
+#         if attr in df.columns:
+#             sql+=f", MAX({attr}) OVER (PARTITION BY numero_de_cliente) as MAX_{attr}, MIN({attr}) OVER (PARTITION BY numero_de_cliente) as MIN_{attr}"
+#         else:
+#             print(f"El atributo {attr} no se encuentra en el df")
     
-    sql+=" FROM df"
+#     sql+=" FROM df"
 
-    con = duckdb.connect(database=":memory:")
-    con.register("df", df)
-    df=con.execute(sql).df()
-    con.close()
-    logger.info(f"ejecucion max min finalizada. df shape: {df.shape}")
-    return df
+#     con = duckdb.connect(database=":memory:")
+#     con.register("df", df)
+#     df=con.execute(sql).df()
+#     con.close()
+#     logger.info(f"ejecucion max min finalizada. df shape: {df.shape}")
+#     return df
 

@@ -10,20 +10,13 @@ logger=logging.getLogger(__name__)
 
 def contruccion_cols(df:pd.DataFrame)->Tuple[list,list,list]:
     logger.info("Comienzo de la extraccion de la seleccion de las columnas")
-    # Columnas categoricas y numericas
-    cat_cols =[]
-    num_cols=[]
-    palabras_features_excluir=["_lag","delta","slope","_max","_min","ratio"]
+    palabras_features_excluir=["_lag","_delta","_slope","_max","_min","_ratio"]
     columnas_cleaned=[c for c in df.columns if not any(p in c for p in palabras_features_excluir)]
     
     col_drops=["numero_de_cliente","foto_mes","active_quarter","clase_ternaria","clase_binaria","clase_peso","cliente_edad","cliente_antiguedad"
            ,"Visa_fultimo_cierre","Visa_fultimo_cierre","Master_fultimo_cierre","Visa_Fvencimiento",
            "Master_Fvencimiento"]
-    for c in columnas_cleaned:
-        if (df[c].nunique() <= 5):
-            cat_cols.append(c)
-        else:
-            num_cols.append(c)
+ 
     lista_t=[c for c in list(map(lambda x : x if x[0]=='t' and x not in col_drops else np.nan ,columnas_cleaned )) if pd.notna(c)]
     lista_c=[c for c in list(map(lambda x : x if x[0]=='c' and x not in col_drops else np.nan ,columnas_cleaned )) if pd.notna(c)]
     lista_m=[c for c in list(map(lambda x : x if x[0]=='m' and x not in col_drops else np.nan ,columnas_cleaned )) if pd.notna(c)]
@@ -56,7 +49,39 @@ def contruccion_cols(df:pd.DataFrame)->Tuple[list,list,list]:
 
     return cols_percentil,cols_lag_delta_max_min_regl ,cols_ratios 
 
-    
+
+def cols_a_dropear_variable_originales_o_corregidas(df: pd.DataFrame, a_eliminar : str = "originales") -> list[str]:
+    """
+    La uso para eliminar las variables originales o las que corregi con la media
+    Es mas para dejar las variables originales o las que corregi
+    """
+    logger.info("Comienzo de la seleccion de  originales o corregidas para eliminar")
+    logger.info(f"Se eligio {a_eliminar} para eliminar")
+    variables_corregidas = [c for c in df.columns if "_corregida" in c]
+    variables_originales = list(map(lambda x : x.replace("_corregida",""), variables_corregidas))
+    if a_eliminar =="originales":
+        cols_a_dropear = variables_originales
+    elif a_eliminar =="corregidas":
+        cols_a_dropear = variables_corregidas
+    logger.info(f"Fin de la seleccion de {a_eliminar} para eliminar")
+    return cols_a_dropear
+
+def cols_a_dropear_variable_originales_o_percentiles(df: pd.DataFrame, a_eliminar : str = "originales") -> list[str]:
+    """
+    La uso para eliminar las variables originales , las primeras 150 y pico, o las percentiles
+    Es mas para dejar las variables originales o las de percentiles
+    """
+    logger.info("Comienzo de la seleccion de persentiles o originales para eliminar")
+    logger.info(f"Se eligio {a_eliminar} para eliminar")
+    variables_percentiles = [c for c in df.columns if "_percentil" in c]
+    variables_originales = list(map(lambda x : x.replace("_percentil","") , variables_percentiles))
+    if a_eliminar =="originales":
+        cols_a_dropear = variables_originales
+    elif a_eliminar =="percentiles":
+        cols_a_dropear = variables_percentiles
+    logger.info(f"Fin de la seleccion de {a_eliminar} para eliminar")
+    return cols_a_dropear
+
 def cols_a_dropear_variable_entera(df: pd.DataFrame, columnas_base: list[str]) -> list[str]:
     """
     A partir de columnas base (ej: 'mrentabilidad'), detecta también
@@ -67,20 +92,26 @@ def cols_a_dropear_variable_entera(df: pd.DataFrame, columnas_base: list[str]) -
       - min_mrentabilidad
       - slope_mrentabilidad
     """
-    # patrones que van antes o después del nombre base
-     # ej: delta_mrentabilidad
+    logger.info(f"Comienzo de la seleccion de la variable {columnas_base} ENTERA y todas sus derivadas para ELIMINAR")
+    
 
     cols_a_dropear = list({c for c in df.columns for col_drop in columnas_base if c.startswith(col_drop)})
+    if len(cols_a_dropear)==0:
+        logger.warning(f"No se encontro ninguna de las columnas en el df")
+    logger.info(f"Fin del proceso de la seleccion de la variable entera y todas sus derivadas para ELIMINAR")
     
     return cols_a_dropear
 
 
 def cols_a_dropear_variable_por_feat(df: pd.DataFrame, columnas_variables: list[str] , columnas_features:list[str]) -> list[str]:
+    logger.info(f"Comienzo de la seleccion de las variables {columnas_features} a elimnar por features {columnas_features}")
     cols_a_dropear =[]
     for cv in columnas_variables:
         for cf in columnas_features:
             cols_a_dropear.append(cv+cf)
     cols_a_dropear = [c for c in cols_a_dropear if c in df.columns]
+    logger.info(f"Fin de la seleccion de las variables a elimnar por feature {cols_a_dropear}")
+
     return cols_a_dropear
 
 
