@@ -19,8 +19,8 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     logger.info(f"Comienzo del experimento : {name}")
 
     # COPIA PARA EL BUCKETS A ELIMINAR ======================================
-    # copia_tabla_local_a_bucket()
-    # return
+    copia_tabla_local_a_bucket()
+    return
     # =========================================
     #DROPEO INICIAL DE MESES
 
