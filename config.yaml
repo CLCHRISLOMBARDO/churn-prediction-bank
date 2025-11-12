@@ -1,4 +1,4 @@
-COMPETENCIA: 2
+COMPETENCIA: 1
 # proceso_ppal : 
     # creacion_target_clase_ternaria
     # analisis_exploratorio 
@@ -6,9 +6,9 @@ COMPETENCIA: 2
     # bayesiana  | test_baye 
     # experimento |  test_exp
     # prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "feat_eng"
+PROCESO_PPAL: "test_baye"
 # SUSBAMPLEO EN PORCENTAJE
-SUBSAMPLEO : 0.05
+SUBSAMPLEO : 0.4
 
 
 configuracion_semilla:
@@ -39,7 +39,7 @@ configuracion_bayesiana:
 
 configuracion_gcp:
  # Completar con la info de la GCP
-  IN_GCP: True
+  IN_GCP: False
 
 configuracion_paths:
   place_path:

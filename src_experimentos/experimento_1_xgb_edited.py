@@ -19,7 +19,9 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
     n_semillas = len(semillas)
-    name=f"EXPERIMENTO_{numero}_{proceso_ppal}_{len(semillas)}_semillas"
+    name=f"{proceso_ppal}_{numero}_XGB_{len(semillas)}_SEMILLAS"
+
+
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name} con {n_semillas} semillas")
     
@@ -29,9 +31,7 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
         logger.info(f"LANZAMIENTO PARA EXP  CON {n_semillas} SEMILLAS")
         output_path_models = path_output_exp_model
         output_path_feat_imp = path_output_exp_feat_imp
-        output_path_graf_ganancia_hist_semillas=path_output_exp_graf_gan_hist_semillas
         output_path_graf_ganancia_hist_total =path_output_exp_graf_gan_hist_total
-        output_path_graf_ganancia_hist_grilla =path_output_exp_graf_gan_hist_grilla
         output_path_graf_curva_ganancia = path_output_exp_graf_curva_ganancia
         output_path_umbrales=path_output_exp_umbral
         logger.info(f"LANZAMIENTO PARA EXPERIMENTO {numero} CON {n_semillas} SEMILLAS")
@@ -44,8 +44,8 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
     # 4. Carga de mejores Hiperparametros
     logger.info("Ingreso de hiperparametros de una Bayesiana ya realizada")
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
-    numero_bayesiana_lgbm =N_BAYESIANA
-    modelo_etiqueta="xgb"
+    numero_bayesiana_xgb =N_BAYESIANA
+    modelo_etiqueta="XGB"
     cantidad_semillas =N_SEMILLAS_BAY
     cantidad_trials= N_TRIALS
     cantidad_boosts = N_BOOSTS
@@ -55,10 +55,10 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
         proceso_bayesiana = "test_baye"
     elif((proceso_ppal == "experimento" )or (proceso_ppal =="prediccion_final")):
         proceso_bayesiana = "bayesiana"
-    name_best_params_file_lgbm=f"best_params_{proceso_bayesiana}_{numero_bayesiana_lgbm}_{modelo_etiqueta}_{cantidad_semillas}_SEMILLAS_{cantidad_trials}_TRIALS_{cantidad_boosts}_BOOSTS.json"
+    name_best_params_file_xgb=f"best_params_{proceso_bayesiana}_{numero_bayesiana_xgb}_{modelo_etiqueta}_{cantidad_semillas}_SEMILLAS_{cantidad_trials}_TRIALS_{cantidad_boosts}_BOOSTS.json"
 
     try:
-        with open(path_output_bayesian_bestparams+name_best_params_file_lgbm, "r") as f:
+        with open(path_output_bayesian_bestparams+name_best_params_file_xgb, "r") as f:
             best_params_dict = json.load(f)
             logger.info(f"Correcta carga de los best params del {modelo_etiqueta} ")
 
@@ -100,24 +100,22 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
                 for i,semilla in enumerate(semillas):
                     logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
                     # Entrenamiento de los modelos --------
-                    name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train_lgbm"
-                    model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
+                    name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train"
+                    model_xgb = entrenamiento_xgb(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
                     
                     # Grafico features importances -------
-                    grafico_feature_importance(model_lgbm,X_train,name_semilla,output_path_feat_imp)
+                    grafico_feature_importance(model_xgb,X_train,name_semilla,output_path_feat_imp)
 
                     # Predicciones en test para cada modelo -------------
-                    y_pred_lgbm=prediccion_test_lgbm(X_test ,model_lgbm)
+                    y_pred_xgb=prediccion_test_xgb(X_test ,model_xgb)
 
-                    y_predicciones_lista.append(y_pred_lgbm)
+                    y_predicciones_lista.append(y_pred_xgb)
 
                     # Estadistica de ganancias -----------
-                    if (proceso_ppal =="experimento" or proceso_ppal =="test_exp"):
-                        guardar_umbral = False
-                    else:
-                        guardar_umbral=True
+                    guardar_umbral = False
+                    
 
-                    estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_lgbm ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
+                    estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_xgb ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
                     
                     estadisticas_ganancia_dict[semilla] = estadisticas_ganancia 
                     y_pred_sorted_dict[semilla] = y_pred_sorted
@@ -132,7 +130,7 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
                 y_predicciones_top_models.append(y_pred_ensamble)
                 logger.info("Fin del ensamblado ")
                 
-                name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train_lgbm"            
+                name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train"            
                 estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
                 estadisticas_ganancia_dict[semilla] = estadisticas_ganancia 
                 y_pred_sorted_dict[semilla] = y_pred_sorted
@@ -179,22 +177,22 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
             for i,semilla in enumerate(semillas):
                 logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
                 name_semilla=f"{name_trial}_SEMILLA_{semilla}_final_train"
-                model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
+                model_xgb = entrenamiento_xgb(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
                 # Grafico features importances
-                grafico_feature_importance(model_lgbm,X_train,name_semilla,output_path_feat_imp)
+                grafico_feature_importance(model_xgb,X_train,name_semilla,output_path_feat_imp)
 
                 # Predicciones en test para cada modelo
                 logger.info(f"Comienzo de la predicciones de apred  : {X_apred['foto_mes'].unique()} para cada modelo")
-                y_pred_lgbm=prediccion_test_lgbm(X_apred ,model_lgbm)
-                y_predicciones_lista.append(y_pred_lgbm)
+                y_pred_xgb=prediccion_test_xgb(X_apred ,model_xgb)
+                y_predicciones_lista.append(y_pred_xgb)
             
             if proceso_ppal =="prediccion_final" :
                 proceso_experimento = "experimento"
             elif proceso_ppal =="test_prediccion_final":
                 proceso_experimento = "test_exp"
-            estadisticas_ganancia_file =f"EXPERIMENTO_{numero}_{proceso_experimento}_{len(semillas)}_semillas"+ f"_TRIAL_{trial}_TOP_{orden_trial}.json"
+            estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_XGB_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}.json"
             file = path_output_exp_umbral+estadisticas_ganancia_file 
-            logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
+            logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")          
             try :
                 with open(file, "r") as f:
                     estadisticas_ganancia = json.load(f)
@@ -219,7 +217,7 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
             proceso_experimento = "experimento"
         elif proceso_ppal =="test_prediccion_final":
             proceso_experimento = "test_exp"
-        estadisticas_ganancia_file =f"EXPERIMENTO_{numero}_{proceso_experimento}_{len(semillas)}_semillas"+ f"_ENSAMBLE_FINAL_umbral_optimo.json"
+        estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_XGB_{len(semillas)}_SEMILLAS"+ f"_ENSAMBLE_FINAL_umbral_optimo.json"
         file = path_output_exp_umbral+estadisticas_ganancia_file 
 
         logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            

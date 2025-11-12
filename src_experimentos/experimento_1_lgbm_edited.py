@@ -18,7 +18,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
     n_semillas = len(semillas)
-    name=f"EXPERIMENTO_{numero}_{proceso_ppal}_{len(semillas)}_semillas"
+    name=f"{proceso_ppal}_{numero}_LGBM_{len(semillas)}_SEMILLAS"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name} con {n_semillas} semillas")
     
@@ -28,9 +28,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         logger.info(f"LANZAMIENTO PARA EXP  CON {n_semillas} SEMILLAS")
         output_path_models = path_output_exp_model
         output_path_feat_imp = path_output_exp_feat_imp
-        output_path_graf_ganancia_hist_semillas=path_output_exp_graf_gan_hist_semillas
         output_path_graf_ganancia_hist_total =path_output_exp_graf_gan_hist_total
-        output_path_graf_ganancia_hist_grilla =path_output_exp_graf_gan_hist_grilla
         output_path_graf_curva_ganancia = path_output_exp_graf_curva_ganancia
         output_path_umbrales=path_output_exp_umbral
         logger.info(f"LANZAMIENTO PARA EXPERIMENTO {numero} CON {n_semillas} SEMILLAS")
@@ -44,7 +42,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     logger.info("Ingreso de hiperparametros de una Bayesiana ya realizada")
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero_bayesiana_lgbm =N_BAYESIANA
-    modelo_etiqueta="lgbm"
+    modelo_etiqueta="LGBM"
     cantidad_semillas =N_SEMILLAS_BAY
     cantidad_trials= N_TRIALS
     cantidad_boosts = N_BOOSTS
@@ -131,7 +129,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 y_predicciones_top_models.append(y_pred_ensamble)
                 logger.info("Fin del ensamblado ")
                 
-                name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train_lgbm"            
+                name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train"            
                 estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
                 estadisticas_ganancia_dict[semilla] = estadisticas_ganancia 
                 y_pred_sorted_dict[semilla] = y_pred_sorted
@@ -191,7 +189,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 proceso_experimento = "experimento"
             elif proceso_ppal =="test_prediccion_final":
                 proceso_experimento = "test_exp"
-            estadisticas_ganancia_file =f"EXPERIMENTO_{numero}_{proceso_experimento}_{len(semillas)}_semillas"+ f"_TRIAL_{trial}_TOP_{orden_trial}.json"
+            estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}.json"
             file = path_output_exp_umbral+estadisticas_ganancia_file 
             logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
             try :
@@ -218,7 +216,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             proceso_experimento = "experimento"
         elif proceso_ppal =="test_prediccion_final":
             proceso_experimento = "test_exp"
-        estadisticas_ganancia_file =f"EXPERIMENTO_{numero}_{proceso_experimento}_{len(semillas)}_semillas"+ f"_ENSAMBLE_FINAL_umbral_optimo.json"
+        estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_ENSAMBLE_FINAL_umbral_optimo.json"
         file = path_output_exp_umbral+estadisticas_ganancia_file 
 
         logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            

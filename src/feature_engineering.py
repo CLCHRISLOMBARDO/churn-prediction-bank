@@ -40,7 +40,6 @@ def copia_tabla():
     sql = "create or replace table df as "
     sql+=f"""SELECT *
             from df_completo"""
-    logger.info(f"Fin de la Copia de la tabla df_completo a df")
     conn=duckdb.connect(PATH_DATA_BASE_DB)
     conn.execute(sql)
     conn.close()

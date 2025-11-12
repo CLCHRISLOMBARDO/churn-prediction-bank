@@ -27,7 +27,7 @@ def lanzar_bayesiana_lgbm(fecha:str , semillas:list,n_experimento:str|int ,proce
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
     # name=f"bayesiana_{numero}_lgbm_{fecha}"
-    name=f"{proceso_ppal}_{numero}_lgbm_{len(semillas)}_SEMILLAS_{N_TRIALS}_TRIALS_{N_BOOSTS}_BOOSTS"
+    name=f"{proceso_ppal}_{numero}_LGBM_{len(semillas)}_SEMILLAS_{N_TRIALS}_TRIALS_{N_BOOSTS}_BOOSTS"
     nombre_log=f"log_{name}_{fecha}"
     logger.info(f"Inicio de ejecucion del flujo : {name}")
 

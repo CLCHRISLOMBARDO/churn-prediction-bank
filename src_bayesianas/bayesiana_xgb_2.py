@@ -26,7 +26,7 @@ def lanzar_bayesiana_xgb(fecha:str , semillas:list,n_experimento:str|int ,proces
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero=n_experimento 
     #"""----------------------------------------------------------------------------------------------"""
-    name=f"{proceso_ppal}_{numero}_lgbm_{len(semillas)}_SEMILLAS_{N_TRIALS}_TRIALS_{N_BOOSTS}_BOOSTS"
+    name=f"{proceso_ppal}_{numero}_XGB_{len(semillas)}_SEMILLAS_{N_TRIALS}_TRIALS_{N_BOOSTS}_BOOSTS"
     nombre_log=f"log_{name}_{fecha}"
     logger.info(f"Inicio de ejecucion del flujo : {name}")
     
