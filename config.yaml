@@ -39,7 +39,7 @@ configuracion_bayesiana:
 
 configuracion_gcp:
  # Completar con la info de la GCP
-  IN_GCP: True
+  IN_GCP: False
 
 configuracion_paths:
   place_path:
