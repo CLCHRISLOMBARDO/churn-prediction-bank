@@ -19,8 +19,8 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     logger.info(f"Comienzo del experimento : {name}")
 
     # COPIA PARA EL BUCKETS A ELIMINAR ======================================
-    copia_tabla_local_a_bucket()
-    return
+    # copia_tabla_local_a_bucket()
+    # return
     # =========================================
     #DROPEO INICIAL DE MESES
 
@@ -38,7 +38,7 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     dict_prod_serv=cols_conteo_servicios_productos(df_completo_chiquito)
     for p_s, cols in dict_prod_serv.items():
         suma_de_prod_servs(df_completo_chiquito,cols,p_s)
-    return
+    
     
     # GANANCIAS Y GASTOS
     ganancias_gastos=cols_beneficios_presion_economica(df_completo_chiquito)
