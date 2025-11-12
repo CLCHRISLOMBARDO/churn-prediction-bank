@@ -23,8 +23,8 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     # =========================================
     #DROPEO INICIAL DE MESES
 
-    # meses_a_dropear=[202006] + [201900 + m for m in range(1,13)]
-    # feature_engineering_drop_meses(meses_a_dropear,"df_completo","df_completo")
+    meses_a_dropear=[202006] + [201900 + m for m in range(1,13)]
+    feature_engineering_drop_meses(meses_a_dropear,"df_completo","df_completo")
     
 
     # CORRECCION DE VARIABLES POR MES POR MEDIA

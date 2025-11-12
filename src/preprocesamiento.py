@@ -11,66 +11,66 @@ from src.config import SUBSAMPLEO
 logger = logging.getLogger(__name__)
 
 
-def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
-    logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
-    mes_train_sql = f"{mes_train[0]}"
-    for m in mes_train[1:]:    
-        mes_train_sql += f",{m}"
-    sql_train=f"""select *
-                from df_completo
-                where foto_mes IN ({mes_train_sql})"""
-    if isinstance(mes_test,list):
-        mes_test_sql = f"{mes_test[0]}"
-        for m in mes_test[1:]:    
-            mes_test_sql += f",{m}"
-        sql_test=f"""select *
-                    from df_completo
-                    where foto_mes IN ({mes_test_sql})"""
-    elif isinstance(mes_test,int):
-        mes_test_sql = f"{mes_test}"
-        sql_test=f"""select *
-                    from df_completo
-                    where foto_mes = {mes_test_sql}"""
+# def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
+#     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
+#     mes_train_sql = f"{mes_train[0]}"
+#     for m in mes_train[1:]:    
+#         mes_train_sql += f",{m}"
+#     sql_train=f"""select *
+#                 from df_completo
+#                 where foto_mes IN ({mes_train_sql})"""
+#     if isinstance(mes_test,list):
+#         mes_test_sql = f"{mes_test[0]}"
+#         for m in mes_test[1:]:    
+#             mes_test_sql += f",{m}"
+#         sql_test=f"""select *
+#                     from df_completo
+#                     where foto_mes IN ({mes_test_sql})"""
+#     elif isinstance(mes_test,int):
+#         mes_test_sql = f"{mes_test}"
+#         sql_test=f"""select *
+#                     from df_completo
+#                     where foto_mes = {mes_test_sql}"""
         
-    mes_apred_sql = f"{mes_apred}"
-    sql_apred=f"""select *
-                from df_completo
-                where foto_mes = {mes_apred_sql}"""
+#     mes_apred_sql = f"{mes_apred}"
+#     sql_apred=f"""select *
+#                 from df_completo
+#                 where foto_mes = {mes_apred_sql}"""
     
-    conn=duckdb.connect(PATH_DATA_BASE_DB)
-    train_data = conn.execute(sql_train).df()
-    test_data = conn.execute(sql_test).df()
-    apred_data = conn.execute(sql_apred).df()
-    conn.close()
-    if subsampleo is not None:
-        train_data=undersampling(train_data , subsampleo,semilla)
+#     conn=duckdb.connect(PATH_DATA_BASE_DB)
+#     train_data = conn.execute(sql_train).df()
+#     test_data = conn.execute(sql_test).df()
+#     apred_data = conn.execute(sql_apred).df()
+#     conn.close()
+#     if subsampleo is not None:
+#         train_data=undersampling(train_data , subsampleo,semilla)
 
-    # TRAIN
-    X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria'], axis=1)
-    y_train_binaria = train_data['clase_binaria']
-    y_train_class=train_data["clase_ternaria"]
-    w_train = train_data['clase_peso']
+#     # TRAIN
+#     X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria'], axis=1)
+#     y_train_binaria = train_data['clase_binaria']
+#     y_train_class=train_data["clase_ternaria"]
+#     w_train = train_data['clase_peso']
 
-    # TEST
-    X_test = test_data.drop(['clase_ternaria', 'clase_peso','clase_binaria'], axis=1)
-    y_test_binaria = test_data['clase_binaria']
-    y_test_class = test_data['clase_ternaria']
-    w_test = test_data['clase_peso']
+#     # TEST
+#     X_test = test_data.drop(['clase_ternaria', 'clase_peso','clase_binaria'], axis=1)
+#     y_test_binaria = test_data['clase_binaria']
+#     y_test_class = test_data['clase_ternaria']
+#     w_test = test_data['clase_peso']
 
 
-    # A PREDECIR
-    X_apred = apred_data.drop(['clase_ternaria', 'clase_peso','clase_binaria'], axis=1)
-    y_apred=X_apred[["numero_de_cliente"]] # DF
+#     # A PREDECIR
+#     X_apred = apred_data.drop(['clase_ternaria', 'clase_peso','clase_binaria'], axis=1)
+#     y_apred=X_apred[["numero_de_cliente"]] # DF
   
 
-    logger.info(f"X_train shape : {X_train.shape} / y_train shape : {y_train_binaria.shape} de los meses : {X_train['foto_mes'].unique()}")
-    logger.info(f"X_test shape : {X_test.shape} / y_test shape : {y_test_binaria.shape}  del mes : {X_test['foto_mes'].unique()}")
-    logger.info(f"X_apred shape : {X_apred.shape} / y_apred shape : {y_apred.shape}  del mes : {X_apred['foto_mes'].unique()}")
+#     logger.info(f"X_train shape : {X_train.shape} / y_train shape : {y_train_binaria.shape} de los meses : {X_train['foto_mes'].unique()}")
+#     logger.info(f"X_test shape : {X_test.shape} / y_test shape : {y_test_binaria.shape}  del mes : {X_test['foto_mes'].unique()}")
+#     logger.info(f"X_apred shape : {X_apred.shape} / y_apred shape : {y_apred.shape}  del mes : {X_apred['foto_mes'].unique()}")
 
-    logger.info(f"cantidad de baja y continua en train:{np.unique(y_train_binaria,return_counts=True)}")
-    logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
-    logger.info("Finalizacion label binario")
-    return X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test ,X_apred , y_apred 
+#     logger.info(f"cantidad de baja y continua en train:{np.unique(y_train_binaria,return_counts=True)}")
+#     logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
+#     logger.info("Finalizacion label binario")
+#     return X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test ,X_apred , y_apred 
 
 def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
