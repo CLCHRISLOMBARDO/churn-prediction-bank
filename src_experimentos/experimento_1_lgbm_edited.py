@@ -79,7 +79,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         elif isinstance(MES_TEST,list):
             mes_test = MES_TEST
         mes_train = MES_TRAIN
-
         for mt in mes_test:
             logger.info(f"========================Comienzo del analisis en el mes test :{mt} ==============================")
             X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,mt,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
@@ -189,7 +188,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 proceso_experimento = "experimento"
             elif proceso_ppal =="test_prediccion_final":
                 proceso_experimento = "test_exp"
-            estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}.json"
+            estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}_MES_TEST_{MES_TEST[-1]}.json"
             file = path_output_exp_umbral+estadisticas_ganancia_file 
             logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
             try :
@@ -216,7 +215,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             proceso_experimento = "experimento"
         elif proceso_ppal =="test_prediccion_final":
             proceso_experimento = "test_exp"
-        estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_ENSAMBLE_FINAL_umbral_optimo.json"
+        estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_ENSAMBLE_FINAL_MES_TEST_{MES_TEST[-1]}_umbral_optimo.json"
         file = path_output_exp_umbral+estadisticas_ganancia_file 
 
         logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            

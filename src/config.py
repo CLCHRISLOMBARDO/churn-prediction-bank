@@ -72,7 +72,7 @@ try:
             PLACE_PATHS = paths["place_path"]["LOCAL_PATH"]
 
         # ================= Rutas de INPUT / LOG ==================
-        PATH_DATA_BASE_DB     =  PLACE_PATHS + inp["PATH_DATA_BASE_DB"]
+        PATH_DATA_BASE_DB     =    inp["PATH_DATA_BASE_DB"] # --------------------------------------------<
         PATH_INPUT_DATA       = PLACE_PATHS + inp["PATH_INPUT_DATA"]
         FILE_INPUT_DATA       = PLACE_PATHS + comp["FILE_INPUT_DATA"]
         FILE_INPUT_DATA_CRUDO = PLACE_PATHS + comp["FILE_INPUT_DATA_CRUDO"]
@@ -88,7 +88,7 @@ try:
         PATH_OUTPUT_EDA          = PLACE_PATHS + out["PATH_OUTPUT_EDA"]
 
         # ============= PATH_OUTPUT_BAYESIAN (detallados) =========
-        path_output_bayesian_db         = PLACE_PATHS + out_bayes["PATH_OUTPUT_BAYESIAN_DB"]
+        path_output_bayesian_db         =  out_bayes["PATH_OUTPUT_BAYESIAN_DB"]# --------------------------------------------<
         path_output_bayesian_bestparams = PLACE_PATHS + out_bayes["PATH_OUTPUT_BAYESIAN_BESTPARAMS"]
         path_output_bayesian_best_iter  = PLACE_PATHS + out_bayes["PATH_OUTPUT_BAYESIAN_BEST_ITER"]
         path_output_bayesian_graf       = PLACE_PATHS + out_bayes["PATH_OUTPUT_BAYESIAN_GRAF"]

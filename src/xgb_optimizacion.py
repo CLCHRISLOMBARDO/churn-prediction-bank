@@ -56,7 +56,7 @@ def xgb_gan_eval_ensamble(preds: np.ndarray, dtrain: xgb.DMatrix):
     logger.info(f"cliente optimo : {idx_max_gan}")
     ganancia_media_meseta = np.mean(ganancia_acumulada[idx_max_gan-500 : idx_max_gan+500])
     logger.info(f"ganancia media meseta : {ganancia_media_meseta}")
-    return 'gan_eval', float(ganancia_media_meseta)
+    return  float(ganancia_media_meseta),int(idx_max_gan),float(ganancia_maxima)
 
 
 def optim_hiperp_binaria_xgb(X_train: pd.DataFrame| pl.DataFrame,y_train_binaria: pd.Series|pl.Series,w_train: pd.Series|pl.Series,n_trials: int, name:str,fecha,semillas:list)-> Study:
@@ -107,7 +107,7 @@ def optim_hiperp_binaria_xgb(X_train: pd.DataFrame| pl.DataFrame,y_train_binaria
             'lambda': reg_lambda,
             'alpha': reg_alpha,
             # 'seed': SEMILLA,
-            'verbosity': -1
+            'verbosity': 0
         }
         es_rounds = int(50 + 5 / eta)
         dtrain = xgb.DMatrix(data=X_train,label=y_train_binaria.values,weight=w_train.values )
@@ -121,14 +121,20 @@ def optim_hiperp_binaria_xgb(X_train: pd.DataFrame| pl.DataFrame,y_train_binaria
                 dtrain=dtrain,
                 num_boost_round=N_BOOSTS,
                 evals=[(dval, "valid")],
-                feval=xgb_gan_eval_individual,
-                maximize=True, 
-                early_stopping_rounds=es_rounds,
+                custom_metric=xgb_gan_eval_individual,
+                callbacks=[
+                    xgb.callback.EarlyStopping(
+                        rounds=es_rounds,
+                        metric_name="gan_eval",  
+                        save_best=True,
+                        maximize=True
+                    )
+                ],
                 verbose_eval=False
             )
-            best_ntree = model_i.best_ntree_limit
-            best_iters.append(best_ntree)
-            y_pred_i = model_i.predict(dval, ntree_limit=best_ntree)
+            best_iter = model_i.best_iteration
+            best_iters.append(best_iter)
+            y_pred_i = model_i.predict(dval, iteration_range=(0, best_iter + 1))
             y_preds.append(y_pred_i)
 
         y_preds_matrix = np.vstack(y_preds)    

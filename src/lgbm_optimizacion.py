@@ -26,7 +26,6 @@ def lgb_gan_eval_individual(y_pred, data):
     logger.info("Calculo ganancia INDIVIDUAL")
     weight = data.get_weight()
     ganancia = np.where(weight == 1.00002, GANANCIA, 0) - np.where(weight < 1.00002, ESTIMULO, 0)
-    logger.info(f"ganancia : {ganancia}")
     ganancia = ganancia[np.argsort(y_pred)[::-1]]
     ganancia = np.cumsum(ganancia)
     #con polars
@@ -45,7 +44,6 @@ def lgb_gan_eval_ensamble(y_pred , data):
     logger.info("Calculo ganancia ENSAMBLE")
     weight = data.get_weight()
     ganancia =np.where(weight == 1.00002 , GANANCIA, 0) - np.where(weight < 1.00002 , ESTIMULO ,0)
-    logger.info(f"ganancia : {ganancia}")
     ganancia_sorted = ganancia[np.argsort(y_pred)[::-1]]
     ganancia_acumulada = np.cumsum(ganancia_sorted)
     ganancia_max = np.max(ganancia_acumulada)
@@ -85,12 +83,8 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
         min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 10, 1600)
         feature_fraction = trial.suggest_float('feature_fraction', 0.1, 1.0)
         bagging_fraction = trial.suggest_float('bagging_fraction', 0.1, 1.0)
-        max_depth = trial.suggest_int('max_depth', 3, 16)
-        min_child_samples = trial.suggest_int('min_child_samples', 5, 200)
-        min_child_weight = trial.suggest_float('min_child_weight', 1e-3, 100.0, log=True)
-        lambda_l1 = trial.suggest_float('lambda_l1', 1e-3, 100.0, log=True)
-        lambda_l2 = trial.suggest_float('lambda_l2', 1e-3, 100.0, log=True)
-        min_split_gain = trial.suggest_float('min_split_gain', 0.0, 2.0)
+        lambda_l1 = trial.suggest_float('lambda_l1', 1e-3, 10.0, log=True)
+        lambda_l2 = trial.suggest_float('lambda_l2', 1e-3, 10.0, log=True)
         # Agregar maxdepth
         # Agregar lo de regularizacion
 
@@ -108,12 +102,8 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
             'feature_fraction': feature_fraction,
             'bagging_fraction': bagging_fraction,
             'bagging_freq': 1 , # 
-            'max_depth': max_depth,
-            'min_child_samples':min_child_samples,
-            'min_child_weight':min_child_weight,
             'lambda_l1':lambda_l1,
             'lambda_l2':lambda_l2,
-            'min_split_gain':min_split_gain,
             'extra_trees' : True,
             'verbose': -1
         }

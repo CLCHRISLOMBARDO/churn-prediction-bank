@@ -13,6 +13,7 @@ import datetime
 import pickle
 import json
 import os
+from typing import Any
 
 from src.config import GANANCIA,ESTIMULO
 
@@ -59,37 +60,63 @@ def entrenamiento_xgb(X_train: pd.DataFrame,y_train_binaria: pd.Series,w_train: 
     return model_xgb
 
 
-
-def grafico_feature_importance(model_xgb,X_train:pd.DataFrame,name:str,output_path:str):
+def grafico_feature_importance(model_xgb: Any, X_train: pd.DataFrame, name: str, output_path: str):
     logger.info("Comienzo del grafico de feature importance")
-    name=f"{name}_feature_importance"
+    os.makedirs(output_path, exist_ok=True)
+    name = f"{name}_feature_importance"
+
+    booster = model_xgb.get_booster() if hasattr(model_xgb, "get_booster") else model_xgb
+
     try:
-        xgb.plot_importance(model_xgb, figsize=(10, 20))
-        plt.savefig(output_path+f"{name}_grafico.png", bbox_inches='tight')
-        plt.close()
+        if isinstance(booster, xgb.Booster) and (booster.feature_names is None or any(f.startswith("f") for f in booster.feature_names)):
+            booster.feature_names = X_train.columns.tolist()
+    except Exception:
+        pass  
+
+    try:
+        fig = plt.figure(figsize=(10, 20))
+        ax = fig.add_subplot(111)
+        xgb.plot_importance(
+            booster,
+            ax=ax,
+            importance_type="gain",    
+            show_values=False,
+            max_num_features=50
+        )
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_path, f"{name}_grafico.png"), bbox_inches="tight")
+        plt.close(fig)
     except Exception as e:
         logger.error(f"Error al intentar graficar los feat importances: {e}")
-    logger.info("Fin del grafico de feature importance")
 
-    importances = model_xgb.feature_importance()
-    feature_names = X_train.columns.tolist()
-    importance_df = pd.DataFrame({'feature': feature_names, 'importance': importances})
-    importance_df = importance_df.sort_values('importance', ascending=False)
-    importance_df["importance_%"] = (importance_df["importance"] /importance_df["importance"].sum())*100
-    # importance_df[importance_df['importance'] > 0]
-    logger.info("Guardado de feat import en excel")
-    try :
-        importance_df.to_excel(output_path+f"{name}_data_frame.xlsx" ,index=False)
-        logger.info("Guardado feat imp en excel con EXITO")
+    try:
+        scores = booster.get_score(importance_type="gain")
+        if not scores:
+            logger.warning("get_score() devolvió un dict vacío; puede que el modelo no tenga importancias disponibles.")
+            importance_df = pd.DataFrame(columns=["feature", "importance", "importance_%"])
+        else:
+            mapping = {f"f{i}": col for i, col in enumerate(X_train.columns)}
+            importance_df = (pd.Series(scores, name="importance")
+                               .rename(index=lambda k: mapping.get(k, k))
+                               .reset_index()
+                               .rename(columns={"index": "feature"}))
+            importance_df = importance_df.sort_values("importance", ascending=False)
+            total = importance_df["importance"].sum()
+            importance_df["importance_%"] = (importance_df["importance"] / total * 100.0) if total else 0.0
+
+        importance_df.to_excel(os.path.join(output_path, f"{name}_data_frame.xlsx"), index=False)
+        logger.info("Guardado feat imp en excel con ÉXITO")
     except Exception as e:
         logger.error(f"Error al intentar guardar los feat imp en excel por {e}")
 
-def prediccion_test_xgb(X:pd.DataFrame ,  model_xgb: xgb.Booster)-> pd.Series:
+    logger.info("Fin del grafico de feature importance")
+
+def prediccion_test_xgb(X, model_xgb):
     mes=X["foto_mes"].unique()
     logger.info(f"comienzo prediccion del modelo en el mes {mes}")
-    y_pred_xgb = model_xgb.predict(X)
+    dtest = xgb.DMatrix(X) 
+    y_pred = model_xgb.predict(dtest)
     logger.info("Fin de la prediccion del modelo")
-    return y_pred_xgb
-
+    return y_pred
 
 # Los calculos de curvas de ganancias e histograma estan en el lgbm

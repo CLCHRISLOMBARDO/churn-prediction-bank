@@ -190,7 +190,7 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
                 proceso_experimento = "experimento"
             elif proceso_ppal =="test_prediccion_final":
                 proceso_experimento = "test_exp"
-            estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_XGB_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}.json"
+            estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_XGB_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}_MES_TEST_{MES_TEST[-1]}.json"
             file = path_output_exp_umbral+estadisticas_ganancia_file 
             logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")          
             try :
@@ -217,7 +217,7 @@ def lanzar_experimento_xgb(fecha:str ,semillas:list[int],n_experimento:int,proce
             proceso_experimento = "experimento"
         elif proceso_ppal =="test_prediccion_final":
             proceso_experimento = "test_exp"
-        estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_XGB_{len(semillas)}_SEMILLAS"+ f"_ENSAMBLE_FINAL_umbral_optimo.json"
+        estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_XGB_{len(semillas)}_SEMILLAS"+ f"_ENSAMBLE_FINAL_MES_TEST_{MES_TEST[-1]}_umbral_optimo.json"
         file = path_output_exp_umbral+estadisticas_ganancia_file 
 
         logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            

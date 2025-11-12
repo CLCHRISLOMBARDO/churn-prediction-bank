@@ -43,15 +43,11 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:p
         'feature_fraction': best_parameters['feature_fraction'],
         'bagging_fraction': best_parameters['bagging_fraction'],
         'bagging_freq': 1,
-        'max_depth': best_parameters['max_depth'],
-        'min_child_samples': best_parameters['min_child_samples'],
-        'min_child_weight': best_parameters['min_child_weight'],
         'lambda_l1': best_parameters['lambda_l1'],
         'lambda_l2': best_parameters['lambda_l2'],
-        'min_split_gain': best_parameters['min_split_gain'],
         'extra_trees': True,
         'seed': semilla,
-        'verbose': 0,
+        'verbose': -1,
     }
 
     train_data = lgb.Dataset(X_train,
@@ -435,22 +431,6 @@ def graf_hist_ganancias_public_private(df_lb_long:pd.DataFrame|list[pd.DataFrame
 
 ## PREDICCION FINAL-------------------------------------------------------------------
 
-def prediccion_apred_prob(X_apred:pd.DataFrame , y_apred:pd.DataFrame , model_lgbm:lgb.Booster, umbral:float,fecha:str,comentario:str)->pd.DataFrame:
-    name=fecha+"_predicciones"
-    logger.info(f"Comienzo de las predicciones del mes {X_apred['foto_mes'].unique()} ")
-    y_pred=model_lgbm.predict(X_apred)
-    y_apred["prediction"] = y_pred
-    y_apred["prediction"]=y_apred["prediction"].apply(lambda x : 1 if x >= umbral else 0)
-    logger.info(f"cantidad de bajas predichas : {(y_apred['prediction']==1).sum()}")
-    y_apred=y_apred.set_index("numero_de_cliente")
-    file_name=prediccion_final_path+name+"_"+comentario+".csv"
-    try:
-        y_apred.to_csv(file_name)
-        logger.info(f"predicciones guardadas en {file_name}")
-    except Exception as e:
-        logger.error(f"Error al intentar guardar las predicciones --> {e}")
-        raise
-    return y_apred
 
 def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series ,umbral_cliente:int , name:str ,output_path:str) -> pd.DataFrame:
     logger.info("Comienzo de la preparacion de las predicciones finales")

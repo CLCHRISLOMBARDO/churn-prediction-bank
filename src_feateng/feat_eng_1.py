@@ -46,7 +46,7 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
 
 
     # PERCENTIL
-    # df_completo_chiquito=creacion_df_small("df_completo") # Para agregar las columnas de las corregidas
+    df_completo_chiquito=creacion_df_small("df_completo") # Para agregar las columnas de las corregidas
     cols_percentil,_,_=contruccion_cols(df_completo_chiquito)
     feature_engineering_percentil(df_completo_chiquito ,cols_percentil,bins=20)
 
@@ -63,10 +63,11 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     feature_engineering_linreg(df_completo_chiquito , cols_lag_delta_max_min_regl,VENTANA)
     feature_engineering_max_min(df_completo_chiquito,cols_lag_delta_max_min_regl ,VENTANA)
     # Si in_gcp True, entonces estoy en el buckets, entonces hacemos solo una copia de la df ocmpleto a un df ya en el bucket
-    if in_gcp:
-        copia_tabla()
-    else:
-        copia_tabla_local_a_bucket()
+    copia_tabla()
+    # if in_gcp:
+    #     copia_tabla()
+    # else:
+    #     copia_tabla_local_a_bucket()
 
     
     #COPIA DE TABLA df_completo a df
