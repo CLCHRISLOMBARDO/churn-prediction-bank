@@ -19,12 +19,11 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     logger.info(f"Comienzo del experimento : {name}")
 
     # COPIA PARA EL BUCKETS A ELIMINAR ======================================
-    # copia_tabla_local_a_bucket()
-    # return
+    
     # =========================================
     #DROPEO INICIAL DE MESES
 
-    meses_a_dropear=[202106] + [201900 + m for m in range(1,13)]
+    meses_a_dropear=[202006] + [201900 + m for m in range(1,13)]
     feature_engineering_drop_meses(meses_a_dropear,"df_completo","df_completo")
     
 
@@ -63,9 +62,15 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     feature_engineering_delta(df_completo_chiquito,cols_lag_delta_max_min_regl,VENTANA)
     feature_engineering_linreg(df_completo_chiquito , cols_lag_delta_max_min_regl,VENTANA)
     feature_engineering_max_min(df_completo_chiquito,cols_lag_delta_max_min_regl ,VENTANA)
+    # Si in_gcp True, entonces estoy en el buckets, entonces hacemos solo una copia de la df ocmpleto a un df ya en el bucket
+    if in_gcp:
+        copia_tabla()
+    else:
+        copia_tabla_local_a_bucket()
+
     
     #COPIA DE TABLA df_completo a df
-    copia_tabla()
+    # copia_tabla()
 
     # ------------- a partir de aca se trabaja con df------------------------#
 
