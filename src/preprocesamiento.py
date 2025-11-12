@@ -9,6 +9,14 @@ import logging
 import duckdb
 from src.config import SUBSAMPLEO
 logger = logging.getLogger(__name__)
+# columnas problemáticas (las que te tiró LightGBM)
+ERR_COLS = (
+    ["tmobile_app", "cmobile_app_trx",
+     "cmobile_app_trx_max", "cmobile_app_trx_min",
+     "tmobile_app_max", "tmobile_app_min"]
+    + [f"cmobile_app_trx_lag_{i}" for i in range(1, 5)]
+    + [f"tmobile_app_lag_{i}" for i in range(1, 5)]
+)
 
 
 def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
@@ -70,6 +78,10 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     logger.info(f"cantidad de baja y continua en train:{np.unique(y_train_binaria,return_counts=True)}")
     logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
     logger.info("Finalizacion label binario")
+    # ÚSALO justo antes de entrenar:
+    X_train = coerce_numeric_cols(X_train, ERR_COLS, fillna_val=0.0)
+    X_test  = coerce_numeric_cols(X_test,  ERR_COLS, fillna_val=0.0)
+    X_apred = coerce_numeric_cols(X_apred, ERR_COLS, fillna_val=0.0)
     return X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test ,X_apred , y_apred 
 
 # def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
@@ -254,4 +266,20 @@ def undersampling(df:pd.DataFrame ,undersampling_rate:float , semilla:int) -> pd
 
     df_train_undersampled = df_train_undersampled.sample(frac=1, random_state=semilla).reset_index(drop=True)
     return df_train_undersampled
+
+
+
+def coerce_numeric_cols(df: pd.DataFrame, cols: list[str], fillna_val: float = 0.0) -> pd.DataFrame:
+    df = df.copy()
+    # solo las que EXISTEN en el df (para evitar KeyError)
+    cols = [c for c in cols if c in df.columns]
+    if not cols:
+        return df
+    # normaliza espacios, coma->punto y fuerza numérico
+    for c in cols:
+        s = df[c].astype(str).str.strip().replace({"": np.nan})
+        s = s.str.replace(",", ".", regex=False)
+        df[c] = pd.to_numeric(s, errors="coerce").fillna(fillna_val)
+    return df
+
 
