@@ -12,15 +12,14 @@ from src.feature_engineering import copia_tabla_local_a_bucket,copia_tabla,featu
 logger=logging.getLogger(__name__)
 
 def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
+    copia_tabla("df_inicial","df_completo")
     numero=n_fe
     #"""----------------------------------------------------------------------------------------------"""
     name=f"FEAT_ENG_{numero}_{proceso_ppal}_VENTANA_{VENTANA}"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name}")
 
-    # COPIA PARA EL BUCKETS A ELIMINAR ======================================
-    
-    # =========================================
+  
    
 
     # SERVICIOS Y PRODUCTOS
@@ -47,7 +46,7 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     feature_engineering_delta(df_completo_chiquito,cols_lag_delta_max_min_regl,ORDEN_LAGS)
  
     # Si in_gcp True, entonces estoy en el buckets, entonces hacemos solo una copia de la df ocmpleto a un df ya en el bucket
-    copia_tabla()
+    copia_tabla("df_completo","df")
     # if in_gcp:
     #     copia_tabla()
     # else:

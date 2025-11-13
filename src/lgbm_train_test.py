@@ -23,12 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 
-def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:pd.Series, best_iter:int, best_parameters:dict[str, object],name:str,output_path:str,semilla:int)->lgb.Booster:
+def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarray,w_train:pd.Series|np.ndarray, best_iter:int, best_parameters:dict[str, object],name:str,output_path:str,semilla:int)->lgb.Booster:
     name=f"{name}_model_lgbm"
-    logger.info(f"Comienzo del entrenamiento del lgbm : {name} en el mes train : {X_train['foto_mes'].unique()}")
-        
+    logger.info(f"Comienzo del entrenamiento del lgbm : {name} en el mes train : {X_train['foto_mes'].unique()}")    
     print(f"Mejor cantidad de árboles para el mejor model best iter : {best_iter}")
-
     params = {
         'objective': 'binary',
         'metric': 'none',              
@@ -69,6 +67,41 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series,w_train:p
         return
     return model_lgbm
 
+
+def entrenamiento_lgbm_zs(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarray,w_train:pd.Series|np.ndarray,best_iter:int, best_parameters:dict[str, object],name:str,output_path:str,semilla:int)->lgb.Booster:
+    name=f"{name}_model_lgbm"
+    logger.info(f"Comienzo del entrenamiento del lgbm con ZS : {name} en el mes train : {X_train['foto_mes'].unique()}")    
+    print(f"Mejor cantidad de árboles para el mejor model best iter : {best_iter}")
+    params = best_parameters
+    params["seed"]=semilla
+    params["max_bin"]=31
+    if params["feature_fraction"]==1.0:
+        params["feature_fraction"]=0.8
+    if params["bagging_fraction"]==1.0:
+        params["bagging_fraction"]=0.8
+    
+    params["bagging_freq"] = 1
+
+    
+
+    logger.info(f"semilla del entrenamiento :{params['seed']}")
+    train_data = lgb.Dataset(X_train,
+                            label=y_train_binaria,
+                            weight=w_train)
+    model_lgbm = lgb.train( params,
+                      train_set=train_data,
+                      num_boost_round=int(best_iter))   
+
+    logger.info(f"comienzo del guardado en {output_path}")
+    try:
+        filename=output_path+f'{name}.txt'
+        model_lgbm.save_model(filename )                         
+        logger.info(f"Modelo {name} guardado en {filename}")
+        logger.info(f"Fin del entrenamiento del LGBM en el mes train : {X_train['foto_mes'].unique()}")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar el modelo {name}, por el error {e}")
+        return
+    return model_lgbm
 
 
 def grafico_feature_importance(model_lgbm:lgb.Booster,X_train:pd.DataFrame,name:str,output_path:str):

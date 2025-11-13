@@ -138,3 +138,16 @@
 {"fecha": "2025-11-12_22-12-32", "competencia": 1, "proceso_ppal": "feat_eng", "n_experimento": 5, "n_semillas": [], "in_gcp": false}
 {"fecha": "2025-11-12_22-17-15", "competencia": 1, "proceso_ppal": "test_baye", "n_experimento": 5, "n_semillas": 3, "in_gcp": false}
 {"fecha": "2025-11-12_22-25-26", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 5, "n_semillas": 6, "in_gcp": false}
+{"fecha": "2025-11-13_01-28-06", "competencia": 1, "proceso_ppal": "creacion_target_clase_ternaria", "n_experimento": 10, "n_semillas": [], "in_gcp": false}
+{"fecha": "2025-11-13_01-30-01", "competencia": 1, "proceso_ppal": "feat_eng", "n_experimento": 10, "n_semillas": [], "in_gcp": false}
+{"fecha": "2025-11-13_01-32-41", "competencia": 1, "proceso_ppal": "test_baye", "n_experimento": 10, "n_semillas": 3, "in_gcp": false}
+{"fecha": "2025-11-13_11-46-33", "competencia": 1, "proceso_ppal": "test_baye", "n_experimento": 10, "n_semillas": 3, "in_gcp": false}
+{"fecha": "2025-11-13_11-47-54", "competencia": 1, "proceso_ppal": "test_baye", "n_experimento": 10, "n_semillas": 3, "in_gcp": false}
+{"fecha": "2025-11-13_13-31-52", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 1000, "n_semillas": 20, "in_gcp": false}
+{"fecha": "2025-11-13_13-34-08", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 1000, "n_semillas": 20, "in_gcp": false}
+{"fecha": "2025-11-13_13-42-56", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 2000, "n_semillas": 20, "in_gcp": false}
+{"fecha": "2025-11-13_13-53-04", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 3000, "n_semillas": 20, "in_gcp": false}
+{"fecha": "2025-11-13_13-55-33", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 4000, "n_semillas": 20, "in_gcp": false}
+{"fecha": "2025-11-13_14-08-44", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 5000, "n_semillas": 20, "in_gcp": false}
+{"fecha": "2025-11-13_14-17-11", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 6000, "n_semillas": 100, "in_gcp": false}
+{"fecha": "2025-11-13_15-08-36", "competencia": 1, "proceso_ppal": "test_prediccion_final", "n_experimento": 6000, "n_semillas": 100, "in_gcp": false}

@@ -53,6 +53,7 @@ try:
         MODEL_EXP           = exp["MODEL_EXP"]
 
         # =================== Optimización LGBM ===================
+        TIPO_BAYESIANA      = bayes.get("TIPO_BAYESIANA")
         N_BAYESIANA         = bayes.get("N_BAYESIANA")
         MODEL_BAY           = bayes.get("MODEL_BAY")
         N_SEMILLAS_BAY      = bayes.get("N_SEMILLAS_BAY")

@@ -54,7 +54,7 @@ def lgb_gan_eval_ensamble(y_pred , data):
     logger.info(f"ganancia media meseta : {ganancia_media_meseta}")
     return ganancia_media_meseta ,idx_max_gan ,ganancia_max
 
-def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd.Series|pl.Series,w_train:pd.Series|pl.Series, n_trials:int, name:str,fecha,semillas:list)-> Study:
+def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd.Series|pl.Series|np.ndarray,w_train:pd.Series|pl.Series|np.ndarray, n_trials:int, name:str,fecha,semillas:list)-> Study:
     logger.info(f"Comienzo optimizacion hiperp binario: {name}")
     if isinstance(X_train, pl.DataFrame):
         X_train = X_train.to_pandas()

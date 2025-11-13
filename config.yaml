@@ -6,9 +6,9 @@ COMPETENCIA: 2
     # bayesiana  | test_baye 
     # experimento |  test_exp
     # prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "feat_eng"
+PROCESO_PPAL: "test_baye"
 # SUSBAMPLEO EN PORCENTAJE
-SUBSAMPLEO : 0.4
+SUBSAMPLEO : 0.1
 
 
 configuracion_semilla:
@@ -18,20 +18,21 @@ configuracion_semilla:
 
 configuracion_feat_eng : 
   N_FE : 1
-  VENTANA: 6
-  ORDEN_LAGS: 3
+  VENTANA: 2
+  ORDEN_LAGS: 2
 configuracion_experimentos:
-  N_EXPERIMENTO : 5
-  N_SEMILLAS_EXP : 6
-  TOP_MODELS : 3
+  N_EXPERIMENTO : 626
+  N_SEMILLAS_EXP : 100
+  TOP_MODELS : 1
   MODEL_EXP : "lgbm" #| "lgbm"
 
 configuracion_bayesiana:
-  N_BAYESIANA: 5
-  N_SEMILLAS_BAY : 3
-  N_TRIALS: 3
-  N_BOOSTS: 100
-  MES_VAL_BAYESIANA: 202103
+  TIPO_BAYESIANA : "ZS" #OB | ZS
+  N_BAYESIANA: 626
+  N_SEMILLAS_BAY : "NAN"
+  N_TRIALS: "NAN"
+  N_BOOSTS: "NAN"
+  MES_VAL_BAYESIANA: 202102
   UMBRAL: 0.025
   GANANCIA: 780000
   ESTIMULO: 20000
@@ -98,7 +99,7 @@ configuracion_competencia_2:
   FILE_INPUT_DATA: "datasets/competencia_02.csv"
   # FILE_INPUT_DATA_CRUDO: "/home/christian_lombardo14/buckets/b1/datasets/competencia_02_crudo.csv.gz"
   FILE_INPUT_DATA_CRUDO: "datasets/competencia_02_crudo.csv.gz"
-  MES_TRAIN: [202005,202006,202007,202008,202009,202010,202011,202012,202101,202102,202103]
+  MES_TRAIN: [202003,202004,202005,202006,202007,202008,202009,202010,202011,202012,202101,202102]
   MES_TEST: [202104,202106]
   MES_A_PREDECIR: 202108
   MES_01: 202101
