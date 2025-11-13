@@ -6,9 +6,9 @@ COMPETENCIA: 2
     # bayesiana  | test_baye 
     # experimento |  test_exp
     # prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "bayesiana"
+PROCESO_PPAL: "creacion_target_clase_ternaria"
 # SUSBAMPLEO EN PORCENTAJE
-SUBSAMPLEO : 0.05
+SUBSAMPLEO : 0.4
 
 
 configuracion_semilla:
@@ -18,18 +18,19 @@ configuracion_semilla:
 
 configuracion_feat_eng : 
   N_FE : 1
-  VENTANA: 4
+  VENTANA: 2
+  ORDEN_LAGS: 2
 configuracion_experimentos:
-  N_EXPERIMENTO : 1
-  N_SEMILLAS_EXP : 40
-  TOP_MODELS : 5
+  N_EXPERIMENTO : 5
+  N_SEMILLAS_EXP : 6
+  TOP_MODELS : 3
   MODEL_EXP : "lgbm" #| "lgbm"
 
 configuracion_bayesiana:
-  N_BAYESIANA: 1
-  N_SEMILLAS_BAY : 40
-  N_TRIALS: 40
-  N_BOOSTS: 3000
+  N_BAYESIANA: 5
+  N_SEMILLAS_BAY : 3
+  N_TRIALS: 3
+  N_BOOSTS: 100
   MES_VAL_BAYESIANA: 202103
   UMBRAL: 0.025
   GANANCIA: 780000

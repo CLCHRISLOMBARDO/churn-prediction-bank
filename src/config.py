@@ -44,6 +44,7 @@ try:
         # =================== Configuracion  feature eng ===================
         N_FE    = fe["N_FE"]
         VENTANA = fe["VENTANA"]
+        ORDEN_LAGS = fe["ORDEN_LAGS"]
         
         # =================== Configuracion  experimentos ===================
         N_EXPERIMENTO       = exp["N_EXPERIMENTO"]

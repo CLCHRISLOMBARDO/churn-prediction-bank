@@ -132,3 +132,9 @@
 {"fecha": "2025-11-12_16-08-30", "competencia": 2, "proceso_ppal": "feat_eng", "n_experimento": 1, "n_semillas": [], "in_gcp": false}
 {"fecha": "2025-11-12_16-12-43", "competencia": 2, "proceso_ppal": "feat_eng", "n_experimento": 1, "n_semillas": [], "in_gcp": false}
 {"fecha": "2025-11-12_16-19-19", "competencia": 2, "proceso_ppal": "feat_eng", "n_experimento": 1, "n_semillas": [], "in_gcp": false}
+{"fecha": "2025-11-12_21-41-44", "competencia": 1, "proceso_ppal": "creacion_target_clase_ternaria", "n_experimento": 1, "n_semillas": [], "in_gcp": false}
+{"fecha": "2025-11-12_21-42-32", "competencia": 1, "proceso_ppal": "creacion_target_clase_ternaria", "n_experimento": 5, "n_semillas": [], "in_gcp": false}
+{"fecha": "2025-11-12_21-46-45", "competencia": 1, "proceso_ppal": "creacion_target_clase_ternaria", "n_experimento": 5, "n_semillas": [], "in_gcp": false}
+{"fecha": "2025-11-12_22-12-32", "competencia": 1, "proceso_ppal": "feat_eng", "n_experimento": 5, "n_semillas": [], "in_gcp": false}
+{"fecha": "2025-11-12_22-17-15", "competencia": 1, "proceso_ppal": "test_baye", "n_experimento": 5, "n_semillas": 3, "in_gcp": false}
+{"fecha": "2025-11-12_22-25-26", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 5, "n_semillas": 6, "in_gcp": false}

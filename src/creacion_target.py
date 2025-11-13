@@ -9,7 +9,7 @@ logger =logging.getLogger(__name__)
 def create_data_base():
     logger.info(f"Creacion de la base de datos en : {PATH_DATA_BASE_DB}")
     sql = f"""
-    create or replace table df_completo as 
+    create or replace table df_inicial as 
     select *
     from read_csv_auto('{FILE_INPUT_DATA_CRUDO}')"""
 
