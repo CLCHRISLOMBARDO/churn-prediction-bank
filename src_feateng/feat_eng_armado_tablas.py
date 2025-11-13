@@ -17,20 +17,11 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     name=f"FEAT_ENG_{numero}_{proceso_ppal}_VENTANA_{VENTANA}"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name}")
-
-    # COPIA PARA EL BUCKETS A ELIMINAR ======================================
+    copia_tabla("df_inicial","df_completo")
+    meses_a_dropear=[202006] + [201900 + m for m in range(1,8)]
+    feature_engineering_drop_meses(meses_a_dropear,"df_completo","df_completo")
     
     # =========================================
-    #DROPEO INICIAL DE MESES
-
-    # meses_a_dropear=[202006] + [201900 + m for m in range(1,13)]
-    # feature_engineering_drop_meses(meses_a_dropear,"df_completo","df_completo")
-    
-
-    # CORRECCION DE VARIABLES POR MES POR MEDIA
-    # df_completo_chiquito=creacion_df_small("df_completo")
-    # variable_meses_dict={"mrentabilidad":"(202106,202105)"}
-    # feature_engineering_correccion_variables_por_mes_por_media(df_completo_chiquito,variable_meses_dict)
 
     # SERVICIOS Y PRODUCTOS
     df_completo_chiquito=creacion_df_small("df_completo")
@@ -58,12 +49,12 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
      
     df_completo_chiquito=creacion_df_small("df_completo")
     _,  cols_lag_delta_max_min_regl  ,   _ = contruccion_cols(df_completo_chiquito)
-    feature_engineering_lag(df_completo_chiquito,cols_lag_delta_max_min_regl,ORDEN_LAG)
-    feature_engineering_delta(df_completo_chiquito,cols_lag_delta_max_min_regl,VENTANA)
+    feature_engineering_lag(df_completo_chiquito,cols_lag_delta_max_min_regl,ORDEN_LAGS)
+    feature_engineering_delta(df_completo_chiquito,cols_lag_delta_max_min_regl,ORDEN_LAGS)
     feature_engineering_linreg(df_completo_chiquito , cols_lag_delta_max_min_regl,VENTANA)
     feature_engineering_max_min(df_completo_chiquito,cols_lag_delta_max_min_regl ,VENTANA)
     # Si in_gcp True, entonces estoy en el buckets, entonces hacemos solo una copia de la df ocmpleto a un df ya en el bucket
-    copia_tabla()
+    copia_tabla_local_a_bucket()
     # if in_gcp:
     #     copia_tabla()
     # else:

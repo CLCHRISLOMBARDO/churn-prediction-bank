@@ -7,7 +7,7 @@ from src.config import *
 from src.configuracion_inicial import creacion_directorios,creacion_logg_local , creacion_logg_global
 from src.generadora_semillas import create_semilla
 from src.creacion_target import lanzar_creacion_clase_ternaria_binaria_peso
-from src_feateng.feat_eng_comp1 import lanzar_feat_eng
+from src_feateng.feat_eng_armado_tablas import lanzar_feat_eng
 from src_bayesianas.bayesiana_lgbm_2 import lanzar_bayesiana_lgbm
 from src_bayesianas.bayesiana_xgb_2 import lanzar_bayesiana_xgb
 from src_experimentos.experimento_eda import lanzar_eda
