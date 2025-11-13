@@ -35,15 +35,15 @@ def copia_tabla_local_a_bucket():
     finally:
         conn.close()
 
-def copia_tabla():
-    logger.info(f"Copia de la tabla df_completo a df")
-    sql = "create or replace table df as "
+def copia_tabla(tabla_origen:str , tabla_copia:str):
+    logger.info(f"Copia de la tabla {tabla_origen} a {tabla_copia}")
+    sql = f"create or replace table {tabla_copia} as "
     sql+=f"""SELECT *
-            from df_completo"""
+            from {tabla_origen}"""
     conn=duckdb.connect(PATH_DATA_BASE_DB)
     conn.execute(sql)
     conn.close()
-    logger.info(f"Finalizada la Copia de la tabla df_completo a df")
+    logger.info(f"Finalizada la Copia de la tabla {tabla_origen} a {tabla_copia}")
     
 
 def feature_engineering_drop_cols(df:pd.DataFrame , columnas:list[str],tabla_origen:str="df",tabla_nueva:str="df") :
@@ -248,7 +248,7 @@ def feature_engineering_lag(df:pd.DataFrame ,columnas:list[str],orden_lag:int=1 
     for attr in columnas:
         if attr in df.columns:
             for i in range(orden_lag_ya_realizado,orden_lag+1):
-                sql+= f",lag({attr},{i}) OVER (PARTITION BY numero_de_cliente ORDER BY foto_mes) AS {attr}_lag_{i}"
+                sql+= f",lag(try_cast({attr} as double),{i}) OVER (PARTITION BY numero_de_cliente ORDER BY foto_mes) AS {attr}_lag_{i}"
         else:
             logger.warning(f"No se encontro el atributo {attr} en df")
     sql+=" FROM df_completo)"
@@ -373,7 +373,7 @@ def feature_engineering_max_min(df : pd.DataFrame|np.ndarray , columnas:list[str
 
         for attr in columnas:
             if attr in df.columns:
-                sql+=f", max({attr}  ) over ventana_{ventana} as {attr}_max ,min({attr}) over ventana_{ventana} as {attr}_min"
+                sql+=f", max(try_cast({attr} as double)  ) over ventana_{ventana} as {attr}_max ,min(try_cast({attr})) over ventana_{ventana} as {attr}_min"
             else :
                 print(f"no se encontro el atributo {attr}")
         sql+=f" FROM df_completo window ventana_{ventana} as (partition by numero_de_cliente order by foto_mes rows between {ventana} preceding and current row))"

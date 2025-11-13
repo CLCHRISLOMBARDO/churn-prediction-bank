@@ -18,8 +18,8 @@ configuracion_semilla:
 
 configuracion_feat_eng : 
   N_FE : 1
-  VENTANA: 2
-  ORDEN_LAGS: 2
+  VENTANA: 6
+  ORDEN_LAGS: 3
 configuracion_experimentos:
   N_EXPERIMENTO : 5
   N_SEMILLAS_EXP : 6
