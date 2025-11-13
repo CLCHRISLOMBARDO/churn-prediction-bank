@@ -17,7 +17,7 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     name=f"FEAT_ENG_{numero}_{proceso_ppal}_VENTANA_{VENTANA}"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name}")
-    copia_tabla("df_inicial","df_completo")
+    # copia_tabla("df_inicial","df_completo")
     meses_a_dropear=[202006] + [201900 + m for m in range(1,8)]
     feature_engineering_drop_meses(meses_a_dropear,"df_completo","df_completo")
     
