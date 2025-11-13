@@ -373,7 +373,7 @@ def feature_engineering_max_min(df : pd.DataFrame|np.ndarray , columnas:list[str
 
         for attr in columnas:
             if attr in df.columns:
-                sql+=f", max(try_cast({attr} as double)  ) over ventana_{ventana} as {attr}_max ,min(try_cast({attr})) over ventana_{ventana} as {attr}_min"
+                sql+=f", max(try_cast({attr} as double)  ) over ventana_{ventana} as {attr}_max ,min(try_cast({attr} as double)) over ventana_{ventana} as {attr}_min"
             else :
                 print(f"no se encontro el atributo {attr}")
         sql+=f" FROM df_completo window ventana_{ventana} as (partition by numero_de_cliente order by foto_mes rows between {ventana} preceding and current row))"

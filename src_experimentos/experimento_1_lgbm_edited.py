@@ -121,14 +121,18 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
                 # Creacion de lqs predicciones medias a partir de los ensambles de las semillas
                 semilla = "ensamble_semillas"
+                name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train"
                 logger.info("Comienzo del ensamblado de todas las semillas")
                 y_pred_df = np.vstack(y_predicciones_lista)
                 logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_df.shape}")
                 y_pred_ensamble = y_pred_df.mean(axis=0)
+                pd.Series(y_pred_ensamble, index=X_test.index).to_csv(path_output_exp_prediction+ name_semilla)
+
                 y_predicciones_top_models.append(y_pred_ensamble)
+
                 logger.info("Fin del ensamblado ")
                 
-                name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train"            
+                            
                 estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
                 estadisticas_ganancia_dict[semilla] = estadisticas_ganancia 
                 y_pred_sorted_dict[semilla] = y_pred_sorted
@@ -150,6 +154,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             y_pred_ensamble_modelos_matrix = np.vstack(y_predicciones_top_models)
             logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_ensamble_modelos_matrix.shape}")
             y_pred_ensamble_final = y_pred_ensamble_modelos_matrix.mean(axis=0)
+            pd.Series(y_pred_ensamble, index=X_test.index).to_csv(path_output_exp_prediction+ name_final)
+
             guardar_umbral = True
             semilla = "ENSAMBLE_FINAL_TOP_MODELS"
             estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble_final ,name_final , output_path_umbrales , semilla, guardar_umbral )

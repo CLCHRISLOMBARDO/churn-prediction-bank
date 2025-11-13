@@ -107,7 +107,7 @@ try:
         path_output_exp_graf_gan_hist_semillas = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_GRAF_HIST_SEMILLA"]
         path_output_exp_graf_curva_ganancia    = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP__GRAF_CURVA_GANANCIA"]
         path_output_exp_umbral                 = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_UMBRAL"]
-
+        path_output_exp_prediction             = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_PREDICTION"]
         # ================= MESES ==============
         MES_TRAIN      = comp.get("MES_TRAIN", [202101, 202102, 202103])
         MES_TEST       = comp.get("MES_TEST", [202104])

@@ -29,11 +29,10 @@ def creacion_directorios():
             #EXPERIMENTOS
     os.makedirs(path_output_exp_model,exist_ok=True)
     os.makedirs(path_output_exp_feat_imp,exist_ok=True)
-    os.makedirs(path_output_exp_graf_gan_hist_grilla,exist_ok=True)
     os.makedirs(path_output_exp_graf_gan_hist_total,exist_ok=True)
-    os.makedirs(path_output_exp_graf_gan_hist_semillas,exist_ok=True)
     os.makedirs(path_output_exp_graf_curva_ganancia,exist_ok=True)
     os.makedirs(path_output_exp_umbral,exist_ok=True)
+    os.makedirs(path_output_exp_prediction,exist_ok=True)
 
 
 def creacion_logg_local(nombre_log:str):
