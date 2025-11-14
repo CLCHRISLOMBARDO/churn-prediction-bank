@@ -14,7 +14,7 @@ import datetime
 import pickle
 import json
 
-from src.config import GANANCIA,ESTIMULO
+from src.config import *
 
 ganancia_acierto = GANANCIA
 costo_estimulo=ESTIMULO
@@ -67,7 +67,41 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarra
         return
     return model_lgbm
 
-
+def entrenamiento_zlgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarray,name:str,output_path:str,semilla:int)->lgb.Booster:
+    lgbm_params = {
+        'objective': 'binary',
+        'boosting_type': 'gbdt',
+        'learning_rate': LEARNING_RATE,
+        'num_leaves': NUM_LEAVES,
+        'feature_fraction': FEATURE_FRACTION,
+        'bagging_fraction': BAGGING_FRACTION,
+        'bagging_freq': BAGGING_FREQ,
+        'min_data_in_leaf': MIN_DATA_IN_LEAF,
+        'max_bin': MAX_BIN,
+        'verbose': -1,
+        'seed': semilla,
+        'force_row_wise': True,
+    }
+    
+    if GRADIENT_BOUND is not None:
+        lgbm_params['gradient_bound'] = GRADIENT_BOUND
+    train_data = lgb.Dataset(X_train, label=y_train_binaria, free_raw_data=True)
+    model_lgbm = lgb.train(
+        lgbm_params,
+        train_data,
+        num_boost_round=NUM_BOOST_ROUND
+    )   
+    logger.info(f"comienzo del guardado en {output_path}")
+    try:
+        filename=output_path+f'{name}.txt'
+        model_lgbm.save_model(filename)                         
+        logger.info(f"Modelo {name} guardado en {filename}")
+        logger.info(f"Fin del entrenamiento del ZLGBM en el mes train : {X_train['foto_mes'].unique()}")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar el modelo {name}, por el error {e}")
+        return 
+    return model_lgbm
+    
 def entrenamiento_lgbm_zs(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarray,w_train:pd.Series|np.ndarray,best_iter:int, best_parameters:dict[str, object],name:str,output_path:str,semilla:int)->lgb.Booster:
     name=f"{name}_model_lgbm"
     logger.info(f"Comienzo del entrenamiento del lgbm con ZS : {name} en el mes train : {X_train['foto_mes'].unique()}")    

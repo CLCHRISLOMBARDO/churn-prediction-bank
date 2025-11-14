@@ -21,13 +21,18 @@ ERR_COLS = (
 
 def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int]
                            ,mes_apred:int,semilla:int=SEMILLA,
-                           subsampleo:float=SUBSAMPLEO , feature_subset= None)->Tuple[pd.DataFrame,
+                           subsampleo:float=SUBSAMPLEO , feature_subset= None,n_canaritos:int=None)->Tuple[pd.DataFrame,
                                                                np.ndarray,np.ndarray, 
                                                                np.ndarray, pd.DataFrame, 
                                                                np.ndarray, np.ndarray, 
                                                                np.ndarray,pd.DataFrame,
                                                                pd.DataFrame]:
     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
+
+    sql_canaritos =''
+    if n_canaritos is not None and n_canaritos>0 :
+        for c in range(1,n_canaritos+1):
+            sql_canaritos += f'RANDOM() as canarito_{c}, '
 
     exclude=''
     if feature_subset is not None:
@@ -41,28 +46,29 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     mes_train_sql = f"{mes_train[0]}"
     for m in mes_train[1:]:    
         mes_train_sql += f",{m}"
-    sql_train=f"""select * {exclude} 
+    sql_train=f"""select {sql_canaritos} * {exclude} 
                 from df_completo
                 where foto_mes IN ({mes_train_sql})"""
     if isinstance(mes_test,list):
         mes_test_sql = f"{mes_test[0]}"
         for m in mes_test[1:]:    
             mes_test_sql += f",{m}"
-        sql_test=f"""select * {exclude}
+        sql_test=f"""select {sql_canaritos} * {exclude}
                     from df_completo
                     where foto_mes IN ({mes_test_sql})"""
     elif isinstance(mes_test,int):
         mes_test_sql = f"{mes_test}"
-        sql_test=f"""select * {exclude}
+        sql_test=f"""select {sql_canaritos} * {exclude}
                     from df_completo
                     where foto_mes = {mes_test_sql}"""
         
     mes_apred_sql = f"{mes_apred}"
-    sql_apred=f"""select * {exclude}
+    sql_apred=f"""select {sql_canaritos} * {exclude}
                 from df_completo
                 where foto_mes = {mes_apred_sql}"""
     
     conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(f"PRAGMA random_seed = {semilla}")
     train_data = conn.execute(sql_train).df()
     test_data = conn.execute(sql_test).df()
     apred_data = conn.execute(sql_apred).df()

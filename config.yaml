@@ -6,7 +6,7 @@ COMPETENCIA: 2
     # 3- bayesiana  | test_baye 
     # 4- experimento |  test_exp
     # 5- prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "bayesiana"
+PROCESO_PPAL: "experimento"
 # SUSBAMPLEO EN PORCENTAJE
 SUBSAMPLEO : 0.1 # solo para baye y exp y pred final
 
@@ -22,7 +22,7 @@ configuracion_feat_eng :
   ORDEN_LAGS: 3
 
 configuracion_bayesiana:
-  TIPO_BAYESIANA : "ZS" # OB | ZS
+  TIPO_BAYESIANA : "ZS" # OB | ZS | ZLGBM
   N_BAYESIANA: "202011_202102"
   N_SEMILLAS_BAY : 1
   N_TRIALS: 1
@@ -33,6 +33,19 @@ configuracion_bayesiana:
   ESTIMULO: 20000
   N_FOLDS: 5 # No hace nada
   MODEL_BAY : "lgbm" #| "lgbm"
+
+configuracion_canaritos:
+  N_CANARITOS : 5
+  MIN_DATA_IN_LEAF : 2000
+  LEARNING_RATE : 1.0
+  GRADIENT_BOUND : 0.01
+  NUM_LEAVES : 300
+  FEATURE_FRACTION : 0.8
+  BAGGING_FRACTION : 0.8
+  BAGGING_FREQ : 5
+  MAX_BIN : 31  
+  NUM_BOOST_ROUND : 1000
+  EARLY_STOPPING_ROUNDS : 200
 
 configuracion_experimentos:
   N_EXPERIMENTO : "202011_202102"

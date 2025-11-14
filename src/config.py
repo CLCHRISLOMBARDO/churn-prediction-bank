@@ -14,6 +14,7 @@ try:
         fe         = cfg["configuracion_feat_eng"]
         exp        = cfg["configuracion_experimentos"]
         bayes      = cfg["configuracion_bayesiana"]
+        canaritos  = cfg["configuracion_canaritos"]
         sem        = cfg["configuracion_semilla"]
         gcp        = cfg["configuracion_gcp"]
         paths      = cfg["configuracion_paths"]
@@ -64,6 +65,19 @@ try:
         GANANCIA            = bayes.get("GANANCIA", 780000)
         ESTIMULO            = bayes.get("ESTIMULO", 20000)
         N_FOLDS             = bayes.get("N_FOLDS", 5)
+
+        # =================== Configuracion canaritos ================
+        N_CANARITOS             = canaritos.get("N_CANARITOS")
+        MIN_DATA_IN_LEAF        = canaritos.get("MIN_DATA_IN_LEAF")
+        LEARNING_RATE           = canaritos.get("LEARNING_RATE")
+        GRADIENT_BOUND          = canaritos.get("GRADIENT_BOUND")
+        NUM_LEAVES              = canaritos.get("NUM_LEAVES")
+        FEATURE_FRACTION        = canaritos.get("FEATURE_FRACTION")
+        BAGGING_FRACTION        = canaritos.get("BAGGING_FRACTION")
+        BAGGING_FREQ            = canaritos.get("BAGGING_FREQ")
+        MAX_BIN                 = canaritos.get("MAX_BIN")
+        NUM_BOOST_ROUND         = canaritos.get("NUM_BOOST_ROUND")
+        EARLY_STOPPING_ROUNDS   = canaritos.get("EARLY_STOPPING_ROUNDS")
 
 
         # ---------------- Entorno (GCP vs local) ----------------

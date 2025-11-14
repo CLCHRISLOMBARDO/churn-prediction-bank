@@ -19,7 +19,7 @@ def copia_tabla_local_a_bucket():
     try:
         # Adjuntamos la base del bucket
         conn.execute(f"""
-            ATTACH '{GCP_PATH+PATH_DATA_BASE_DB}' AS db_destino;
+            ATTACH '{GCP_PATH + PATH_DATA_BASE_DB}' AS db_destino;
         """)
 
         # Copiamos la tabla local hacia la base en el bucket

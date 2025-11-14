@@ -7,7 +7,7 @@ import json
 
 from src.config import *
 from src.preprocesamiento import split_train_test_apred
-from src.lgbm_train_test import entrenamiento_lgbm,entrenamiento_lgbm_zs,grafico_feature_importance,prediccion_test_lgbm ,calc_estadisticas_ganancia,grafico_curvas_ganancia, grafico_hist_ganancia ,preparacion_ypred_kaggle
+from src.lgbm_train_test import entrenamiento_zlgbm,entrenamiento_lgbm,entrenamiento_lgbm_zs,grafico_feature_importance,prediccion_test_lgbm ,calc_estadisticas_ganancia,grafico_curvas_ganancia, grafico_hist_ganancia ,preparacion_ypred_kaggle
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 ## Carga de variables
 
@@ -22,7 +22,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name} con {n_semillas} semillas")
     
-
     # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import
     if (proceso_ppal =="experimento") or (proceso_ppal =="test_exp") :
         logger.info(f"LANZAMIENTO PARA EXP  CON {n_semillas} SEMILLAS")
@@ -48,37 +47,40 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     cantidad_trials= N_TRIALS
     cantidad_boosts = N_BOOSTS
     #"""-----------------------------------------------------------------------------------------------"""
-    if( (proceso_ppal =="test_exp") or (proceso_ppal =="test_prediccion_final")):
-        proceso_bayesiana = "test_baye"
-    elif((proceso_ppal == "experimento" )or (proceso_ppal =="prediccion_final")):
-        proceso_bayesiana = "bayesiana"
-    name_best_params_file_lgbm=f"best_params{proceso_bayesiana}_{numero_bayesiana_lgbm}_{modelo_etiqueta}_TIPO_{tipo_bayesiana}_{cantidad_semillas}_SEMILLAS_{cantidad_trials}_TRIALS_{cantidad_boosts}_BOOSTS.json"
+    if tipo_bayesiana!="ZLGBM":
+        if( (proceso_ppal =="test_exp") or (proceso_ppal =="test_prediccion_final")):
+            proceso_bayesiana = "test_baye"
+        elif((proceso_ppal == "experimento" )or (proceso_ppal =="prediccion_final")):
+            proceso_bayesiana = "bayesiana"
+        name_best_params_file_lgbm=f"best_params{proceso_bayesiana}_{numero_bayesiana_lgbm}_{modelo_etiqueta}_TIPO_{tipo_bayesiana}_{cantidad_semillas}_SEMILLAS_{cantidad_trials}_TRIALS_{cantidad_boosts}_BOOSTS.json"
 
-    try:
-        with open(path_output_bayesian_bestparams+name_best_params_file_lgbm, "r") as f:
-            best_params_dict = json.load(f)
-            logger.info(f"Correcta carga de los best params del {modelo_etiqueta} ")
+        try:
+            with open(path_output_bayesian_bestparams+name_best_params_file_lgbm, "r") as f:
+                best_params_dict = json.load(f)
+                logger.info(f"Correcta carga de los best params del {modelo_etiqueta} ")
 
-    except Exception as e:
-        logger.error(f"No se pudo encontrar los best params ni best iter del {modelo_etiqueta} por el error {e}")
-        raise
-    
-    if tipo_bayesiana =="OB":
-        best_params_dict_sorted = sorted(best_params_dict , key=lambda x : x["ganancia_media_meseta"] ,reverse=True)
-        top_models_bayesiana = best_params_dict_sorted[0:TOP_MODELS]
-        top_bp = {b["trial_number"]:{"params":b["params"],"best_iter_trial":b["best_iter_trial"]} for b in top_models_bayesiana}
-        logger.info(f"Los mejores Trials de la Bayesiana {N_BAYESIANA} son : {top_bp.keys()}")
-        logger.info(f"Los mejores parametros del mejor modelo de la Bayesiana {N_BAYESIANA} son : {top_bp[list(top_bp.keys())[0]]['params']}")
-        logger.info(f"El mejor num de iteracion del mejor modelo de la Bayesiana {N_BAYESIANA} es : {top_bp[list(top_bp.keys())[0]]['best_iter_trial']}")   
+        except Exception as e:
+            logger.error(f"No se pudo encontrar los best params ni best iter del {modelo_etiqueta} por el error {e}")
+            raise
+        
+        if tipo_bayesiana =="OB":
+            best_params_dict_sorted = sorted(best_params_dict , key=lambda x : x["ganancia_media_meseta"] ,reverse=True)
+            top_models_bayesiana = best_params_dict_sorted[0:TOP_MODELS]
+            top_bp = {b["trial_number"]:{"params":b["params"],"best_iter_trial":b["best_iter_trial"]} for b in top_models_bayesiana}
+            logger.info(f"Los mejores Trials de la Bayesiana {N_BAYESIANA} son : {top_bp.keys()}")
+            logger.info(f"Los mejores parametros del mejor modelo de la Bayesiana {N_BAYESIANA} son : {top_bp[list(top_bp.keys())[0]]['params']}")
+            logger.info(f"El mejor num de iteracion del mejor modelo de la Bayesiana {N_BAYESIANA} es : {top_bp[list(top_bp.keys())[0]]['best_iter_trial']}")   
 
-    elif tipo_bayesiana =="ZS":
-        top_bp = {
-            b["trial_number"]: {
-                "params": {k: v for k, v in b["params"].items() if k not in ["num_iterations", "seed"] },
-                "best_iter_trial": b["params"].get("num_iterations", None)
+        elif tipo_bayesiana =="ZS":
+            top_bp = {
+                b["trial_number"]: {
+                    "params": {k: v for k, v in b["params"].items() if k not in ["num_iterations", "seed"] },
+                    "best_iter_trial": b["params"].get("num_iterations", None)
+                }
+                for b in best_params_dict
             }
-            for b in best_params_dict
-        }
+        elif tipo_bayesiana =="ZLGBM":
+            top_bp = {0 : 0}
 ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04 
 
     #3. spliteo train - test - apred - Subsampleo
@@ -94,25 +96,31 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,mt,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
             y_predicciones_top_models=[]
             for orden_trial , trial in enumerate(top_bp):
-                name_trial = name + f"_TRIAL_{trial}_TOP_{orden_trial}_MES_TEST_{mt}"
-                best_params_i = top_bp[trial]["params"]
-                best_iter_i = top_bp[trial]["best_iter_trial"]
-            
-                logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con hiperparams {best_params_i}")
-                logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con best iter {best_iter_i}")
+                if tipo_bayesiana!="ZLGBM":
+                    name_trial = name + f"_TRIAL_{trial}_TOP_{orden_trial}_MES_TEST_{mt}"
+                    best_params_i = top_bp[trial]["params"]
+                    best_iter_i = top_bp[trial]["best_iter_trial"]
+                    logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con hiperparams {best_params_i}")
+                    logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con best iter {best_iter_i}")
+                else:
+                    logger.info(f"Comienzo del ZLGBM")
                 y_predicciones_lista=[]
                 y_pred_sorted_dict={}
                 ganancia_acumulada_dict={}
                 estadisticas_ganancia_dict={}
                 for i,semilla in enumerate(semillas):
-                    logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
+                    if tipo_bayesiana!="ZLGBM":
+                        logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
+                        name_semilla=f"{name_trial}_SEMILLA_{semilla}_fase_testeo"
+                    else:
+                        name_semilla = name + f"_MES_TEST_{mt}_SEMILLA_{semilla}_fase_testeo"
                     # Entrenamiento de los modelos --------
-                    name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train_lgbm"
                     if tipo_bayesiana =="OB":
                         model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
                     elif tipo_bayesiana =="ZS":
                         model_lgbm = entrenamiento_lgbm_zs(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
-
+                    elif tipo_bayesiana =="ZLGBM":
+                        model_lgbm = entrenamiento_zlgbm(X_train , y_train_binaria  ,name_semilla,output_path_models,semilla)
 
                     # Grafico features importances -------
                     grafico_feature_importance(model_lgbm,X_train,name_semilla,output_path_feat_imp)
@@ -136,7 +144,10 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
                 # Creacion de lqs predicciones medias a partir de los ensambles de las semillas
                 semilla = "ensamble_semillas"
-                name_semilla=f"{name_trial}_SEMILLA_{semilla}_1rst_train"
+                if tipo_bayesiana !="ZLGBM":
+                    name_semilla=f"{name_trial}_SEMILLA_{semilla}_fase_testeo"
+                else:
+                    name_semilla=f"{name}_SEMILLA_{semilla}_fase_testeo"
                 logger.info("Comienzo del ensamblado de todas las semillas")
                 y_pred_df = np.vstack(y_predicciones_lista)
                 logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_df.shape}")
@@ -164,19 +175,21 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 logger.info("Vamos a graficar la curva de ganancia con y_pred_ensamble")
                 grafico_curvas_ganancia(y_pred_sorted_dict ,ganancia_acumulada_dict,estadisticas_ganancia_dict,name_trial,output_path_graf_curva_ganancia)
                 grafico_hist_ganancia(estadisticas_ganancia_dict , name_trial,output_path_graf_ganancia_hist_total)
-            logger.info("Comienzo ensamblado de los top models")
-            name_final = name + f"_ENSAMBLE_FINAL_MES_TEST_{mt}"
-            y_pred_ensamble_modelos_matrix = np.vstack(y_predicciones_top_models)
-            logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_ensamble_modelos_matrix.shape}")
-            y_pred_ensamble_final = y_pred_ensamble_modelos_matrix.mean(axis=0)
-            pd.Series(y_pred_ensamble, index=X_test.index).to_csv(path_output_exp_prediction+ name_final)
+            if tipo_bayesiana=="OB":
+                logger.info("Comienzo ensamblado de los top models")
+                name_final = name + f"_ENSAMBLE_FINAL_MES_TEST_{mt}"
+                y_pred_ensamble_modelos_matrix = np.vstack(y_predicciones_top_models)
+                logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_ensamble_modelos_matrix.shape}")
+                y_pred_ensamble_final = y_pred_ensamble_modelos_matrix.mean(axis=0)
+                pd.Series(y_pred_ensamble, index=X_test.index).to_csv(path_output_exp_prediction+ name_final)
 
-            guardar_umbral = True
-            semilla = "ENSAMBLE_FINAL_TOP_MODELS"
-            estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble_final ,name_final , output_path_umbrales , semilla, guardar_umbral )
-            grafico_curvas_ganancia(y_pred_sorted ,ganancia_acumulada,estadisticas_ganancia,name_final,output_path_graf_curva_ganancia)
-                    
+                guardar_umbral = True
+                semilla = "ENSAMBLE_FINAL_TOP_MODELS"
+                estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble_final ,name_final , output_path_umbrales , semilla, guardar_umbral )
+                grafico_curvas_ganancia(y_pred_sorted ,ganancia_acumulada,estadisticas_ganancia,name_final,output_path_graf_curva_ganancia)
+                
     elif (proceso_ppal =="prediccion_final" or  proceso_ppal =="test_prediccion_final"):
+        logger.info(f"========================Comienzo de la prediccion final=============================")
         if isinstance(MES_TEST , list):
             mes_train=MES_TRAIN+MES_TEST
         elif isinstance(MES_TEST, int):
@@ -185,20 +198,29 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         X_train, y_train_binaria,y_train_class, w_train, _, _, y_test_class, _,X_apred, y_apred = split_train_test_apred(n_experimento,mes_train,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
         y_apred_top_models=[]
         for orden_trial , trial in enumerate(top_bp):
-            name_trial = name + f"_TRIAL_{trial}_TOP_{orden_trial}"
-            best_params_i = top_bp[trial]["params"]
-            best_iter_i = top_bp[trial]["best_iter_trial"]
-            logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con hiperparams {best_params_i}")
-            logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con best iter {best_iter_i}")
+            if tipo_bayesiana!="ZLGBM":
+                    name_trial = name + f"_TRIAL_{trial}_TOP_{orden_trial}"
+                    best_params_i = top_bp[trial]["params"]
+                    best_iter_i = top_bp[trial]["best_iter_trial"]
+                    logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con hiperparams {best_params_i}")
+                    logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con best iter {best_iter_i}")
+            else:
+                    name_trial = name   
+                    logger.info(f"Comienzo del ZLGBM")
+
             y_predicciones_lista=[]
             for i,semilla in enumerate(semillas):
-                logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
-                name_semilla=f"{name_trial}_SEMILLA_{semilla}_final_train"
+                if tipo_bayesiana!="ZLGBM":
+                    logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
+                    name_semilla=f"{name_trial}_SEMILLA_{semilla}_final_train"
+                else:
+                    name_semilla = name + f"SEMILLA_{semilla}_final_train"
                 if tipo_bayesiana =="OB":
                     model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
                 elif tipo_bayesiana =="ZS":
                     model_lgbm = entrenamiento_lgbm_zs(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
-
+                elif tipo_bayesiana =="ZLGBM":
+                    model_lgbm = entrenamiento_zlgbm(X_train , y_train_binaria  ,name_semilla,output_path_models,semilla)
 
                 # Grafico features importances
                 grafico_feature_importance(model_lgbm,X_train,name_semilla,output_path_feat_imp)
@@ -212,7 +234,11 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 proceso_experimento = "experimento"
             elif proceso_ppal =="test_prediccion_final":
                 proceso_experimento = "test_exp"
-            estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}_MES_TEST_{MES_TEST[-1]}.json"
+            if tipo_bayesiana != "ZLGBM":
+                estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}_MES_TEST_{MES_TEST[-1]}.json"
+            else:
+                estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS.json"
+
             file = path_output_exp_umbral+estadisticas_ganancia_file 
             logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
             try :
@@ -224,41 +250,43 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 logger.error(f"Error al tratar de cargar umbrales {estadisticas_ganancia_file} por {e}")
                 raise
             logger.info("Calculo del cliente optimo mean")
-            cliente_optimo_trial = estadisticas_ganancia["ensamble_semillas"]["cliente"]
-            logger.info(f"Cliente optimo del semillero del trial {trial} = {cliente_optimo_trial}")
+            cliente_optimo = estadisticas_ganancia["ensamble_semillas"]["cliente"]
+            logger.info(f"Cliente optimo del semillero del trial {trial} = {cliente_optimo}")
             logger.info(f"Comienzo del ensamble del semillero")
             y_pred_matrix = np.vstack(y_predicciones_lista)
             logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_matrix.shape}")
             y_pred_ensamble_trial_i = y_pred_matrix.mean(axis=0)
             logger.info("Fin del ensamblado del semillero ")
             # Predicciones en test 04 para cada modelo
-            y_apred_trial_i = preparacion_ypred_kaggle(y_apred, y_pred_ensamble_trial_i ,cliente_optimo_trial , name_trial ,path_output_prediccion_final)
-            y_apred_top_models.append(y_pred_ensamble_trial_i)
-        name_final = name + "_ENSAMBLE_FINAL"        
-        if proceso_ppal =="prediccion_final" :
-            proceso_experimento = "experimento"
-        elif proceso_ppal =="test_prediccion_final":
-            proceso_experimento = "test_exp"
-        estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_ENSAMBLE_FINAL_MES_TEST_{MES_TEST[-1]}_umbral_optimo.json"
-        file = path_output_exp_umbral+estadisticas_ganancia_file 
+            y_apred_trial_i = preparacion_ypred_kaggle(y_apred, y_pred_ensamble_trial_i ,cliente_optimo, name_trial ,path_output_prediccion_final)
+            if tipo_bayesiana !="ZLGBM":
+                y_apred_top_models.append(y_pred_ensamble_trial_i)
+        if tipo_bayesiana !="ZLGBM":
+            name_final = name + "_ENSAMBLE_FINAL"        
+            if proceso_ppal =="prediccion_final" :
+                proceso_experimento = "experimento"
+            elif proceso_ppal =="test_prediccion_final":
+                proceso_experimento = "test_exp"
+            estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_ENSAMBLE_FINAL_MES_TEST_{MES_TEST[-1]}_umbral_optimo.json"
+            file = path_output_exp_umbral+estadisticas_ganancia_file 
 
-        logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
-        try :
-            with open(file, "r") as f:
-                estadisticas_ganancia = json.load(f)
-            logger.info(f"Carga de los datos umbrales {estadisticas_ganancia_file} exitosa")
+            logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
+            try :
+                with open(file, "r") as f:
+                    estadisticas_ganancia = json.load(f)
+                logger.info(f"Carga de los datos umbrales {estadisticas_ganancia_file} exitosa")
 
-        except Exception as e:
-            logger.error(f"Error al tratar de cargar umbrales {estadisticas_ganancia_file} por {e}")
-            raise
-        logger.info("Calculo del cliente optimo mean")
-        cliente_optimo = estadisticas_ganancia["cliente"]
-        logger.info(f"Cliente optimo del ensamble de los top models = {cliente_optimo}")
-        logger.info(f"Comienzo del ensamble del semillero")
-        y_pred_ensamble_modelos_matrix = np.vstack(y_apred_top_models)
-        logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_ensamble_modelos_matrix.shape}")
-        y_pred_ensamble_final = y_pred_ensamble_modelos_matrix.mean(axis=0)
-        y_apred_ensamble_top_models = preparacion_ypred_kaggle(y_apred, y_pred_ensamble_final ,cliente_optimo , name_final ,path_output_prediccion_final)
+            except Exception as e:
+                logger.error(f"Error al tratar de cargar umbrales {estadisticas_ganancia_file} por {e}")
+                raise
+            logger.info("Calculo del cliente optimo mean")
+            cliente_optimo = estadisticas_ganancia["cliente"]
+            logger.info(f"Cliente optimo del ensamble de los top models = {cliente_optimo}")
+            logger.info(f"Comienzo del ensamble del semillero")
+            y_pred_ensamble_modelos_matrix = np.vstack(y_apred_top_models)
+            logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_ensamble_modelos_matrix.shape}")
+            y_pred_ensamble_final = y_pred_ensamble_modelos_matrix.mean(axis=0)
+            y_apred_ensamble_top_models = preparacion_ypred_kaggle(y_apred, y_pred_ensamble_final ,cliente_optimo , name_final ,path_output_prediccion_final)
 
 logger.info(f">>> Ejecucion finalizada. Revisar logs para mas detalles.")
 
