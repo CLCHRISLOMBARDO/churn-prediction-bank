@@ -6,7 +6,7 @@ COMPETENCIA: 2
     # 3- bayesiana  | test_baye 
     # 4- experimento |  test_exp
     # 5- prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "experimento"
+PROCESO_PPAL: "bayesiana"
 # SUSBAMPLEO EN PORCENTAJE
 SUBSAMPLEO : 0.1 # solo para baye y exp y pred final
 
@@ -23,7 +23,7 @@ configuracion_feat_eng :
 
 configuracion_bayesiana:
   TIPO_BAYESIANA : "ZS" # OB | ZS
-  N_BAYESIANA: "202009_202012"
+  N_BAYESIANA: "202011_202102"
   N_SEMILLAS_BAY : 1
   N_TRIALS: 1
   N_BOOSTS: 1
@@ -35,7 +35,7 @@ configuracion_bayesiana:
   MODEL_BAY : "lgbm" #| "lgbm"
 
 configuracion_experimentos:
-  N_EXPERIMENTO : "202009_202012"
+  N_EXPERIMENTO : "202011_202102"
   N_SEMILLAS_EXP : 100
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"
@@ -48,7 +48,7 @@ configuracion_gcp:
 configuracion_paths:
   place_path:
     LOCAL_PATH: ""
-    GCP_PATH: "/home/carbonelldv/buckets/b1/"
+    GCP_PATH: "/home/christian_lombardo14/buckets/b1/"
   PATH_LOGS: "logs/"
   PATH_LOG_GLOBAL : "global_log/"
 
@@ -100,7 +100,7 @@ configuracion_competencia_1:
 configuracion_competencia_2:
   FILE_INPUT_DATA: "datasets/competencia_02.csv"
   FILE_INPUT_DATA_CRUDO: "datasets/competencia_02_crudo.csv.gz"
-  MES_TRAIN: [202009,202010,202011,202012] #AGREGAR EL DEL VAL BAYESIANA Faltan:[202003,202004,202005,202006,202007,202008,202009,202010]
+  MES_TRAIN: [202011,202012,202101,202102] #AGREGAR EL DEL VAL BAYESIANA Faltan:[202003,202004,202005,202006,202007,202008,202009,202010]
   MES_TEST: [202104,202106]
   MES_A_PREDECIR: 202108
   MES_01: 202101
