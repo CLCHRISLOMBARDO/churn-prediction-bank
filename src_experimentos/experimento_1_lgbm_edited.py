@@ -47,7 +47,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     cantidad_trials= N_TRIALS
     cantidad_boosts = N_BOOSTS
     #"""-----------------------------------------------------------------------------------------------"""
-    if tipo_bayesiana!="ZLGBM":
+    if tipo_bayesiana != "ZLGBM":
         if( (proceso_ppal =="test_exp") or (proceso_ppal =="test_prediccion_final")):
             proceso_bayesiana = "test_baye"
         elif((proceso_ppal == "experimento" )or (proceso_ppal =="prediccion_final")):
@@ -62,7 +62,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         except Exception as e:
             logger.error(f"No se pudo encontrar los best params ni best iter del {modelo_etiqueta} por el error {e}")
             raise
-        
+    
         if tipo_bayesiana =="OB":
             best_params_dict_sorted = sorted(best_params_dict , key=lambda x : x["ganancia_media_meseta"] ,reverse=True)
             top_models_bayesiana = best_params_dict_sorted[0:TOP_MODELS]
@@ -79,8 +79,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 }
                 for b in best_params_dict
             }
-        elif tipo_bayesiana =="ZLGBM":
-            top_bp = {0 : 0}
+    elif tipo_bayesiana =="ZLGBM":
+        top_bp = {0:0}
 ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04 
 
     #3. spliteo train - test - apred - Subsampleo
@@ -103,6 +103,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                     logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con hiperparams {best_params_i}")
                     logger.info(f"Comienzo del modelo del top del orden {orden_trial} : trial={trial} con best iter {best_iter_i}")
                 else:
+                    name_trial = name+ f"_MES_TEST_{mt}"
                     logger.info(f"Comienzo del ZLGBM")
                 y_predicciones_lista=[]
                 y_pred_sorted_dict={}
@@ -111,9 +112,10 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 for i,semilla in enumerate(semillas):
                     if tipo_bayesiana!="ZLGBM":
                         logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
-                        name_semilla=f"{name_trial}_SEMILLA_{semilla}_fase_testeo"
                     else:
-                        name_semilla = name + f"_MES_TEST_{mt}_SEMILLA_{semilla}_fase_testeo"
+                        logger.info(f"Comienzo de la semilla numero {semilla} del zlgbm *****************************************")
+
+                    name_semilla=f"{name_trial}_SEMILLA_{semilla}_fase_testeo"
                     # Entrenamiento de los modelos --------
                     if tipo_bayesiana =="OB":
                         model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
@@ -144,10 +146,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
                 # Creacion de lqs predicciones medias a partir de los ensambles de las semillas
                 semilla = "ensamble_semillas"
-                if tipo_bayesiana !="ZLGBM":
-                    name_semilla=f"{name_trial}_SEMILLA_{semilla}_fase_testeo"
-                else:
-                    name_semilla=f"{name}_SEMILLA_{semilla}_fase_testeo"
+                name_semilla=f"{name_trial}_SEMILLA_{semilla}_fase_testeo"
+             
                 logger.info("Comienzo del ensamblado de todas las semillas")
                 y_pred_df = np.vstack(y_predicciones_lista)
                 logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_df.shape}")
@@ -181,7 +181,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 y_pred_ensamble_modelos_matrix = np.vstack(y_predicciones_top_models)
                 logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_ensamble_modelos_matrix.shape}")
                 y_pred_ensamble_final = y_pred_ensamble_modelos_matrix.mean(axis=0)
-                pd.Series(y_pred_ensamble, index=X_test.index).to_csv(path_output_exp_prediction+ name_final)
+                pd.Series(y_pred_ensamble_final, index=X_test.index).to_csv(path_output_exp_prediction+ name_final)
 
                 guardar_umbral = True
                 semilla = "ENSAMBLE_FINAL_TOP_MODELS"
@@ -212,9 +212,10 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             for i,semilla in enumerate(semillas):
                 if tipo_bayesiana!="ZLGBM":
                     logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
-                    name_semilla=f"{name_trial}_SEMILLA_{semilla}_final_train"
+                
                 else:
-                    name_semilla = name + f"SEMILLA_{semilla}_final_train"
+                    logger.info(f"Comienzo de la semilla numero {semilla}  *****************************************")
+                name_semilla=f"{name_trial}_SEMILLA_{semilla}_final_train"
                 if tipo_bayesiana =="OB":
                     model_lgbm = entrenamiento_lgbm(X_train , y_train_binaria,w_train ,best_iter_i,best_params_i ,name_semilla,output_path_models,semilla)
                 elif tipo_bayesiana =="ZS":
