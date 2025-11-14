@@ -113,6 +113,8 @@ def entrenamiento_lgbm_zs(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.nda
         params["feature_fraction"]=0.8
     if params["bagging_fraction"]==1.0:
         params["bagging_fraction"]=0.8
+    if best_iter>3000:
+        best_iter= 3000
     
     params["bagging_freq"] = 1
 
