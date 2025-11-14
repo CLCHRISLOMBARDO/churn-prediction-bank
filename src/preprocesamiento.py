@@ -76,7 +76,7 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     conn.close()
     if subsampleo is not None:
         train_data=undersampling(train_data , subsampleo,semilla)
-
+    logger.info(f"Terminada la carga de df con columnas: {train_data.columns}")
     # TRAIN
     X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria'], axis=1)
     y_train_binaria = train_data['clase_binaria'].to_numpy()

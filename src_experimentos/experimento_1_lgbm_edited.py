@@ -48,6 +48,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     cantidad_boosts = N_BOOSTS
     #"""-----------------------------------------------------------------------------------------------"""
     if tipo_bayesiana != "ZLGBM":
+        n_canaritos=None
         if( (proceso_ppal =="test_exp") or (proceso_ppal =="test_prediccion_final")):
             proceso_bayesiana = "test_baye"
         elif((proceso_ppal == "experimento" )or (proceso_ppal =="prediccion_final")):
@@ -80,6 +81,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 for b in best_params_dict
             }
     elif tipo_bayesiana =="ZLGBM":
+        n_canaritos=N_CANARITOS
         top_bp = {0:0}
 ## 5. Primer Entrenamiento lgbm con la mejor iteracion y los mejores hiperparametros en [01,02,03] y evaluamos en 04 
 
@@ -93,7 +95,9 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         mes_train = MES_TRAIN
         for mt in mes_test:
             logger.info(f"========================Comienzo del analisis en el mes test :{mt} ==============================")
-            X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,mt,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
+            X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,
+                                                                                                                                        mt,MES_A_PREDECIR,
+                                                                                                                                        SEMILLA,SUBSAMPLEO,feature_subset=None,n_canaritos=5)
             y_predicciones_top_models=[]
             for orden_trial , trial in enumerate(top_bp):
                 if tipo_bayesiana!="ZLGBM":
@@ -195,7 +199,9 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         elif isinstance(MES_TEST, int):
             mes_train=MES_TRAIN.append(MES_TEST)
         mes_train=list(set(mes_train))
-        X_train, y_train_binaria,y_train_class, w_train, _, _, y_test_class, _,X_apred, y_apred = split_train_test_apred(n_experimento,mes_train,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)
+        X_train, y_train_binaria,y_train_class, w_train, _, _, y_test_class, _,X_apred, y_apred = split_train_test_apred(n_experimento,mes_train,
+                                                                                                                                        MES_TEST,MES_A_PREDECIR,
+                                                                                                                                        SEMILLA,SUBSAMPLEO,feature_subset=None,n_canaritos=5)
         y_apred_top_models=[]
         for orden_trial , trial in enumerate(top_bp):
             if tipo_bayesiana!="ZLGBM":
