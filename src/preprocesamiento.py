@@ -68,7 +68,8 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
                 where foto_mes = {mes_apred_sql}"""
     
     conn=duckdb.connect(PATH_DATA_BASE_DB)
-    conn.execute(f"PRAGMA random_seed = {semilla}")
+    seed_float = (semilla % 10000) / 10000.0
+    conn.execute("SELECT setseed(?)", [seed_float])
     train_data = conn.execute(sql_train).df()
     test_data = conn.execute(sql_test).df()
     apred_data = conn.execute(sql_apred).df()
