@@ -52,7 +52,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         proceso_bayesiana = "test_baye"
     elif((proceso_ppal == "experimento" )or (proceso_ppal =="prediccion_final")):
         proceso_bayesiana = "bayesiana"
-    name_best_params_file_lgbm=f"best_params_{proceso_bayesiana}_{numero_bayesiana_lgbm}_{modelo_etiqueta}_TIPO_{tipo_bayesiana}_{cantidad_semillas}_SEMILLAS_{cantidad_trials}_TRIALS_{cantidad_boosts}_BOOSTS.json"
+    name_best_params_file_lgbm=f"best_params{proceso_bayesiana}_{numero_bayesiana_lgbm}_{modelo_etiqueta}_TIPO_{tipo_bayesiana}_{cantidad_semillas}_SEMILLAS_{cantidad_trials}_TRIALS_{cantidad_boosts}_BOOSTS.json"
 
     try:
         with open(path_output_bayesian_bestparams+name_best_params_file_lgbm, "r") as f:
