@@ -5,7 +5,7 @@ import duckdb
 import logging
 
 #### FALTA AGREGAR LOS PUNTOS DE CONTROL PARA VISUALIZAR QUE ESTEN BIEN
-from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB
+from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB,GCP_PATH
 logger = logging.getLogger(__name__)
 
 def copia_tabla_local_a_bucket():
@@ -18,8 +18,8 @@ def copia_tabla_local_a_bucket():
     conn = duckdb.connect(PATH_DATA_BASE_DB)
     try:
         # Adjuntamos la base del bucket
-        conn.execute("""
-            ATTACH '/home/christian_lombardo14/buckets/b1/datasets/base_de_datos.duckdb' AS db_destino;
+        conn.execute(f"""
+            ATTACH '{GCP_PATH+PATH_DATA_BASE_DB}' AS db_destino;
         """)
 
         # Copiamos la tabla local hacia la base en el bucket

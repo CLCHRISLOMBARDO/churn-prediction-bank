@@ -68,10 +68,12 @@ try:
 
         # ---------------- Entorno (GCP vs local) ----------------
         in_gcp = bool(gcp.get("IN_GCP", False))
+        GCP_PATH = paths["place_path"]["GCP_PATH"]
+        LOCAL_PATH = paths["place_path"]["LOCAL_PATH"]
         if in_gcp:
-            PLACE_PATHS = paths["place_path"]["GCP_PATH"]
+            PLACE_PATHS = GCP_PATH
         else:
-            PLACE_PATHS = paths["place_path"]["LOCAL_PATH"]
+            PLACE_PATHS = LOCAL_PATH
 
         # ================= Rutas de INPUT / LOG ==================
         PATH_DATA_BASE_DB     =    inp["PATH_DATA_BASE_DB"] # --------------------------------------------<
