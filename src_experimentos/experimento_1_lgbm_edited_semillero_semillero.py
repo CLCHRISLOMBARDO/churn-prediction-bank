@@ -142,7 +142,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_df.shape}")
                 y_pred_ensamble = y_pred_df.mean(axis=0)
                 pd.Series(y_pred_ensamble, index=X_test.index).to_csv(path_output_exp_prediction+ name_semilla)
-
                 y_predicciones_top_models.append(y_pred_ensamble)
 
                 logger.info("Fin del ensamblado ")
