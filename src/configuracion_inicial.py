@@ -7,6 +7,8 @@ import duckdb
 
 def creacion_directorios():
     ## Creacion de las carpetas
+    if in_gcp :
+        os.makedirs("datasets/",exist_ok=True)
     os.makedirs(PATH_INPUT_DATA,exist_ok=True)
             #LOGS PATHS
     os.makedirs(PATH_LOGS,exist_ok=True)
