@@ -53,7 +53,7 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     feature_engineering_delta(df_completo_chiquito,cols_lag_delta_max_min_regl,ORDEN_LAGS)
     feature_engineering_linreg(df_completo_chiquito , cols_lag_delta_max_min_regl,VENTANA)
     feature_engineering_max_min(df_completo_chiquito,cols_lag_delta_max_min_regl ,VENTANA)
-    copia_tabla_local_a_bucket()
+    # copia_tabla_local_a_bucket()
 
    
 
