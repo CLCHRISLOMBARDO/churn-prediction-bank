@@ -92,9 +92,12 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             mes_test=list(MES_TEST)
         elif isinstance(MES_TEST,list):
             mes_test = MES_TEST
-        mes_train = MES_TRAIN
         for mt in mes_test:
             logger.info(f"========================Comienzo del analisis en el mes test :{mt} ==============================")
+            if mt == 202104:
+                mes_train = MES_TRAIN_04
+            elif mt == 202106:
+                mes_train = MES_TRAIN_06
             X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,
                                                                                                                                         mt,MES_A_PREDECIR,
                                                                                                                                         SEMILLA,SUBSAMPLEO,feature_subset=None,n_canaritos=5)
@@ -194,11 +197,12 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 
     elif (proceso_ppal =="prediccion_final" or  proceso_ppal =="test_prediccion_final"):
         logger.info(f"========================Comienzo de la prediccion final=============================")
-        if isinstance(MES_TEST , list):
-            mes_train=MES_TRAIN+MES_TEST
-        elif isinstance(MES_TEST, int):
-            mes_train=MES_TRAIN.append(MES_TEST)
-        mes_train=list(set(mes_train))
+        # if isinstance(MES_TEST , list):
+        #     mes_train=MES_TRAIN+MES_TEST
+        # elif isinstance(MES_TEST, int):
+        #     mes_train=MES_TRAIN.append(MES_TEST)
+        # mes_train=list(set(mes_train))
+        mes_train = MES_TRAIN_08
         X_train, y_train_binaria,y_train_class, w_train, _, _, y_test_class, _,X_apred, y_apred = split_train_test_apred(n_experimento,mes_train,
                                                                                                                                         MES_TEST,MES_A_PREDECIR,
                                                                                                                                         SEMILLA,SUBSAMPLEO,feature_subset=None,n_canaritos=5)
