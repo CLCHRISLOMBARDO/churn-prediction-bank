@@ -49,6 +49,7 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     sql_train=f"""select {sql_canaritos} * {exclude} 
                 from df_completo
                 where foto_mes IN ({mes_train_sql})"""
+    logger.info(f"sql train query : {sql_train}")
     if isinstance(mes_test,list):
         mes_test_sql = f"{mes_test[0]}"
         for m in mes_test[1:]:    
@@ -61,11 +62,13 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
         sql_test=f"""select {sql_canaritos} * {exclude}
                     from df_completo
                     where foto_mes = {mes_test_sql}"""
+    logger.info(f"sql train query : {sql_test}")
         
     mes_apred_sql = f"{mes_apred}"
     sql_apred=f"""select {sql_canaritos} * {exclude}
                 from df_completo
                 where foto_mes = {mes_apred_sql}"""
+    logger.info(f"sql train query : {sql_apred}")
     
     conn=duckdb.connect(PATH_DATA_BASE_DB)
     seed_float = (semilla % 10000) / 10000.0

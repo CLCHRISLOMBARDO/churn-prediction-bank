@@ -137,11 +137,10 @@ def cols_a_dropear_variable_entera(df: pd.DataFrame, columnas_base: list[str]) -
     """
     logger.info(f"Comienzo de la seleccion de la variable {columnas_base} ENTERA y todas sus derivadas para ELIMINAR")
     
-
-    cols_a_dropear = list({c for c in df.columns for col_drop in columnas_base if c.startswith(col_drop)})
+    cols_a_dropear = [c for c in df.columns for variable in columnas_base if variable in c]
     if len(cols_a_dropear)==0:
         logger.warning(f"No se encontro ninguna de las columnas en el df")
-    logger.info(f"Fin del proceso de la seleccion de la variable entera y todas sus derivadas para ELIMINAR")
+    logger.info(f"Fin del proceso de la seleccion de la variable entera y todas sus derivadas para ELIMINAR: {cols_a_dropear}")
     
     return cols_a_dropear
 
