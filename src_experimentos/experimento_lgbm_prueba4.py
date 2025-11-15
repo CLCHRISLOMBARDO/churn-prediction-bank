@@ -6,6 +6,8 @@ import logging
 import json
 
 from src.config import *
+from src.configuracion_inicial import creacion_df_small
+from src.constr_lista_cols import contrs_cols_dropear_por_features_sufijos ,cols_a_dropear_variable_originales_o_percentiles
 from src.preprocesamiento import split_train_test_apred
 from src.lgbm_train_test import entrenamiento_zlgbm,entrenamiento_lgbm,entrenamiento_lgbm_zs,grafico_feature_importance,prediccion_test_lgbm ,calc_estadisticas_ganancia,grafico_curvas_ganancia, grafico_hist_ganancia ,preparacion_ypred_kaggle
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
@@ -21,7 +23,17 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     name=f"{proceso_ppal}_{numero}_LGBM_{len(semillas)}_SEMILLAS"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name} con {n_semillas} semillas")
-    
+
+    # ---------------------- CONSTRUCCION COLUMNAS A ELIMINAR------------------------
+    df_completo_chiquito=creacion_df_small("df_completo")
+    sufijos=[f"lag_3","delta_3","_ratio","_slope","_max","_min","suma_de_",
+             "monto_ganancias","monto_gastos","ganancia_gasto_ratio"]
+    cols_drops_1=contrs_cols_dropear_por_features_sufijos(df_completo_chiquito,sufijos)
+    df_completo_chiquito=creacion_df_small("df_completo")
+    cols_drops_2=cols_a_dropear_variable_originales_o_percentiles(df_completo_chiquito,a_eliminar="percentiles")
+    colos_drops = cols_drops_1+cols_drops_2
+    colos_drops=list(set(colos_drops))
+
     # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import
     if (proceso_ppal =="experimento") or (proceso_ppal =="test_exp") :
         logger.info(f"LANZAMIENTO PARA EXP  CON {n_semillas} SEMILLAS")
@@ -36,7 +48,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         logger.info(f"LANZAMIENTO PARA PREDICCION FINAL CON {n_semillas} SEMILLAS")
         output_path_models = path_output_finales_model
         output_path_feat_imp =path_output_finales_feat_imp
- 
+    
     # 4. Carga de mejores Hiperparametros
     logger.info("Ingreso de hiperparametros de una Bayesiana ya realizada")
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
@@ -100,7 +112,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 mes_train = MES_TRAIN_06
             X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,
                                                                                                                                         mt,MES_A_PREDECIR,
-                                                                                                                                        SEMILLA,SUBSAMPLEO,feature_subset=None,n_canaritos=5)
+                                                                                                                                        SEMILLA,SUBSAMPLEO,feature_subset=colos_drops,n_canaritos=5)
             y_predicciones_top_models=[]
             for orden_trial , trial in enumerate(top_bp):
                 if tipo_bayesiana!="ZLGBM":
@@ -120,7 +132,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                     if tipo_bayesiana!="ZLGBM":
                         logger.info(f"Comienzo de la semilla numero {semilla} del orden {i} de {len(semillas)} iteraciones para el orden del trial {orden_trial} *****************************************")
                     else:
-                        logger.info(f"Comienzo de la semilla numero {semilla} del zlgbm  del orden {i} *****************************************")
+                        logger.info(f"Comienzo de la semilla numero {semilla} del orden {i}  del zlgbm *****************************************")
 
                     name_semilla=f"{name_trial}_SEMILLA_{semilla}_fase_testeo"
                     # Entrenamiento de los modelos --------
@@ -205,7 +217,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         mes_train = MES_TRAIN_08
         X_train, y_train_binaria,y_train_class, w_train, _, _, y_test_class, _,X_apred, y_apred = split_train_test_apred(n_experimento,mes_train,
                                                                                                                                         MES_TEST,MES_A_PREDECIR,
-                                                                                                                                        SEMILLA,SUBSAMPLEO,feature_subset=None,n_canaritos=5)
+                                                                                                                                        SEMILLA,SUBSAMPLEO,feature_subset=colos_drops,n_canaritos=5)
         y_apred_top_models=[]
         for orden_trial , trial in enumerate(top_bp):
             if tipo_bayesiana!="ZLGBM":

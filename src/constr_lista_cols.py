@@ -157,7 +157,10 @@ def cols_a_dropear_variable_por_feat(df: pd.DataFrame, columnas_variables: list[
 
     return cols_a_dropear
 
-
+def contrs_cols_dropear_por_features_sufijos(df:pd.DataFrame,cols_features_sufijos:list[str]):
+    logger.info(f"Comienzo de la seleccion de cols a dropear por features sufijos: {cols_features_sufijos}")
+    cols_a_dropear=[c for c in df.columns for fs in cols_features_sufijos if fs in c]
+    return cols_a_dropear
 
 
 def contrs_cols_dropear_feat_imp(df:pd.DataFrame , file:str , threshold:float)->list[str]:
