@@ -49,7 +49,7 @@ configuracion_canaritos:
 
 configuracion_experimentos:
   N_EXPERIMENTO : "prueba_zlgbm_7"
-  N_SEMILLAS_EXP : 6
+  N_SEMILLAS_EXP : 5
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"
 
