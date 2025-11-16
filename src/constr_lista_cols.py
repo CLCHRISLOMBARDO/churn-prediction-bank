@@ -82,8 +82,8 @@ def cols_beneficios_presion_economica(df:pd.DataFrame):
     "mcomisiones","mcomisiones_mantenimiento","mcomisiones_otras",
     # Débitos y pagos de servicios (egresos automáticos)
     "mcuenta_debitos_automaticos","mpagodeservicios","mpagomiscuentas",
-    # Deuda / préstamos (presión financiera)
-    "mprestamos_personales","mprestamos_prendarios","mprestamos_hipotecarios","mpasivos_margen",
+    # Deuda / préstamos (presión financiera)"mprestamos_personales",
+    "mprestamos_prendarios","mprestamos_hipotecarios","mpasivos_margen",
     # Egresos por movimientos
     "mtransferencias_emitidas","mextraccion_autoservicio",
     "mcheques_emitidos","mcheques_depositados_rechazados","mcheques_emitidos_rechazados",
