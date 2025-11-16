@@ -48,7 +48,7 @@ configuracion_canaritos:
   EARLY_STOPPING_ROUNDS : 200
 
 configuracion_experimentos:
-  N_EXPERIMENTO :  "final_7" #"p_zlgbm_13"
+  N_EXPERIMENTO :  "final_8" #"p_zlgbm_13"
   N_SEMILLAS_EXP : 5
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"
