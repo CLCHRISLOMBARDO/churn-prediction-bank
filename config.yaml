@@ -1,4 +1,4 @@
-COMPETENCIA: 1
+COMPETENCIA: 2
 # proceso_ppal : 
     # 0 -analisis_exploratorio 
     # 1- creacion_target_clase_ternaria 
@@ -48,7 +48,7 @@ configuracion_canaritos:
   EARLY_STOPPING_ROUNDS : 200
 
 configuracion_experimentos:
-  N_EXPERIMENTO :  "p_zlgbm_150" #"p_zlgbm_13"
+  N_EXPERIMENTO :  "p_zlgbm_13" #"p_zlgbm_13"
   N_SEMILLAS_EXP : 5
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"
@@ -61,7 +61,7 @@ configuracion_gcp:
 configuracion_paths:
   place_path:
     LOCAL_PATH: ""
-    GCP_PATH: "/home/carbonelldv/buckets/b1/"
+    GCP_PATH: "/home/christian_lombardo14/buckets/b1/"
   PATH_LOGS: "logs/"
   PATH_LOG_GLOBAL : "global_log/"
 
