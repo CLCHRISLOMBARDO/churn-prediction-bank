@@ -500,17 +500,17 @@ def graf_hist_ganancias_public_private(df_lb_long:pd.DataFrame|list[pd.DataFrame
 
 ## PREDICCION FINAL-------------------------------------------------------------------
 
-
+def preparacion_ytest_kaggle(y_test:np.ndarray , )
 def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series|np.ndarray ,umbral_cliente:int , name:str ,output_path:str) -> pd.DataFrame:
     logger.info("Comienzo de la preparacion de las predicciones finales")
     name = name+"_predicciones_finales"
-    y_apred["prediction"] = y_pred 
-    y_apred= y_apred.sort_values(by="prediction" , ascending=False)
+    y_apred["Predicted"] = y_pred 
+    y_apred= y_apred.sort_values(by="Predicted" , ascending=False)
     k = int(np.floor(umbral_cliente))
-    y_apred["prediction"] = 0
+    y_apred["Predicted"] = 0
 
-    y_apred.iloc[:k , y_apred.columns.get_loc("prediction")] = 1
-    logger.info(f"cantidad de bajas predichas : {int((y_apred['prediction']==1).sum())}")
+    y_apred.iloc[:k , y_apred.columns.get_loc("Predicted")] = 1
+    logger.info(f"cantidad de bajas predichas : {int((y_apred['Predicted']==1).sum())}")
     y_apred = y_apred.set_index("numero_de_cliente")
     file_name=output_path+name+".csv"
     try:
