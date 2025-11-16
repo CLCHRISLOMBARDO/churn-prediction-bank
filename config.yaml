@@ -48,7 +48,7 @@ configuracion_canaritos:
   EARLY_STOPPING_ROUNDS : 200
 
 configuracion_experimentos:
-  N_EXPERIMENTO :  "final_7.2" #"p_zlgbm_13"
+  N_EXPERIMENTO :  "final_13.0" #"p_zlgbm_13"
   N_SEMILLAS_EXP : 5
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"
@@ -61,7 +61,7 @@ configuracion_gcp:
 configuracion_paths:
   place_path:
     LOCAL_PATH: ""
-    GCP_PATH: "/home/carbonelldv/buckets/b1/"
+    GCP_PATH: "/home/christian_lombardo14/buckets/b1/"
   PATH_LOGS: "logs/"
   PATH_LOG_GLOBAL : "global_log/"
 
@@ -114,9 +114,9 @@ configuracion_competencia_2:
   FILE_INPUT_DATA: "datasets/competencia_02.csv"
   FILE_INPUT_DATA_CRUDO: "datasets/competencia_02_crudo.csv.gz"
   MES_TRAIN: [202009,202010,202011,202012,202101,202102] #NO HACE NADA AHORA Faltan:[202003,202004,202005,202006,202007,202008,202009,202010]
-  MES_TRAIN_04: [202011,202012,202101]
-  MES_TRAIN_06: [202101,202102,202103]
-  MES_TRAIN_08: [202103,202104,202105]
+  MES_TRAIN_04: [202012,202101,202102]
+  MES_TRAIN_06: [202102,202103,202104]
+  MES_TRAIN_08: [202104,202105,202106]
   MES_TEST: [202104,202106]
   MES_A_PREDECIR: 202108
   MES_01: 202101
