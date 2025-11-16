@@ -500,7 +500,8 @@ def graf_hist_ganancias_public_private(df_lb_long:pd.DataFrame|list[pd.DataFrame
 
 ## PREDICCION FINAL-------------------------------------------------------------------
 
-def preparacion_ytest_kaggle(y_test:np.ndarray , )
+# def preparacion_ytest_kaggle(y_test:np.ndarray|pd.Series , y_pred:np.ndarray |pd.Series,umbral_cliente:int , name:str ,output_path:str):
+
 def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series|np.ndarray ,umbral_cliente:int , name:str ,output_path:str) -> pd.DataFrame:
     logger.info("Comienzo de la preparacion de las predicciones finales")
     name = name+"_predicciones_finales"
