@@ -500,27 +500,87 @@ def graf_hist_ganancias_public_private(df_lb_long:pd.DataFrame|list[pd.DataFrame
 
 ## PREDICCION FINAL-------------------------------------------------------------------
 
-# def preparacion_ytest_kaggle(y_test:np.ndarray|pd.Series , y_pred:np.ndarray |pd.Series,umbral_cliente:int , name:str ,output_path:str):
-#     y_test = 
+def preparacion_ytest_proba_kaggle( X:pd.DataFrame , y_pred:np.ndarray , name:str ,output_path:str):
+    # name_bin=name+"prediccion_test_binaria"
+    logger.info("Entre a la preparacion del ytest de kaggle")
+    name_proba= name+"prediccion_test_proba"
+    numeros_clientes = X["numero_de_cliente"].values
+    y_pred_df = pd.DataFrame(data=numeros_clientes , columns=["numero_de_cliente"],index=X.index)
+    y_pred_df["Predicted"] = np.asarray(y_pred)
+    y_pred_proba =y_pred_df.copy()
+    y_pred_proba.set_index("numero_de_cliente")
 
-def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series|np.ndarray ,umbral_cliente:int , name:str ,output_path:str) -> pd.DataFrame:
-    logger.info("Comienzo de la preparacion de las predicciones finales")
-    name = name+"_predicciones_finales"
-    y_apred["Predicted"] = y_pred 
-    y_apred= y_apred.sort_values(by="Predicted" , ascending=False)
-    k = int(np.floor(umbral_cliente))
-    y_apred["Predicted"] = 0
+    # y_pred_df_sorted = y_pred_df.sort_values(by="Predicted",ascending=False)
+    # col_predicted_idx = y_pred_df_sorted.columns.get_loc("Predicted")
+    # y_pred_df_sorted.iloc[:umbral_cliente , col_predicted_idx] = 1
+    # y_pred_df_sorted.iloc[umbral_cliente:, col_predicted_idx] = 0
+    # logger.info(f"cantidad de bajas predichas : {int((y_pred_df_sorted['Predicted']==1).sum())}")
+    # file_name_bin=output_path+name_bin+".csv"
+    file_name_proba=output_path+name_proba+".csv"
 
-    y_apred.iloc[:k , y_apred.columns.get_loc("Predicted")] = 1
-    logger.info(f"cantidad de bajas predichas : {int((y_apred['Predicted']==1).sum())}")
-    y_apred = y_apred.set_index("numero_de_cliente")
+    # try:
+    #     y_pred_df_sorted.to_csv(file_name_bin,index=False)
+    #     logger.info(f"predicciones guardadas en {file_name}")
+    # except Exception as e:
+    #     logger.error(f"Error al intentar guardar las predicciones --> {e}")
+    #     raise
+    try:
+        y_pred_proba.to_csv(file_name_proba,index=False)
+        logger.info(f"predicciones guardadas en {file_name_proba}")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar las predicciones --> {e}")
+        raise
+    return 
+
+def preparacion_nclientesbajas_zulip(X:pd.DataFrame , y_pred:np.ndarray|pd.Series , umbral_cliente:int,name:str ,output_path:str):
+    logger.info("Comienzo de la preparacion de las predicciones finales para subir a zulip")
+    name = name + "_clientes_zulip"
+    df = pd.DataFrame({
+    "numero_de_cliente": X["numero_de_cliente"].values,
+    "Predicted_zulip": np.asarray(y_pred)})
+    df =df.sort_values(by="Predicted_zulip" , ascending=False)
+    col_num_cliente = df.columns.get_loc("numero_de_cliente")
+    numeros_de_clientes_a_enviar = df.iloc[:umbral_cliente ,col_num_cliente ]
     file_name=output_path+name+".csv"
     try:
-        y_apred.to_csv(file_name)
+        numeros_de_clientes_a_enviar.to_csv(file_name,index=False)
         logger.info(f"predicciones guardadas en {file_name}")
     except Exception as e:
         logger.error(f"Error al intentar guardar las predicciones --> {e}")
         raise
-    return y_apred
+    return 
+
+def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series|np.ndarray ,umbral_cliente:int , name:str ,output_path:str) -> pd.DataFrame:
+    logger.info("Comienzo de la preparacion de las predicciones finales")
+    name_bin = name+"_pred_finales_binaria"
+    name_proba=name+"_pred_finales_proba"
+    y_apred["Predicted"] = np.asarray(y_pred)
+    y_apred= y_apred.sort_values(by="Predicted" , ascending=False)
+    k = int(np.floor(umbral_cliente))
+    # Predicciones de probabilidades
+    y_apred_proba = y_apred.copy()
+    y_apred_proba = y_apred_proba.set_index("numero_de_cliente")
+    # Predicciones Binarias
+    y_apred["Predicted"] = 0
+    y_apred.iloc[:k , y_apred.columns.get_loc("Predicted")] = 1
+    logger.info(f"cantidad de bajas predichas : {int((y_apred['Predicted']==1).sum())}")
+    y_apred = y_apred.set_index("numero_de_cliente")
+    file_name_bin=output_path+name_bin+".csv"
+    file_name_proba=output_path+name_proba+".csv"
+    try:
+        y_apred.to_csv(file_name_bin)
+        logger.info(f"predicciones binarias guardadas en {file_name_bin}")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar las predicciones --> {e}")
+        raise
+    try:
+        y_apred_proba.to_csv(file_name_proba)
+        logger.info(f"predicciones binarias guardadas en {file_name_bin}")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar las predicciones --> {e}")
+        raise
+    return
+
+
 
 

@@ -151,3 +151,13 @@
 {"fecha": "2025-11-13_14-08-44", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 5000, "n_semillas": 20, "in_gcp": false}
 {"fecha": "2025-11-13_14-17-11", "competencia": 1, "proceso_ppal": "test_exp", "n_experimento": 6000, "n_semillas": 100, "in_gcp": false}
 {"fecha": "2025-11-13_15-08-36", "competencia": 1, "proceso_ppal": "test_prediccion_final", "n_experimento": 6000, "n_semillas": 100, "in_gcp": false}
+{"fecha": "2025-11-16_13-53-00", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": "Intento_local", "n_semillas": 5, "in_gcp": false}
+{"fecha": "2025-11-16_13-55-35", "competencia": 1, "proceso_ppal": "prediccion_final", "n_experimento": "Intento_local", "n_semillas": 5, "in_gcp": false}
+{"fecha": "2025-11-16_13-58-12", "competencia": 1, "proceso_ppal": "prediccion_final", "n_experimento": "Intento_local", "n_semillas": 5, "in_gcp": false}
+{"fecha": "2025-11-16_17-07-35", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": "Intento_local_1", "n_semillas": 5, "in_gcp": false}
+{"fecha": "2025-11-16_17-13-36", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": "Intento_local_1", "n_semillas": 5, "in_gcp": false}
+{"fecha": "2025-11-16_17-16-42", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": "Intento_local_1", "n_semillas": 5, "in_gcp": false}
+{"fecha": "2025-11-16_17-21-17", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": "Intento_local_1", "n_semillas": 2, "in_gcp": false}
+{"fecha": "2025-11-16_17-23-01", "competencia": 1, "proceso_ppal": "experimento", "n_experimento": "Intento_local_1", "n_semillas": 2, "in_gcp": false}
+{"fecha": "2025-11-16_17-25-10", "competencia": 1, "proceso_ppal": "prediccion_final", "n_experimento": "Intento_local_1", "n_semillas": 2, "in_gcp": false}
+{"fecha": "2025-11-16_17-27-17", "competencia": 1, "proceso_ppal": "prediccion_final", "n_experimento": "Intento_local_1", "n_semillas": 2, "in_gcp": false}

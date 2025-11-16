@@ -7,9 +7,9 @@ import json
 
 from src.config import *
 from src.configuracion_inicial import creacion_df_small
-from src.constr_lista_cols import contrs_cols_dropear_por_features_sufijos ,cols_a_dropear_variable_originales_o_percentiles
+from src.constr_lista_cols import cols_a_dropear_variable_entera,contrs_cols_dropear_por_features_sufijos ,cols_a_dropear_variable_originales_o_percentiles
 from src.preprocesamiento import split_train_test_apred
-from src.lgbm_train_test import entrenamiento_zlgbm,entrenamiento_lgbm,entrenamiento_lgbm_zs,grafico_feature_importance,prediccion_test_lgbm ,calc_estadisticas_ganancia,grafico_curvas_ganancia, grafico_hist_ganancia ,preparacion_ypred_kaggle
+from src.lgbm_train_test import preparacion_nclientesbajas_zulip,entrenamiento_zlgbm,entrenamiento_lgbm,entrenamiento_lgbm_zs,grafico_feature_importance,prediccion_test_lgbm ,calc_estadisticas_ganancia,grafico_curvas_ganancia, grafico_hist_ganancia ,preparacion_ypred_kaggle,preparacion_ytest_proba_kaggle
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 ## Carga de variables
 
@@ -26,14 +26,18 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
     # ---------------------- CONSTRUCCION COLUMNAS A ELIMINAR------------------------
     df_completo_chiquito=creacion_df_small("df_completo")
-    sufijos=[f"lag_3","delta_3","_ratio","_slope","_max","_min","suma_de_",
+    sufijos=[f"lag_{i}" for i in range(1,4)]+[f"delta_{i}" for i in range(1,4)]+["_ratio","_slope","_max","_min","suma_de_",
              "monto_ganancias","monto_gastos","ganancia_gasto_ratio"]
     cols_drops_1=contrs_cols_dropear_por_features_sufijos(df_completo_chiquito,sufijos)
-    df_completo_chiquito=creacion_df_small("df_completo")
-    cols_drops_2=cols_a_dropear_variable_originales_o_percentiles(df_completo_chiquito,a_eliminar="percentiles")
-    cols_drops = cols_drops_1+cols_drops_2
-    cols_drops=list(set(cols_drops))
 
+    df_completo_chiquito=creacion_df_small("df_completo")
+    cols_drops_2=cols_a_dropear_variable_originales_o_percentiles(df_completo_chiquito,a_eliminar="originales")
+    
+    df_completo_chiquito=creacion_df_small("df_completo")
+    cols_drops_3=cols_a_dropear_variable_entera(df_completo_chiquito, ['mprestamos_personales','cprestamos_personales'])
+    
+    cols_drops = cols_drops_1+cols_drops_2 + cols_drops_3
+    cols_drops=list(set(cols_drops))
     # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import
     if (proceso_ppal =="experimento") or (proceso_ppal =="test_exp") :
         logger.info(f"LANZAMIENTO PARA EXP  CON {n_semillas} SEMILLAS")
@@ -112,7 +116,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 mes_train = MES_TRAIN_06
             X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,
                                                                                                                                         mt,MES_A_PREDECIR,
-                                                                                                                                        SEMILLA,SUBSAMPLEO,feature_subset=colos_drops,n_canaritos=5)
+                                                                                                                                        SEMILLA,SUBSAMPLEO,feature_subset=cols_drops,n_canaritos=5)
             y_predicciones_top_models=[]
             for orden_trial , trial in enumerate(top_bp):
                 if tipo_bayesiana!="ZLGBM":
@@ -171,13 +175,13 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 y_pred_df = np.vstack(y_predicciones_lista)
                 logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_df.shape}")
                 y_pred_ensamble = y_pred_df.mean(axis=0)
+                # Guardado de predicciones
                 preparacion_ytest_proba_kaggle(X=X_test,y_pred=y_pred_ensamble,name=name_semilla,output_path=path_output_exp_prediction)
 
                 y_predicciones_top_models.append(y_pred_ensamble)
 
                 logger.info("Fin del ensamblado ")
                 
-                            
                 estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble ,name_semilla , output_path_umbrales , semilla, guardar_umbral )
                 estadisticas_ganancia_dict[semilla] = estadisticas_ganancia 
                 y_pred_sorted_dict[semilla] = y_pred_sorted
@@ -260,7 +264,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             if tipo_bayesiana != "ZLGBM":
                 estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}_MES_TEST_{MES_TEST[-1]}.json"
             else:
-                estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS" + f"_MES_TEST_202106.json"
+                estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS" + f"_MES_TEST_{MES_TEST[-1]}.json"
 
             file = path_output_exp_umbral+estadisticas_ganancia_file 
             logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
@@ -280,8 +284,10 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_matrix.shape}")
             y_pred_ensamble_trial_i = y_pred_matrix.mean(axis=0)
             logger.info("Fin del ensamblado del semillero ")
-            # Predicciones en test 04 para cada modelo
-            y_apred_trial_i = preparacion_ypred_kaggle(y_apred, y_pred_ensamble_trial_i ,cliente_optimo, name_trial ,path_output_prediccion_final)
+            # Predicciones binarias y proba 
+            preparacion_ypred_kaggle(y_apred, y_pred_ensamble_trial_i ,cliente_optimo, name_trial ,path_output_prediccion_final)
+            # Numero de clientes a enviar
+            preparacion_nclientesbajas_zulip(X_apred,y_pred_ensamble_trial_i,cliente_optimo,name_trial ,path_output_prediccion_final)
             if tipo_bayesiana !="ZLGBM":
                 y_apred_top_models.append(y_pred_ensamble_trial_i)
         if tipo_bayesiana !="ZLGBM":
@@ -309,7 +315,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             y_pred_ensamble_modelos_matrix = np.vstack(y_apred_top_models)
             logger.info(f" shape de la matriz con todas las predicciones ensamblado{y_pred_ensamble_modelos_matrix.shape}")
             y_pred_ensamble_final = y_pred_ensamble_modelos_matrix.mean(axis=0)
-            y_apred_ensamble_top_models = preparacion_ypred_kaggle(y_apred, y_pred_ensamble_final ,cliente_optimo , name_final ,path_output_prediccion_final)
+            preparacion_ypred_kaggle(y_apred, y_pred_ensamble_final ,cliente_optimo, name_final ,path_output_prediccion_final)
+            preparacion_nclientesbajas_zulip(X_apred,y_pred_ensamble_final,cliente_optimo,name_final ,path_output_prediccion_final)
 
 logger.info(f">>> Ejecucion finalizada. Revisar logs para mas detalles.")
 
