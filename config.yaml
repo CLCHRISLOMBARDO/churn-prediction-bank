@@ -6,7 +6,7 @@ COMPETENCIA: 2
     # 3- bayesiana  | test_baye 
     # 4- experimento |  test_exp
     # 5- prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "creacion_target_clase_ternaria"
+PROCESO_PPAL: "feat_eng"
 # SUSBAMPLEO EN PORCENTAJE
 SUBSAMPLEO : 0.1 # solo para baye y exp y pred final
 
@@ -18,8 +18,8 @@ configuracion_semilla:
 
 configuracion_feat_eng : 
   N_FE : 1
-  VENTANA: 6
-  ORDEN_LAGS: 3
+  VENTANA: 3
+  ORDEN_LAGS: 2
 
 configuracion_bayesiana:
   TIPO_BAYESIANA : "ZLGBM" # OB | ZS | ZLGBM
