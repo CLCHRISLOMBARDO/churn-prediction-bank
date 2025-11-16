@@ -26,18 +26,17 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
     # ---------------------- CONSTRUCCION COLUMNAS A ELIMINAR------------------------
     df_completo_chiquito=creacion_df_small("df_completo")
-    sufijos=[f"lag_3","delta_3","_ratio","_slope","_max","_min","suma_de_",
+    sufijos=[f"lag_{i}" for i in range(1,4)]+[f"delta_{i}" for i in range(1,4)]+["_ratio","_slope","_max","_min","suma_de_",
              "monto_ganancias","monto_gastos","ganancia_gasto_ratio"]
     cols_drops_1=contrs_cols_dropear_por_features_sufijos(df_completo_chiquito,sufijos)
 
-    df_completo_chiquito=creacion_df_small("df_completo")
-    cols_drops_2=cols_a_dropear_variable_originales_o_percentiles(df_completo_chiquito,a_eliminar="percentiles")
+    # df_completo_chiquito=creacion_df_small("df_completo")
+    # cols_drops_2=cols_a_dropear_variable_originales_o_percentiles(df_completo_chiquito,a_eliminar="originales")
     
     df_completo_chiquito=creacion_df_small("df_completo")
     cols_drops_3=cols_a_dropear_variable_entera(df_completo_chiquito, ['mprestamos_personales','cprestamos_personales'])
     
-    
-    cols_drops = cols_drops_1+cols_drops_2 + cols_drops_3
+    cols_drops = cols_drops_1 + cols_drops_3
     cols_drops=list(set(cols_drops))
 
     # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import

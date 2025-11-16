@@ -501,74 +501,24 @@ def graf_hist_ganancias_public_private(df_lb_long:pd.DataFrame|list[pd.DataFrame
 ## PREDICCION FINAL-------------------------------------------------------------------
 
 
-# def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series|np.ndarray ,umbral_cliente:int , name:str ,output_path:str) -> pd.DataFrame:
-#     logger.info("Comienzo de la preparacion de las predicciones finales")
-#     name = name+"_predicciones_finales"
-#     y_apred["prediction"] = y_pred 
-#     y_apred= y_apred.sort_values(by="prediction" , ascending=False)
-#     k = int(np.floor(umbral_cliente))
-#     y_apred["prediction"] = 0
-
-#     y_apred.iloc[:k , y_apred.columns.get_loc("prediction")] = 1
-#     logger.info(f"cantidad de bajas predichas : {int((y_apred['prediction']==1).sum())}")
-#     y_apred = y_apred.set_index("numero_de_cliente")
-#     file_name=output_path+name+".csv"
-#     try:
-#         y_apred.to_csv(file_name)
-#         logger.info(f"predicciones guardadas en {file_name}")
-#     except Exception as e:
-#         logger.error(f"Error al intentar guardar las predicciones --> {e}")
-#         raise
-#     return y_apred
-
-
-def preparacion_ypred_kaggle(
-    y_apred: pd.DataFrame,
-    y_pred: pd.Series | np.ndarray,
-    umbral_cliente: int,
-    name: str,
-    output_path: str,
-) -> pd.DataFrame:
-    """
-    Prepara el archivo de envío para Kaggle.
-
-    - Ordena por score de predicción (y_pred) de mayor a menor.
-    - Marca con 1 los primeros `umbral_cliente` clientes y 0 el resto.
-    - Genera un CSV con columnas: numero_de_cliente, Predicted
-    """
+def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series|np.ndarray ,umbral_cliente:int , name:str ,output_path:str) -> pd.DataFrame:
     logger.info("Comienzo de la preparacion de las predicciones finales")
-
-    # Aseguramos que solo esté la columna de id
-    df = y_apred[["numero_de_cliente"]].copy()
-
-    # Por si y_pred viene como np.array
-    df["score"] = np.asarray(y_pred)
-
-    # Ordenamos por score
-    df = df.sort_values(by="score", ascending=False)
-
-    # Umbral de clientes a etiquetar como 1
+    name = name+"_predicciones_finales"
+    y_apred["prediction"] = y_pred 
+    y_apred= y_apred.sort_values(by="prediction" , ascending=False)
     k = int(np.floor(umbral_cliente))
+    y_apred["prediction"] = 0
 
-    # Inicialmente todos 0
-    df["Predicted"] = 0
-    # Primeros k como 1
-    df.iloc[:k, df.columns.get_loc("Predicted")] = 1
-
-    logger.info(f"cantidad de bajas predichas : {int((df['Predicted'] == 1).sum())}")
-
-    # Dejamos solo las columnas que pide Kaggle
-    df_submit = df[["numero_de_cliente", "Predicted"]]
-
-    # Armamos nombre de archivo
-    file_name = os.path.join(output_path, f"{name}_predicciones_finales.csv")
-
+    y_apred.iloc[:k , y_apred.columns.get_loc("prediction")] = 1
+    logger.info(f"cantidad de bajas predichas : {int((y_apred['prediction']==1).sum())}")
+    y_apred = y_apred.set_index("numero_de_cliente")
+    file_name=output_path+name+".csv"
     try:
-        df_submit.to_csv(file_name, index=False)
-        logger.info(f"Predicciones guardadas en {file_name}")
+        y_apred.to_csv(file_name)
+        logger.info(f"predicciones guardadas en {file_name}")
     except Exception as e:
         logger.error(f"Error al intentar guardar las predicciones --> {e}")
         raise
+    return y_apred
 
-    return df_submit
 

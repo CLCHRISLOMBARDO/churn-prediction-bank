@@ -260,7 +260,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             if tipo_bayesiana != "ZLGBM":
                 estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS"+ f"_TRIAL_{trial}_TOP_{orden_trial}_MES_TEST_{MES_TEST[-1]}.json"
             else:
-                estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS.json"
+                estadisticas_ganancia_file =f"{proceso_experimento}_{numero}_LGBM_{len(semillas)}_SEMILLAS" + f"_MES_TEST_202106.json"
 
             file = path_output_exp_umbral+estadisticas_ganancia_file 
             logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
