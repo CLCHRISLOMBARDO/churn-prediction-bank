@@ -543,7 +543,7 @@ def preparacion_nclientesbajas_zulip(X:pd.DataFrame , y_pred:np.ndarray|pd.Serie
     numeros_de_clientes_a_enviar = df.iloc[:umbral_cliente ,col_num_cliente ]
     file_name=output_path+name+".csv"
     try:
-        numeros_de_clientes_a_enviar.to_csv(file_name,index=False)
+        numeros_de_clientes_a_enviar.to_csv(file_name,index=False,header=False)
         logger.info(f"predicciones guardadas en {file_name}")
     except Exception as e:
         logger.error(f"Error al intentar guardar las predicciones --> {e}")
