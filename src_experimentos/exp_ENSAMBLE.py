@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 import logging
 import json
+from functools import reduce
+import duckdb
+
 
 from src.config import *
 from src.configuracion_inicial import creacion_df_small
@@ -20,13 +23,315 @@ def lanzar_experimento_ensamble(fecha:str ,semillas:list[int],n_experimento:int,
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
     n_semillas = len(semillas)
-    name=f"{proceso_ppal}_{numero}_ENSAMBLE_{len(semillas)}_SEMILLAS"
+    name=f"{proceso_ppal}_{numero}_LGBM_{len(semillas)}_SEMILLAS"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name} con {n_semillas} semillas")
 
     # ---------------------- CONSTRUCCION COLUMNAS A ELIMINAR------------------------
-
     
+    # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import
+    if (proceso_ppal =="experimento") or (proceso_ppal =="test_exp") :
+        logger.info(f"LANZAMIENTO PARA EXP  CON {n_semillas} SEMILLAS")
+        output_path_models = path_output_exp_model
+        output_path_feat_imp = path_output_exp_feat_imp
+        output_path_graf_ganancia_hist_total =path_output_exp_graf_gan_hist_total
+        output_path_graf_curva_ganancia = path_output_exp_graf_curva_ganancia
+        output_path_umbrales=path_output_exp_umbral
+        logger.info(f"LANZAMIENTO PARA EXPERIMENTO {numero} CON {n_semillas} SEMILLAS")
+        
+    elif (proceso_ppal == "prediccion_final") or (proceso_ppal =="test_prediccion_final"):
+        logger.info(f"LANZAMIENTO PARA PREDICCION FINAL CON {n_semillas} SEMILLAS")
+        output_path_models = path_output_finales_model
+        output_path_feat_imp =path_output_finales_feat_imp
+    
+    # 4. Carga de mejores Hiperparametros
+    logger.info("Ingreso de hiperparametros de una Bayesiana ya realizada")
+    #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
+    tipo_bayesiana=TIPO_BAYESIANA
+    numero_bayesiana_lgbm =N_BAYESIANA
+    modelo_etiqueta="LGBM"
+    cantidad_semillas =N_SEMILLAS_BAY
+    cantidad_trials= N_TRIALS
+    cantidad_boosts = N_BOOSTS
+    #"""-----------------------------------------------------------------------------------------------"""
+    names_exp_finals_preds=["final_7","final_7.2","final_7.3","final_7.4"]
 
+
+    if proceso_ppal in ("experimento", "test_exp"):
+        logger.info("Entro en el proceso experimento !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+        # Normalizo MES_TEST a lista
+        if isinstance(MES_TEST, int):
+            mes_test = [MES_TEST]
+        elif isinstance(MES_TEST, list):
+            mes_test = MES_TEST
+        else:
+            raise ValueError(f"Tipo no soportado para MES_TEST: {type(MES_TEST)}")
+
+        for mt in mes_test:
+            logger.info(f"======================== Comienzo del analisis en el mes test : {mt} ==============================")
+
+            lists_df = []
+            for i, n_exp in enumerate(names_exp_finals_preds):
+                name_file = (
+                    path_output_exp_prediction
+                    + f"experimento_{n_exp}_LGBM_5_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
+                    "prediccion_test_proba.csv"
+                )
+                logger.info(f"name file : {name_file}")
+                df_i = pd.read_csv(name_file)
+                lists_df.append(df_i)
+
+            # Renombro 'predicted' en cada DF para no pisar columnas
+            dfs_renamed = []
+            for i, df in enumerate(lists_df):
+                df_tmp = df.copy()
+                df_tmp = df_tmp.rename(columns={"predicted": f"pred_model_{i}"})
+                dfs_renamed.append(df_tmp)
+
+            # Merge de todos los modelos por numero_de_cliente
+            df_ensamble = reduce(
+                lambda left, right: pd.merge(left, right, on="numero_de_cliente", how="inner"),
+                dfs_renamed
+            )
+            logger.info(f"Ensamblado el df con shape : {df_ensamble.shape}")
+
+            # Calcular promedio de probas por cliente
+            cols_pred = [c for c in df_ensamble.columns if c.startswith("pred_model_")]
+            df_ensamble["Predicted"] = df_ensamble[cols_pred].mean(axis=1)
+
+            # Levanto la clase verdadera desde DuckDB
+            sql_test = f"""
+                select numero_de_cliente, clase_ternaria
+                from df_completo
+                where foto_mes = {mt}
+            """
+            logger.info(f"sql test query : {sql_test}")
+
+            conn = duckdb.connect(PATH_DATA_BASE_DB)
+            test_data = conn.execute(sql_test).df()
+            conn.close()
+
+            # Merge con la info de clase_ternaria
+            df_final = pd.merge(df_ensamble, test_data, on="numero_de_cliente", how="inner")
+
+            # Arrays para la función de ganancia
+            y_test_class = df_final["clase_ternaria"].to_numpy()
+            y_pred_ensamble = df_final["Predicted"].to_numpy()
+
+            semilla = "ensamble"
+            name_final = f"ENSAMBLE_FINAL_MES_TEST_{mt}"
+
+            guardar_umbral = True
+            estadisticas_ganancia, y_pred_sorted, ganancia_acumulada = calc_estadisticas_ganancia(
+                y_test_class,
+                y_pred_ensamble,
+                name_final,
+                output_path_umbrales,
+                semilla,
+                guardar_umbral
+            )
+
+            grafico_curvas_ganancia(
+                y_pred_sorted,
+                ganancia_acumulada,
+                estadisticas_ganancia,
+                name_final,
+                output_path_graf_curva_ganancia
+            )
+
+    elif proceso_ppal in ("prediccion_final", "test_prediccion_final"):
+        logger.info("======================== Comienzo de la prediccion final ==========================")
+
+        lists_df_bin = []
+        lists_df_proba = []
+
+        # Levanto los CSVs por modelo
+        for i, n_exp in enumerate(names_exp_finals_preds):
+
+            name_file_bin = (
+                path_output_exp_prediction
+                + f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_binaria.csv"
+            )
+            name_file_proba = (
+                path_output_exp_prediction
+                + f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_proba.csv"
+            )
+
+            logger.info(f"name file bin: {name_file_bin}")
+            logger.info(f"name file proba: {name_file_proba}")
+
+            df_i_bin = pd.read_csv(name_file_bin)
+            df_i_proba = pd.read_csv(name_file_proba)
+
+            lists_df_bin.append(df_i_bin)
+            lists_df_proba.append(df_i_proba)
+
+        # =========================
+        #   ENSAMBLE DE PROBAS
+        # =========================
+
+        dfs_renamed_proba = []
+        for i, df in enumerate(lists_df_proba):
+            df_tmp_proba = df.copy()
+            df_tmp_proba = df_tmp_proba.rename(columns={"predicted": f"pred_proba_{i}"})
+            dfs_renamed_proba.append(df_tmp_proba)
+
+        df_ensamble_proba = reduce(
+            lambda left, right: pd.merge(left, right, on="numero_de_cliente", how="inner"),
+            dfs_renamed_proba
+        )
+
+        cols_pred_proba = [c for c in df_ensamble_proba.columns if c.startswith("pred_proba_")]
+        df_ensamble_proba["pred_proba_mean"] = df_ensamble_proba[cols_pred_proba].mean(axis=1)
+
+        # =========================
+        #   ENSAMBLE BINARIO (VOTING)
+        # =========================
+
+        dfs_renamed_bin = []
+        for i, df in enumerate(lists_df_bin):
+            df_tmp_bin = df.copy()
+            df_tmp_bin = df_tmp_bin.rename(columns={"predicted": f"pred_bin_{i}"})
+            dfs_renamed_bin.append(df_tmp_bin)
+
+        df_ensamble_bin = reduce(
+            lambda left, right: pd.merge(left, right, on="numero_de_cliente", how="inner"),
+            dfs_renamed_bin
+        )
+
+        cols_pred_bin = [c for c in df_ensamble_bin.columns if c.startswith("pred_bin_")]
+        df_ensamble_bin["votes_sum"] = df_ensamble_bin[cols_pred_bin].sum(axis=1)
+
+        n_models = len(cols_pred_bin)
+        df_ensamble_bin["pred_bin_vote"] = (df_ensamble_bin["votes_sum"] >= (n_models / 2)).astype(int)
+
+        # =========================
+        #   UNIR PROBA + BINARIO
+        # =========================
+
+        df_final_pred = pd.merge(
+            df_ensamble_proba[["numero_de_cliente", "pred_proba_mean"]],
+            df_ensamble_bin[["numero_de_cliente", "pred_bin_vote"]],
+            on="numero_de_cliente",
+            how="inner"
+        )
+
+        logger.info(f"DF final pred shape: {df_final_pred.shape}")
+
+        # =========================
+        #   ENVIAR A ZULIP
+        # =========================
+
+        # 1) Para probabilidades (TOP-k clientes)
+        y_pred_proba = df_final_pred["pred_proba_mean"].to_numpy()
+        preparacion_nclientesbajas_zulip(
+            df_final_pred,
+            y_pred_proba,
+            umbral_cliente=UMBRAL_CLIENTE,    
+            name="pred_final_proba",
+            output_path=path_output_prediccion_final
+        )
+
+        # 2) Para voting binario (TOP-k clientes)
+        y_pred_bin = df_final_pred["pred_bin_vote"].to_numpy()
+        preparacion_nclientesbajas_zulip(
+            df_final_pred,
+            y_pred_bin,
+            umbral_cliente=UMBRAL_CLIENTE,
+            name="pred_final_bin",
+            output_path=path_output_prediccion_final
+        )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # if (proceso_ppal =="experimento" or proceso_ppal =="test_exp") :
+    #     logger.info(f"Entro en el proceso experimento !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    #     if isinstance(MES_TEST,int):
+    #         mes_test=[MES_TEST]
+    #     elif isinstance(MES_TEST,list):
+    #         mes_test = MES_TEST
+    #     for mt in mes_test:
+    #         logger.info(f"========================Comienzo del analisis en el mes test :{mt} ==============================")
+    #         lists_df=[]
+    #         for i,n_exp in enumerate(names_exp_finals_preds):
+    #             name_file= path_output_exp_prediction+f"experimento_{n_exp}_LGBM_5_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeoprediccion_test_proba.csv"
+    #             logger.info(f"name file : {name_file}")
+    #             df_i=pd.read_csv(name_file)
+    #             lists_df.append(df_i)
+    #         dfs_renamed = []
+            
+    #         for i, df in enumerate(lists_df):
+    #             df_tmp = df.copy()
+    #             df_tmp = df_tmp.rename(columns={"predicted": f"pred_model_{i}"})
+    #             dfs_renamed.append(df_tmp)
+            
+    #         df_ensamble = reduce(lambda left, right: pd.merge(left, right, on="numero_de_cliente", how="inner"),dfs_renamed)
+    #         logger.info(f"Ensamblado el df con shape : {df_ensamble.shape}")
+                
+    #         sql_test=f"""select numero_de_cliente, clase_ternaria
+    #                     from df_completo
+    #                     where foto_mes = {mt}"""
+    #         logger.info(f"sql test query : {sql_test}")
+            
+    #         conn=duckdb.connect(PATH_DATA_BASE_DB)
+    #         test_data = conn.execute(sql_test).df()
+    #         conn.close()
+
+    #         df_final = pd.merge(df_final,test_data,on="numero_de_cliente",how="inner")
+
+    #         y_test_class=df_final["clase_ternaria"].to_numpy
+    #         y_pred_ensamble = df_final["Predicted"].to_numpy
+    #         name_final = name 
+
+    #         guardar_umbral = True
+    #         semilla="ensamble"
+    #         name_final = f"ENSAMBLE_FINAL_MES_TEST{mt}"
+    #         estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble ,name_final , output_path_umbrales , semilla, guardar_umbral )
+    #         grafico_curvas_ganancia(y_pred_sorted ,ganancia_acumulada,estadisticas_ganancia,name_final,output_path_graf_curva_ganancia)
+            
+    # elif (proceso_ppal =="prediccion_final" or  proceso_ppal =="test_prediccion_final"):
+    #     logger.info(f"========================Comienzo de la prediccion final ==========================")
+    #     lists_df_bin=[]
+    #     lists_df_proba=[]
+    #     for i,n_exp in enumerate(names_exp_finals_preds):
+    #         name_file_bin= path_output_exp_prediction+f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_binaria.csv"
+    #         name_file_proba= path_output_exp_prediction+f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_proba.csv"
+
+    #         logger.info(f"name file bin: {name_file_bin}")
+    #         logger.info(f"name file proba: {name_file_proba}")
+    #         df_i_bin=pd.read_csv(name_file_bin)
+    #         df_i_proba=pd.read_csv(name_file_proba)
+
+    #         lists_df_bin.append(df_i_bin)
+    #         lists_df_proba.append(df_i_proba)
+    #     dfs_renamed_bin = []
+    #     for i, df in enumerate(lists_df_bin):
+    #         df_tmp_bin = df.copy()
+    #         df_tmp_bin = df_tmp_bin.rename(columns={"predicted": f"pred_model_{i}"})
+    #         dfs_renamed_bin.append(df_tmp)
+        
+
+    #     dfs_renamed_proba = []
+    #     for i, df in enumerate(lists_df_proba):
+    #         df_tmp_proba = df.copy()
+    #         df_tmp_proba = df_tmp_proba.rename(columns={"predicted": f"pred_model_{i}"})
+    #         dfs_renamed.append(df_tmp)
+    #     df_ensamble_proba = reduce(lambda left, right: pd.merge(left, right, on="numero_de_cliente", how="inner"),dfs_renamed)
+
+        
 logger.info(f">>> Ejecucion finalizada. Revisar logs para mas detalles.")
 

@@ -132,6 +132,7 @@ try:
         MES_TRAIN_08      = comp.get("MES_TRAIN_08", [202101, 202102, 202103])
         MES_TEST       = comp.get("MES_TEST", [202104])
         MES_A_PREDECIR = comp.get("MES_A_PREDECIR", 202106)
+        UMBRAL_CLIENTE = comp.get("UMBRAL_CLIENTE",11500)
         MES_01         = comp.get("MES_01", 202101)
         MES_02         = comp.get("MES_02", 202102)
         MES_03         = comp.get("MES_03", 202103)
