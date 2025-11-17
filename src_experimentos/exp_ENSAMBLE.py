@@ -18,7 +18,7 @@ from src.lgbm_train_test import preparacion_nclientesbajas_zulip,entrenamiento_z
 
 logger=logging.getLogger(__name__)
 
-def lanzar_experimento_ensamble(fecha:str ,semillas:list[int],n_experimento:int,proceso_ppal:str ="experimento"): 
+def lanzar_experimento(fecha:str ,semillas:list[int],n_experimento:int,proceso_ppal:str ="experimento"): 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
