@@ -151,11 +151,11 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         for i, n_exp in enumerate(names_exp_finals_preds):
 
             name_file_bin = (
-                path_output_exp_prediction
+                path_output_prediccion_final
                 + f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_binaria.csv"
             )
             name_file_proba = (
-                path_output_exp_prediction
+                path_output_prediccion_final
                 + f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_proba.csv"
             )
 
