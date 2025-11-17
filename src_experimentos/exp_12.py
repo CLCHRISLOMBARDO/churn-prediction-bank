@@ -27,7 +27,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     # ---------------------- CONSTRUCCION COLUMNAS A ELIMINAR------------------------
     df_completo_chiquito=creacion_df_small("df_completo")
     sufijos=[f"lag_{i}" for i in range(1,4)]+[f"delta_{i}" for i in range(1,4)]+["_ratio","_slope","_max","_min",
-             "monto_ganancias","monto_gastos","ganancia_gasto_ratio"]
+             "monto_ganancias","monto_gastos","ganancia_gasto_dif"]
     cols_drops_1=contrs_cols_dropear_por_features_sufijos(df_completo_chiquito,sufijos)
 
     # df_completo_chiquito=creacion_df_small("df_completo")
