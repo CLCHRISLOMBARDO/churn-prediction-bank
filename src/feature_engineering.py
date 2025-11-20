@@ -13,6 +13,9 @@ def conversion_parquet(tabla:str):
     sql=f"""COPY (SELECT * FROM {tabla})
     TO '{FILE_INPUT_DATA_PARQUET}'
     (FORMAT PARQUET)"""
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
     logger.info("FIN del guardado en parquet")
 
 def copia_tabla(tabla_origen:str , tabla_copia:str):
