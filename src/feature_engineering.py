@@ -192,7 +192,7 @@ def suma_ganancias_gastos(df:pd.DataFrame,cols_ganancias:list ,cols_gastos:list)
 def ratios_ganancia_gastos(df:pd.DataFrame):
 
     logger.info("Comienzo del ratio ganancia_gasto")
-    if "ganancia_gasto_ratio" in df.columns:
+    if "ganancia_gasto_dif" in df.columns:
         logger.info("Ya se realizo el ratio ganancia gasto")
         return
     logger.info("Todavia no se realizo el ratio ganancia gasto")
