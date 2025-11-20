@@ -5,35 +5,15 @@ import duckdb
 import logging
 
 #### FALTA AGREGAR LOS PUNTOS DE CONTROL PARA VISUALIZAR QUE ESTEN BIEN
-from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB,GCP_PATH
+from src.config import FILE_INPUT_DATA , PATH_DATA_BASE_DB,GCP_PATH,FILE_INPUT_DATA_PARQUET
 logger = logging.getLogger(__name__)
 
-def copia_tabla_local_a_bucket():
-    """
-    Copia la tabla df_completo desde la base local (PATH_DATA_BASE_DB)
-    hacia la base ubicada en el bucket.
-    """
-    logger.info("Inicio de la copia de df_completo desde local a bucket")
-
-    conn = duckdb.connect(PATH_DATA_BASE_DB)
-    try:
-        # Adjuntamos la base del bucket
-        conn.execute(f"""
-            ATTACH '{GCP_PATH + PATH_DATA_BASE_DB}' AS db_destino;
-        """)
-
-        # Copiamos la tabla local hacia la base en el bucket
-        conn.execute("""
-            CREATE OR REPLACE TABLE db_destino.df_completo AS
-            SELECT * FROM df_completo;
-        """)
-
-        conn.execute("DETACH db_destino;")
-        logger.info("✅ Copia completada: df_completo (local) → df_completo (bucket)")
-    except Exception as e:
-        logger.error(f"❌ Error durante la copia local → bucket: {e}")
-    finally:
-        conn.close()
+def conversion_parquet(tabla:str):
+    logger.info("Comienzo del guardado en parquet")
+    sql=f"""COPY (SELECT * FROM {tabla})
+    TO '{FILE_INPUT_DATA_PARQUET}'
+    (FORMAT PARQUET)"""
+    logger.info("FIN del guardado en parquet")
 
 def copia_tabla(tabla_origen:str , tabla_copia:str):
     logger.info(f"Copia de la tabla {tabla_origen} a {tabla_copia}")

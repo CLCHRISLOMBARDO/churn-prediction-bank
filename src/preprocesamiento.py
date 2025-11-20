@@ -4,9 +4,10 @@ import polars as pl
 import numpy as np
 from sklearn.impute import SimpleImputer
 from typing import Tuple
-from src.config import SEMILLA, PATH_DATA_BASE_DB
+from src.config import SEMILLA, PATH_DATA_BASE_DB , FILE_INPUT_DATA_PARQUET, GCP_PATH
 import logging
 import duckdb
+import os
 from src.config import SUBSAMPLEO
 logger = logging.getLogger(__name__)
 # columnas problemáticas (las que te tiró LightGBM)
@@ -29,6 +30,15 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
                                                                pd.DataFrame]:
     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
 
+    if os.path.exists(FILE_INPUT_DATA_PARQUET):
+        logger.info(f"Ya se hizo el feat eng y el parquet ya existe en {FILE_INPUT_DATA_PARQUET}")
+    else:
+        logger.info(f"NO se hizo el feat eng y el parquet NO existe en {FILE_INPUT_DATA_PARQUET}")
+        logger.info(f"Ejecutar a mano : gsutil cp gs://{GCP_PATH}/datasets/competencia_02_final.parquet /datasets/")
+        raise
+        
+
+    
     sql_canaritos =''
     if n_canaritos is not None and n_canaritos>0 :
         for c in range(1,n_canaritos+1):
