@@ -29,6 +29,14 @@ def _create_table_de_parquet():
     conn.close()
     logger.info("Fin de la creacion de la tabla a partir del parquet")
 
+def _existencia_tabla():
+    logger.info("Comienzo de Comprobando la existencia de la tabla df_completo")
+    sql = """  """
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    print(conn.execute("SHOW TABLES").fetchdf())
+    conn.close()
+    logger.info("FIN de Comprobando la existencia de la tabla df_completo")
+
 def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int]
                            ,mes_apred:int,semilla:int=SEMILLA,
                            subsampleo:float=SUBSAMPLEO , feature_subset= None,n_canaritos:int=None)->Tuple[pd.DataFrame,
@@ -39,6 +47,9 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
                                                                pd.DataFrame]:
     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
 
+    # if os.path.exists(PATH_DATA_BASE_DB):
+    #     logger.info(f"Ya existe un .duckdb por lo que ya se creo la tabla del parquet en {PATH_DATA_BASE_DB}")
+    #     _existencia_tabla()
     if os.path.exists(FILE_INPUT_DATA_PARQUET):
         logger.info(f"Ya se hizo el feat eng y el parquet ya existe en {FILE_INPUT_DATA_PARQUET}")
         _create_table_de_parquet()
