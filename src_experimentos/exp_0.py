@@ -31,7 +31,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     df_completo_chiquito=creacion_df_small("df_completo")
     cols_drops_2=cols_a_dropear_variable_originales_o_percentiles(df_completo_chiquito,a_eliminar="originales")
 
-    cols_drops=cols_drops_1 + cols_drops_2
+    cols_drops=list(set(cols_drops_1 + cols_drops_2))
 
     # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import
     if (proceso_ppal =="experimento") or (proceso_ppal =="test_exp") :
