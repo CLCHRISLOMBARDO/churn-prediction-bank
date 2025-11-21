@@ -98,10 +98,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             )
             logger.info(f"Ensamblado el df con shape : {df_ensamble.shape}")
 
-            # ahora sí: promedio de probas
             cols_pred = [c for c in df_ensamble.columns if c.startswith("pred_model_")]
             df_ensamble["Predicted"] = df_ensamble[cols_pred].mean(axis=1)
-            # Levanto la clase verdadera desde DuckDB
             sql_test = f"""
                 select numero_de_cliente, clase_ternaria
                 from df_completo
@@ -113,7 +111,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             test_data = conn.execute(sql_test).df()
             conn.close()
 
-            # Merge con la info de clase_ternaria
             df_final = pd.merge(df_ensamble, test_data, on="numero_de_cliente", how="inner")
 
             # Arrays para la función de ganancia

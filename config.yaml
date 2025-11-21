@@ -6,7 +6,7 @@ COMPETENCIA: 2
     # 3- bayesiana  | test_baye 
     # 4- experimento |  test_exp
     # 5- prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "feat_eng"
+PROCESO_PPAL: "experimento"
 # SUSBAMPLEO EN PORCENTAJE
 SUBSAMPLEO : 0.1 # solo para baye y exp y pred final
 
@@ -48,7 +48,7 @@ configuracion_canaritos:
   EARLY_STOPPING_ROUNDS : 200
 
 configuracion_experimentos:
-  N_EXPERIMENTO :  "8_despuescomp" #"p_zlgbm_13"
+  N_EXPERIMENTO :  "0_despues_comp" #"p_zlgbm_13"
   N_SEMILLAS_EXP : 5
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"

@@ -20,6 +20,15 @@ ERR_COLS = (
 )
 
 
+def _create_table_de_parquet():
+    logger.info("Comienzo de la creacion de la tabla a partir del parquet")
+    sql = f"""create or replace table df_completo as 
+                select * from read_parquet('{FILE_INPUT_DATA_PARQUET}')"""
+    conn=duckdb.connect(PATH_DATA_BASE_DB, read_only=False)
+    conn.execute(sql)
+    conn.close()
+    logger.info("Fin de la creacion de la tabla a partir del parquet")
+
 def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int]
                            ,mes_apred:int,semilla:int=SEMILLA,
                            subsampleo:float=SUBSAMPLEO , feature_subset= None,n_canaritos:int=None)->Tuple[pd.DataFrame,
@@ -32,13 +41,13 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
 
     if os.path.exists(FILE_INPUT_DATA_PARQUET):
         logger.info(f"Ya se hizo el feat eng y el parquet ya existe en {FILE_INPUT_DATA_PARQUET}")
+        _create_table_de_parquet()
     else:
         logger.info(f"NO se hizo el feat eng y el parquet NO existe en {FILE_INPUT_DATA_PARQUET}")
         logger.info(f"Ejecutar a mano : gsutil cp gs://{GCP_PATH}/datasets/competencia_02_final.parquet /datasets/")
         raise
-        
 
-    
+        
     sql_canaritos =''
     if n_canaritos is not None and n_canaritos>0 :
         for c in range(1,n_canaritos+1):
