@@ -20,6 +20,28 @@ ERR_COLS = (
 )
 
 
+
+
+def _existencia_tabla_duckdb()->bool:
+    logger.info("Comienzo de Comprobando la existencia de la tabla df_completo")
+    sql = """
+            SELECT EXISTS(
+            SELECT 1 
+            FROM information_schema.tables 
+            WHERE table_name = 'df_completo')"""
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    existe=conn.execute(sql).fetchone()[0]
+    conn.close()
+    logger.info(f"La tabla existe ? : {existe}")
+    logger.info("FIN de Comprobando la existencia de la tabla df_completo")
+    return existe
+def _existencia_parquet()->bool:
+    logger.info(f"Comienzo de la verificacion de la existencia del parquet en {FILE_INPUT_DATA_PARQUET}")
+    existe=os.path.exists(FILE_INPUT_DATA_PARQUET)
+    logger.info(f"El parquet existe ?: {existe} ")
+    logger.info(f"Fin de la verificacion de la existencia del parquet en {FILE_INPUT_DATA_PARQUET}")
+    return existe
+
 def _create_table_de_parquet():
     logger.info("Comienzo de la creacion de la tabla a partir del parquet")
     sql = f"""create or replace table df_completo as 
@@ -29,13 +51,16 @@ def _create_table_de_parquet():
     conn.close()
     logger.info("Fin de la creacion de la tabla a partir del parquet")
 
-def _existencia_tabla():
-    logger.info("Comienzo de Comprobando la existencia de la tabla df_completo")
-    sql = """  """
-    conn=duckdb.connect(PATH_DATA_BASE_DB)
-    print(conn.execute("SHOW TABLES").fetchdf())
-    conn.close()
-    logger.info("FIN de Comprobando la existencia de la tabla df_completo")
+def verificacion_o_creacion_tabla():
+    logger.info("Comienzo del proceso inicial de verif o creacion de df_completo")
+    if _existencia_tabla_duckdb():
+        return
+    elif _existencia_parquet():
+        _create_table_de_parquet()
+    else:
+        logger.info(f"parquet NO existe en {FILE_INPUT_DATA_PARQUET} pero si en el bucket")
+        logger.info(f"Ejecutar a mano : gsutil cp gs://{GCP_PATH}/datasets/competencia_02_final.parquet /datasets/ y volver el experimento")
+        raise
 
 def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int]
                            ,mes_apred:int,semilla:int=SEMILLA,
@@ -46,17 +71,6 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
                                                                np.ndarray,pd.DataFrame,
                                                                pd.DataFrame]:
     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
-
-    # if os.path.exists(PATH_DATA_BASE_DB):
-    #     logger.info(f"Ya existe un .duckdb por lo que ya se creo la tabla del parquet en {PATH_DATA_BASE_DB}")
-    #     _existencia_tabla()
-    if os.path.exists(FILE_INPUT_DATA_PARQUET):
-        logger.info(f"Ya se hizo el feat eng y el parquet ya existe en {FILE_INPUT_DATA_PARQUET}")
-        _create_table_de_parquet()
-    else:
-        logger.info(f"NO se hizo el feat eng y el parquet NO existe en {FILE_INPUT_DATA_PARQUET}")
-        logger.info(f"Ejecutar a mano : gsutil cp gs://{GCP_PATH}/datasets/competencia_02_final.parquet /datasets/")
-        raise
 
         
     sql_canaritos =''

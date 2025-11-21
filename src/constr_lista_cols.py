@@ -142,7 +142,7 @@ def cols_a_dropear_variable_entera(df: pd.DataFrame, columnas_base: list[str]) -
         logger.warning(f"No se encontro ninguna de las columnas en el df")
     logger.info(f"Fin del proceso de la seleccion de la variable entera y todas sus derivadas para ELIMINAR: {cols_a_dropear}")
     
-    return cols_a_dropear
+    return list(set(cols_a_dropear))
 
 
 def cols_a_dropear_variable_por_feat(df: pd.DataFrame, columnas_variables: list[str] , columnas_features:list[str]) -> list[str]:

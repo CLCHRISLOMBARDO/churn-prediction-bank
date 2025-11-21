@@ -27,7 +27,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name} con {n_semillas} semillas")
 
-    # ---------------------- CONSTRUCCION COLUMNAS A ELIMINAR------------------------
     
     # Defini el path de los outputs de los modelos, de los graf de hist gan, de graf curva ganan, de umbrales, de feat import
     if (proceso_ppal =="experimento") or (proceso_ppal =="test_exp") :
@@ -84,7 +83,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
             dfs_renamed = []
             for i, df in enumerate(lists_df):
-                # Me quedo solo con cliente + proba
                 if "Predicted" not in df.columns:
                     raise ValueError(f"No encuentro columna 'Predicted' en el archivo #{i}: cols={df.columns}")
 
@@ -113,7 +111,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
             df_final = pd.merge(df_ensamble, test_data, on="numero_de_cliente", how="inner")
 
-            # Arrays para la función de ganancia
             y_test_class = df_final["clase_ternaria"].to_numpy()
             y_pred_ensamble = df_final["Predicted"].to_numpy()
 
@@ -165,13 +162,10 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             lists_df_bin.append(df_i_bin)
             lists_df_proba.append(df_i_proba)
 
-        # =========================
         #   ENSAMBLE DE PROBAS
-        # =========================
 
         dfs_renamed_proba = []
         for i, df in enumerate(lists_df_proba):
-            # Me quedo solo con cliente + proba
             if "Predicted" in df.columns:
                 col_pred = "Predicted"
             elif "predicted" in df.columns:
@@ -191,10 +185,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         cols_pred_proba = [c for c in df_ensamble_proba.columns if c.startswith("pred_proba_")]
         df_ensamble_proba["pred_proba_mean"] = df_ensamble_proba[cols_pred_proba].mean(axis=1)
 
-        # =========================
         #   ENSAMBLE BINARIO (VOTING)
-        # =========================
-
+        
         dfs_renamed_bin = []
         for i, df in enumerate(lists_df_bin):
             if "Predicted" in df.columns:

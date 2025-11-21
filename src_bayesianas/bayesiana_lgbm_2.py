@@ -8,7 +8,7 @@ import logging
 import json
 import lightgbm as lgb
 from src.config import *
-from src.preprocesamiento import split_train_test_apred
+from src.preprocesamiento import verificacion_o_creacion_tabla,split_train_test_apred
 from src.lgbm_optimizacion import optim_hiperp_binaria , graficos_bayesiana
 from src.optimization_ZS import optimizar_zero_shot
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
@@ -32,6 +32,8 @@ def lanzar_bayesiana_lgbm(fecha:str , semillas:list,n_experimento:str|int ,proce
     name=f"{proceso_ppal}_{numero}_LGBM_TIPO_{tipo_bayesiana}_{len(semillas)}_SEMILLAS_{N_TRIALS}_TRIALS_{N_BOOSTS}_BOOSTS"
     nombre_log=f"log_{name}_{fecha}"
     logger.info(f"Inicio de ejecucion del flujo : {name}")
+    # VERIFICACION DE TABLAS - ---------------
+    verificacion_o_creacion_tabla()
     if tipo_bayesiana =="OB":
         logger.info(f"=== COMIENZO OPTIMIZACIÓN {tipo_bayesiana} ===")
         X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(numero,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)    

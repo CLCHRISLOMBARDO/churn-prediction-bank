@@ -1,5 +1,7 @@
 #experimento_i.py
-# EXPERIMENTO : Ensamble con lgb. Es el 8 pero pongo el subsampleo. Eliminaos cprestamos_personales y mprestamos_personales
+# EXPERIMENTO 01 :  Mismo que 0 pero 
+#           agregamos mas meses
+#           
 import numpy as np
 import pandas as pd
 import logging
@@ -26,6 +28,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     # Verificacion existencia .duckcb , .parquet ------------------------------------
     verificacion_o_creacion_tabla()
     # ---------------------- CONSTRUCCION COLUMNAS A ELIMINAR------------------------
+    # AGREGAMOS MAS MESES
     df_completo_chiquito=creacion_df_small("df_completo")
     cols_drops_1=cols_a_dropear_variable_entera(df_completo_chiquito, ['mprestamos_personales','cprestamos_personales'])
     

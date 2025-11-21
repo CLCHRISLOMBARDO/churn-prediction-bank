@@ -575,7 +575,7 @@ def preparacion_ypred_kaggle( y_apred:pd.DataFrame, y_pred:pd.Series|np.ndarray 
         raise
     try:
         y_apred_proba.to_csv(file_name_proba)
-        logger.info(f"predicciones binarias guardadas en {file_name_bin}")
+        logger.info(f"predicciones proba guardadas en {file_name_bin}")
     except Exception as e:
         logger.error(f"Error al intentar guardar las predicciones --> {e}")
         raise
