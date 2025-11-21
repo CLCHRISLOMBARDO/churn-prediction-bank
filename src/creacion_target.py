@@ -43,7 +43,7 @@ def creacion_clase_ternaria() :
     lead(foto_mes  , 2 ) OVER (PARTITION BY numero_de_cliente ORDER BY foto_mes) as foto_mes_2
     FROM df_inicial)
     SELECT * EXCLUDE (foto_mes_1,foto_mes_2),
-    if (foto_mes < 202108 , if(foto_mes <202107 ,
+    if (foto_mes < 202109 , if(foto_mes <202108 ,
     if(df2.foto_mes_1 IS NULL,'BAJA+1', 
     if(df2.foto_mes_2 IS NULL,'BAJA+2','Continua')) ,
     if(df2.foto_mes_1 IS NULL,'BAJA+1',NULL)) ,NULL) as clase_ternaria
@@ -63,7 +63,8 @@ def conversion_binario():
     sql_creacion += """ SELECT *, 
                 if(clase_ternaria= 'BAJA+2' ,1.00002 ,
                     if(clase_ternaria = 'BAJA+1' , 1.00001,1.0)) as clase_peso ,
-                if(clase_ternaria = 'Continua' ,0 ,1) as clase_binaria
+                if(clase_ternaria = 'Continua' ,0 ,1) as clase_binaria ,
+                if(clase_ternaria = 'BAJA+2' , 1,0) as clase_binaria_2
                 from df_inicial"""
     conn.execute(sql_creacion)
     
@@ -72,7 +73,9 @@ def conversion_binario():
             COUNT(*) FILTER(where clase_peso = 1.00001) as peso_baja_1,
             COUNT(*) FILTER(where clase_peso = 1.0) as peso_continua,
             COUNT(*) FILTER(where clase_binaria =1) as binaria_bajas,
-            COUNT(*) FILTER(where clase_binaria =0) as binaria_continua
+            COUNT(*) FILTER(where clase_binaria =0) as binaria_continua,
+            COUNT(*) FILTER(where clase_binaria_2 = 1) as binaria_baja_2,
+            COUNT(*) FILTER(where clase_binaria_2 = 0) as binaria_baja_1_continua
             from df_inicial
             group by foto_mes"""
     contador_clase_peso =conn.execute(sql_contador).df()

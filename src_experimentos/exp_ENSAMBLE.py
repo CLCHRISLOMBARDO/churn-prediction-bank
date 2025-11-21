@@ -54,6 +54,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     cantidad_boosts = N_BOOSTS
     #"""-----------------------------------------------------------------------------------------------"""
     names_exp_finals_preds=["final_7","final_7.2","final_7.3","final_7.4"]
+    n_semillas= "5"
 
     from functools import reduce
 
@@ -74,7 +75,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             for i, n_exp in enumerate(names_exp_finals_preds):
                 name_file = (
                     path_output_exp_prediction
-                    + f"experimento_{n_exp}_LGBM_5_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
+                    + f"experimento_{n_exp}_LGBM_{n_semillas}_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
                     "prediccion_test_proba.csv"
                 )
                 logger.info(f"name file : {name_file}")
@@ -146,11 +147,11 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
             name_file_bin = (
                 path_output_prediccion_final
-                + f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_binaria.csv"
+                + f"prediccion_final_{n_exp}_LGBM_{n_semillas}_SEMILLAS_pred_finales_binaria.csv"
             )
             name_file_proba = (
                 path_output_prediccion_final
-                + f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_proba.csv"
+                + f"prediccion_final_{n_exp}_LGBM_{n_semillas}_SEMILLAS_pred_finales_proba.csv"
             )
 
             logger.info(f"name file bin: {name_file_bin}")
@@ -245,95 +246,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             name="pred_final_bin",
             output_path=path_output_prediccion_final
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        # if (proceso_ppal =="experimento" or proceso_ppal =="test_exp") :
-        #     logger.info(f"Entro en el proceso experimento !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        #     if isinstance(MES_TEST,int):
-        #         mes_test=[MES_TEST]
-        #     elif isinstance(MES_TEST,list):
-        #         mes_test = MES_TEST
-        #     for mt in mes_test:
-        #         logger.info(f"========================Comienzo del analisis en el mes test :{mt} ==============================")
-        #         lists_df=[]
-        #         for i,n_exp in enumerate(names_exp_finals_preds):
-        #             name_file= path_output_exp_prediction+f"experimento_{n_exp}_LGBM_5_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeoprediccion_test_proba.csv"
-        #             logger.info(f"name file : {name_file}")
-        #             df_i=pd.read_csv(name_file)
-        #             lists_df.append(df_i)
-        #         dfs_renamed = []
-                
-        #         for i, df in enumerate(lists_df):
-        #             df_tmp = df.copy()
-        #             df_tmp = df_tmp.rename(columns={"predicted": f"pred_model_{i}"})
-        #             dfs_renamed.append(df_tmp)
-                
-        #         df_ensamble = reduce(lambda left, right: pd.merge(left, right, on="numero_de_cliente", how="inner"),dfs_renamed)
-        #         logger.info(f"Ensamblado el df con shape : {df_ensamble.shape}")
-                    
-        #         sql_test=f"""select numero_de_cliente, clase_ternaria
-        #                     from df_completo
-        #                     where foto_mes = {mt}"""
-        #         logger.info(f"sql test query : {sql_test}")
-                
-        #         conn=duckdb.connect(PATH_DATA_BASE_DB)
-        #         test_data = conn.execute(sql_test).df()
-        #         conn.close()
-
-        #         df_final = pd.merge(df_final,test_data,on="numero_de_cliente",how="inner")
-
-        #         y_test_class=df_final["clase_ternaria"].to_numpy
-        #         y_pred_ensamble = df_final["Predicted"].to_numpy
-        #         name_final = name 
-
-        #         guardar_umbral = True
-        #         semilla="ensamble"
-        #         name_final = f"ENSAMBLE_FINAL_MES_TEST{mt}"
-        #         estadisticas_ganancia , y_pred_sorted,ganancia_acumulada= calc_estadisticas_ganancia(y_test_class , y_pred_ensamble ,name_final , output_path_umbrales , semilla, guardar_umbral )
-        #         grafico_curvas_ganancia(y_pred_sorted ,ganancia_acumulada,estadisticas_ganancia,name_final,output_path_graf_curva_ganancia)
-                
-        # elif (proceso_ppal =="prediccion_final" or  proceso_ppal =="test_prediccion_final"):
-        #     logger.info(f"========================Comienzo de la prediccion final ==========================")
-        #     lists_df_bin=[]
-        #     lists_df_proba=[]
-        #     for i,n_exp in enumerate(names_exp_finals_preds):
-        #         name_file_bin= path_output_exp_prediction+f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_binaria.csv"
-        #         name_file_proba= path_output_exp_prediction+f"prediccion_final_{n_exp}_LGBM_5_SEMILLAS_pred_finales_proba.csv"
-
-        #         logger.info(f"name file bin: {name_file_bin}")
-        #         logger.info(f"name file proba: {name_file_proba}")
-        #         df_i_bin=pd.read_csv(name_file_bin)
-        #         df_i_proba=pd.read_csv(name_file_proba)
-
-        #         lists_df_bin.append(df_i_bin)
-        #         lists_df_proba.append(df_i_proba)
-        #     dfs_renamed_bin = []
-        #     for i, df in enumerate(lists_df_bin):
-        #         df_tmp_bin = df.copy()
-        #         df_tmp_bin = df_tmp_bin.rename(columns={"predicted": f"pred_model_{i}"})
-        #         dfs_renamed_bin.append(df_tmp)
-            
-
-        #     dfs_renamed_proba = []
-        #     for i, df in enumerate(lists_df_proba):
-        #         df_tmp_proba = df.copy()
-        #         df_tmp_proba = df_tmp_proba.rename(columns={"predicted": f"pred_model_{i}"})
-        #         dfs_renamed.append(df_tmp)
-        #     df_ensamble_proba = reduce(lambda left, right: pd.merge(left, right, on="numero_de_cliente", how="inner"),dfs_renamed)
 
             
 logger.info(f">>> Ejecucion finalizada. Revisar logs para mas detalles.")

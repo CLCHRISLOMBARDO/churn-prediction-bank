@@ -19,9 +19,6 @@ ERR_COLS = (
     + [f"tmobile_app_lag_{i}" for i in range(1, 5)]
 )
 
-
-
-
 def _existencia_tabla_duckdb()->bool:
     logger.info("Comienzo de Comprobando la existencia de la tabla df_completo")
     sql = """
@@ -65,9 +62,9 @@ def verificacion_o_creacion_tabla():
 def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int]
                            ,mes_apred:int,semilla:int=SEMILLA,
                            subsampleo:float=SUBSAMPLEO , feature_subset= None,n_canaritos:int=None)->Tuple[pd.DataFrame,
-                                                               np.ndarray,np.ndarray, 
+                                                               np.ndarray,np.ndarray,np.ndarray, 
                                                                np.ndarray, pd.DataFrame, 
-                                                               np.ndarray, np.ndarray, 
+                                                               np.ndarray,np.ndarray,np.ndarray, 
                                                                np.ndarray,pd.DataFrame,
                                                                pd.DataFrame]:
     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
@@ -125,20 +122,22 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
         train_data=undersampling(train_data , subsampleo,semilla)
     logger.info(f"Terminada la carga de df con columnas: {train_data.columns}")
     # TRAIN
-    X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria'], axis=1)
+    X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria','clase_binaria_2'], axis=1)
     y_train_binaria = train_data['clase_binaria'].to_numpy()
+    y_train_binaria_2 = train_data['clase_binaria_2'].to_numpy()
     y_train_class=train_data["clase_ternaria"].to_numpy()
     w_train = train_data['clase_peso'].to_numpy()
 
     # TEST
-    X_test = test_data.drop(['clase_ternaria', 'clase_peso','clase_binaria'], axis=1)
+    X_test = test_data.drop(['clase_ternaria', 'clase_peso','clase_binaria','clase_binaria_2'], axis=1)
     y_test_binaria = test_data['clase_binaria'].to_numpy()
+    y_test_binaria_2 = test_data['clase_binaria_2'].to_numpy()
     y_test_class = test_data['clase_ternaria'].to_numpy()
     w_test = test_data['clase_peso'].to_numpy()
 
 
     # A PREDECIR
-    X_apred = apred_data.drop(['clase_ternaria', 'clase_peso','clase_binaria'], axis=1)
+    X_apred = apred_data.drop(['clase_ternaria', 'clase_peso','clase_binaria','clase_binaria_2'], axis=1)
     y_apred=X_apred[["numero_de_cliente"]] # DF
   
 
@@ -153,7 +152,7 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     X_train = coerce_numeric_cols(X_train, ERR_COLS, fillna_val=0.0)
     X_test  = coerce_numeric_cols(X_test,  ERR_COLS, fillna_val=0.0)
     X_apred = coerce_numeric_cols(X_apred, ERR_COLS, fillna_val=0.0)
-    return X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test ,X_apred , y_apred 
+    return X_train, y_train_binaria,y_train_binaria_2,y_train_class, w_train, X_test, y_test_binaria,y_test_binaria_2, y_test_class, w_test ,X_apred , y_apred 
 
 # def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
 #     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")

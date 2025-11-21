@@ -35,6 +35,8 @@ try:
             comp    = cfg["configuracion_competencia_1"]
         elif COMPETENCIA == 2:
             comp    = cfg["configuracion_competencia_2"]
+        elif COMPETENCIA == 3:
+            comp    = cfg["configuracion_competencia_3"]
 
 
         # ================= Configuración  semillas =================
@@ -130,7 +132,13 @@ try:
         MES_TRAIN      = comp.get("MES_TRAIN", [202101, 202102, 202103])
         MES_TRAIN_04      = comp.get("MES_TRAIN_04", [202101, 202102, 202103])
         MES_TRAIN_06      = comp.get("MES_TRAIN_06", [202101, 202102, 202103])
-        MES_TRAIN_08      = comp.get("MES_TRAIN_08", [202101, 202102, 202103])
+        if COMPETENCIA ==2 :
+            MES_TRAIN_PRED      = comp.get("MES_TRAIN_08", [202101, 202102, 202103])
+        if COMPETENCIA ==3:
+            MES_TRAIN_05  = comp.get("MES_TRAIN_05", [202101, 202102, 202103])
+            MES_TRAIN_07  = comp.get("MES_TRAIN_07", [202101, 202102, 202103])
+            MES_TRAIN_PRED  = comp.get("MES_TRAIN_09", [202101, 202102, 202103])
+        
         MES_TEST       = comp.get("MES_TEST", [202104])
         MES_A_PREDECIR = comp.get("MES_A_PREDECIR", 202106)
         UMBRAL_CLIENTE = comp.get("UMBRAL_CLIENTE",11500)

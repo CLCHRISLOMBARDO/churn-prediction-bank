@@ -1,7 +1,10 @@
-#experimento_i.py
+
 # EXPERIMENTO 01 :  Mismo que 0 pero 
-#           agregamos mas meses
-#           
+#      - Agregamos mas meses
+        # MES_TRAIN_04: [202001,202002,202003,202004,202005,202007,202008,202009,202010,202011,202012,202101,202102]
+        # MES_TRAIN_06: [202001,202002,202003,202004,202005,202007,202008,202009,202010,202011,202012,202101,202102,202103,202104]
+        # MES_TRAIN_08: [202001,202002,202003,202004,202005,202007,202008,202009,202010,202011,202012,202101,202102,202103,202104,202105,202106]
+#     
 import numpy as np
 import pandas as pd
 import logging
@@ -28,7 +31,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     # Verificacion existencia .duckcb , .parquet ------------------------------------
     verificacion_o_creacion_tabla()
     # ---------------------- CONSTRUCCION COLUMNAS A ELIMINAR------------------------
-    # AGREGAMOS MAS MESES
     df_completo_chiquito=creacion_df_small("df_completo")
     cols_drops_1=cols_a_dropear_variable_entera(df_completo_chiquito, ['mprestamos_personales','cprestamos_personales'])
     
@@ -111,9 +113,13 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             logger.info(f"========================Comienzo del analisis en el mes test :{mt} ==============================")
             if mt == 202104:
                 mes_train = MES_TRAIN_04
+            elif mt == 202105:
+                mes_train = MES_TRAIN_05
             elif mt == 202106:
                 mes_train = MES_TRAIN_06
-            X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,
+            elif mt == 202107:
+                mes_train = MES_TRAIN_07
+            X_train, y_train_binaria,_,y_train_class, w_train, X_test, y_test_binaria,_, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,
                                                                                                                                         mt,MES_A_PREDECIR,
                                                                                                                                         SEMILLA,SUBSAMPLEO,feature_subset=cols_drops,n_canaritos=5)
             y_predicciones_top_models=[]
@@ -212,13 +218,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 
     elif (proceso_ppal =="prediccion_final" or  proceso_ppal =="test_prediccion_final"):
         logger.info(f"========================Comienzo de la prediccion final=============================")
-        # if isinstance(MES_TEST , list):
-        #     mes_train=MES_TRAIN+MES_TEST
-        # elif isinstance(MES_TEST, int):
-        #     mes_train=MES_TRAIN.append(MES_TEST)
-        # mes_train=list(set(mes_train))
-        mes_train = MES_TRAIN_08
-        X_train, y_train_binaria,y_train_class, w_train, _, _, y_test_class, _,X_apred, y_apred = split_train_test_apred(n_experimento,mes_train,
+        mes_train = MES_TRAIN_PRED
+        X_train, y_train_binaria,_,y_train_class, w_train, _, _,_, _, _,X_apred, y_apred = split_train_test_apred(n_experimento,mes_train,
                                                                                                                                         MES_TEST,MES_A_PREDECIR,
                                                                                                                                         SEMILLA,SUBSAMPLEO,feature_subset=cols_drops,n_canaritos=5)
         y_apred_top_models=[]

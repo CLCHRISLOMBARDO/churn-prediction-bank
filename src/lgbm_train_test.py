@@ -118,8 +118,6 @@ def entrenamiento_lgbm_zs(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.nda
     
     params["bagging_freq"] = 1
 
-    
-
     logger.info(f"semilla del entrenamiento :{params['seed']}")
     train_data = lgb.Dataset(X_train,
                             label=y_train_binaria,
