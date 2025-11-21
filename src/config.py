@@ -95,7 +95,9 @@ try:
         PATH_DATA_BASE_DB     =    inp["PATH_DATA_BASE_DB"] # --------------------------------------------<
         PATH_INPUT_DATA       = PLACE_PATHS + inp["PATH_INPUT_DATA"]
         FILE_INPUT_DATA       = PLACE_PATHS + comp["FILE_INPUT_DATA"]
-        FILE_INPUT_DATA_CRUDO = PLACE_PATHS + comp["FILE_INPUT_DATA_CRUDO"]
+        FILE_INPUT_DATA_CRUDO_2 = PLACE_PATHS + comp["FILE_INPUT_DATA_CRUDO_2"]
+        if COMPETENCIA==3:
+            FILE_INPUT_DATA_CRUDO_3 = PLACE_PATHS + comp["FILE_INPUT_DATA_CRUDO_3"]
         FILE_INPUT_DATA_PARQUET = comp["FILE_INPUT_DATA_PARQUET"]
         PATH_LOGS             = PLACE_PATHS + paths["PATH_LOGS"]
         PATH_LOG_GLOBAL       = paths["PATH_LOG_GLOBAL"]

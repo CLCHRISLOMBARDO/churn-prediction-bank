@@ -11,7 +11,13 @@ def create_data_base():
     sql = f"""
     create or replace table df_inicial as 
     select *
-    from read_csv_auto('{FILE_INPUT_DATA_CRUDO}')"""
+    from read_csv_auto('{FILE_INPUT_DATA_CRUDO_2}')"""
+    if COMPETENCIA ==3 : 
+        sql+=f""" UNION 
+        select * 
+        from read_csv_auto('{FILE_INPUT_DATA_CRUDO_3}')"""
+    
+    logger.info(f"El query es : {sql}")
 
     conn=duckdb.connect(PATH_DATA_BASE_DB)
     conn.execute(sql)
