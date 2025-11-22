@@ -28,7 +28,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     verificacion_o_creacion_tabla()
     # ---------------------- CONSTRUCCION COLUMNAS A ELIMINAR------------------------
     df_completo_chiquito=creacion_df_small("df_completo")
-    cols_drops_1=cols_a_dropear_variable_entera(df_completo_chiquito, ['mprestamos_personales','cprestamos_personales'])
+    cols_drops_1=cols_a_dropear_variable_entera(df_completo_chiquito, ['mprestamos_personales','cprestamos_personales','suma_de_prestamos_productos'])
     
     df_completo_chiquito=creacion_df_small("df_completo")
     cols_drops_2=cols_a_dropear_variable_originales_o_percentiles(df_completo_chiquito,a_eliminar="originales")
