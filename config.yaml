@@ -8,7 +8,7 @@ COMPETENCIA: 3
     # 5- prediccion_final | test_prediccion_final |
 PROCESO_PPAL: "experimento"
 # SUSBAMPLEO EN PORCENTAJE
-SUBSAMPLEO : 0.05 # solo para baye y exp y pred final
+SUBSAMPLEO : 0.1 # solo para baye y exp y pred final
 
 
 configuracion_semilla:
@@ -36,20 +36,20 @@ configuracion_bayesiana:
 
 configuracion_canaritos:
   N_CANARITOS : 5
-  MIN_DATA_IN_LEAF : 200 #2000
+  MIN_DATA_IN_LEAF : 2000 #200
   LEARNING_RATE : 1.0
-  GRADIENT_BOUND : 0.4 #0.01
-  NUM_LEAVES : 31 #300
+  GRADIENT_BOUND : 0.01 #0.4
+  NUM_LEAVES : 300 #31
   FEATURE_FRACTION : 0.8
   BAGGING_FRACTION : 0.8
-  BAGGING_FREQ : 1 #5
+  BAGGING_FREQ : 5 # 1
   MAX_BIN : 31  
-  NUM_BOOST_ROUND :  64 #1000
+  NUM_BOOST_ROUND :  1000 #64
   EARLY_STOPPING_ROUNDS : 200
 
 configuracion_experimentos:
-  N_EXPERIMENTO :  "c3_exp0" #"p_zlgbm_13"
-  N_SEMILLAS_EXP : 100
+  N_EXPERIMENTO :  "c3_exp1" #"p_zlgbm_13"
+  N_SEMILLAS_EXP : 5
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"
 
