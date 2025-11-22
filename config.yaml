@@ -36,16 +36,21 @@ configuracion_bayesiana:
 
 configuracion_canaritos:
   N_CANARITOS : 5
-  MIN_DATA_IN_LEAF : 2000 #200
+  MIN_DATA_IN_LEAF : 200 #2000
   LEARNING_RATE : 1.0
-  GRADIENT_BOUND : 0.01 #0.4
-  NUM_LEAVES : 300 #31
-  FEATURE_FRACTION : 0.8
-  BAGGING_FRACTION : 0.8
-  BAGGING_FREQ : 5 # 1
+  GRADIENT_BOUND : 0.4 #0.01
+  NUM_LEAVES : 9999 #300
+  FEATURE_FRACTION : 0.5 #0.8
+  BAGGING_FRACTION : 1 #0.8
+  BAGGING_FREQ : 0 # 1
   MAX_BIN : 31  
-  NUM_BOOST_ROUND :  1000 #64
+  NUM_ITERATIONS :  64 #1000
   EARLY_STOPPING_ROUNDS : 200
+  FIRST_METRIC_ONLY : False 
+  BOOST_FROM_AVERAGE : True
+  FEATURE_PRE_FILTER : False # True valor determinado
+
+
 
 configuracion_experimentos:
   N_EXPERIMENTO :  "c3_exp1" #"p_zlgbm_13"

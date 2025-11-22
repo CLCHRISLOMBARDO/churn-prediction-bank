@@ -78,8 +78,12 @@ try:
         BAGGING_FRACTION        = canaritos.get("BAGGING_FRACTION")
         BAGGING_FREQ            = canaritos.get("BAGGING_FREQ")
         MAX_BIN                 = canaritos.get("MAX_BIN")
-        NUM_BOOST_ROUND         = canaritos.get("NUM_BOOST_ROUND")
+        NUM_ITERATIONS         = canaritos.get("NUM_ITERATIONS")
         EARLY_STOPPING_ROUNDS   = canaritos.get("EARLY_STOPPING_ROUNDS")
+        FIRST_METRIC_ONLY       = canaritos.get("FIRST_METRIC_ONLY")
+        BOOST_FROM_AVERAGE      = canaritos.get("BOOST_FROM_AVERAGE")
+        FEATURE_PRE_FILTER      = canaritos.get("FEATURE_PRE_FILTER")
+        
 
 
         # ---------------- Entorno (GCP vs local) ----------------

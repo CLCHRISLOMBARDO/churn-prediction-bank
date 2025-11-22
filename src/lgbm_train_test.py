@@ -71,25 +71,29 @@ def entrenamiento_zlgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarr
     lgbm_params = {
         'objective': 'binary',
         'boosting_type': 'gbdt',
+        'metric':"None",
         'learning_rate': LEARNING_RATE,
         'num_leaves': NUM_LEAVES,
         'feature_fraction': FEATURE_FRACTION,
-        'bagging_fraction': BAGGING_FRACTION,
-        'bagging_freq': BAGGING_FREQ,
+        'bagging_fraction': BAGGING_FRACTION,#
+        'bagging_freq': BAGGING_FREQ,#
         'min_data_in_leaf': MIN_DATA_IN_LEAF,
         'max_bin': MAX_BIN,
-        'verbose': -1,
+        'verbosity': -1,
         'seed': semilla,
-        'force_row_wise': True,
+        'force_row_wise': True, 
+        'first_metric_only':FIRST_METRIC_ONLY,
+        'boost_from_average':BOOST_FROM_AVERAGE,
+        'feature_pre_filter':FEATURE_PRE_FILTER
     }
-    
+   
     if GRADIENT_BOUND is not None:
         lgbm_params['gradient_bound'] = GRADIENT_BOUND
     train_data = lgb.Dataset(X_train, label=y_train_binaria, free_raw_data=True)
     model_lgbm = lgb.train(
         lgbm_params,
         train_data,
-        num_boost_round=NUM_BOOST_ROUND
+        num_boost_round=NUM_ITERATIONS
     )   
     logger.info(f"comienzo del guardado en {output_path}")
     try:
