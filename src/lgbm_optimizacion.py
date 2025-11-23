@@ -141,7 +141,7 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
     storage_name = "sqlite:///" + path_output_bayesian_db + "optimization_lgbm.db"
     study_name = f"study_{name}"    # VAria en numero de bayesiana y len(semillas)
 
-
+    optuna.logging.set_verbosity(optuna.logging.INFO)
     study = optuna.create_study(
         direction="maximize",
         study_name=study_name,

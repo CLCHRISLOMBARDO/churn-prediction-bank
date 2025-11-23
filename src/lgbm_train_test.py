@@ -75,8 +75,8 @@ def entrenamiento_zlgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarr
         'learning_rate': LEARNING_RATE,
         'num_leaves': NUM_LEAVES,
         'feature_fraction': FEATURE_FRACTION,
-        'bagging_fraction': BAGGING_FRACTION,#
-        'bagging_freq': BAGGING_FREQ,#
+        'bagging_fraction': BAGGING_FRACTION,
+        'bagging_freq': BAGGING_FREQ,
         'min_data_in_leaf': MIN_DATA_IN_LEAF,
         'max_bin': MAX_BIN,
         'verbosity': -1,
