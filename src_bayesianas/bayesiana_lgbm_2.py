@@ -8,6 +8,8 @@ import logging
 import json
 import lightgbm as lgb
 from src.config import *
+from src.configuracion_inicial import creacion_df_small
+from src.constr_lista_cols import cols_a_dropear_variable_entera,cols_a_dropear_variable_originales_o_percentiles
 from src.preprocesamiento import verificacion_o_creacion_tabla,split_train_test_apred
 from src.lgbm_optimizacion import optim_hiperp_binaria , graficos_bayesiana
 from src.optimization_ZS import optimizar_zero_shot
@@ -34,9 +36,19 @@ def lanzar_bayesiana_lgbm(fecha:str , semillas:list,n_experimento:str|int ,proce
     logger.info(f"Inicio de ejecucion del flujo : {name}")
     # VERIFICACION DE TABLAS - ---------------
     verificacion_o_creacion_tabla()
+    # DROPEO DE FEATURES ---------------------
+    df_completo_chiquito=creacion_df_small("df_completo")
+    cols_drops_1=cols_a_dropear_variable_entera(df_completo_chiquito, ['mprestamos_personales','cprestamos_personales','suma_de_prestamos_productos'])
+    
+    df_completo_chiquito=creacion_df_small("df_completo")
+    cols_drops_2=cols_a_dropear_variable_originales_o_percentiles(df_completo_chiquito,a_eliminar="originales")
+
+    cols_drops=list(set(cols_drops_1 + cols_drops_2))
+
     if tipo_bayesiana =="OB":
         logger.info(f"=== COMIENZO OPTIMIZACIÓN {tipo_bayesiana} ===")
-        X_train, y_train_binaria,_,y_train_class, w_train, X_test, y_test_binaria,_, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(numero,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)    
+        X_train, y_train_binaria,_,y_train_class, w_train, X_test, y_test_binaria,_, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(numero,MES_TRAIN,MES_TEST,MES_A_PREDECIR,
+                                                                                                                                                    SEMILLA,SUBSAMPLEO,feature_subset=col_drops,n_canaritos=None)    
         study = optim_hiperp_binaria(X_train , y_train_binaria,w_train ,n_trials , name,fecha,semillas)
         graficos_bayesiana(study ,fecha, name)
         logger.info("=== ANÁLISIS DE RESULTADOS ===")

@@ -78,6 +78,7 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
     logger.info(f"Meses validacion en bayesiana : {X_val['foto_mes'].unique()}")
 
     def objective(trial):
+        logger.info(f"COMIENZO DEL TRIAL NUMERO : {trial.number}  de {n_trials}------------------------")
         num_leaves = trial.suggest_int('num_leaves', 8, 100)
         learning_rate = trial.suggest_float('learning_rate', 0.003, 0.1) 
         min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 10, 1600)
