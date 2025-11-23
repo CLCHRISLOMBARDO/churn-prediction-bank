@@ -36,7 +36,7 @@ def lanzar_bayesiana_lgbm(fecha:str , semillas:list,n_experimento:str|int ,proce
     verificacion_o_creacion_tabla()
     if tipo_bayesiana =="OB":
         logger.info(f"=== COMIENZO OPTIMIZACIÓN {tipo_bayesiana} ===")
-        X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(numero,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)    
+        X_train, y_train_binaria,_,y_train_class, w_train, X_test, y_test_binaria,_, y_test_class, w_test,X_apred, y_apred = split_train_test_apred(numero,MES_TRAIN,MES_TEST,MES_A_PREDECIR,SEMILLA,SUBSAMPLEO)    
         study = optim_hiperp_binaria(X_train , y_train_binaria,w_train ,n_trials , name,fecha,semillas)
         graficos_bayesiana(study ,fecha, name)
         logger.info("=== ANÁLISIS DE RESULTADOS ===")
