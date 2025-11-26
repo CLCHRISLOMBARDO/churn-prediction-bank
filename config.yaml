@@ -36,25 +36,25 @@ configuracion_bayesiana:
 
 configuracion_canaritos:
   N_CANARITOS : 5
-  MIN_DATA_IN_LEAF : 2000 #200
+  MIN_DATA_IN_LEAF : 200 #2000
   LEARNING_RATE : 1.0
-  GRADIENT_BOUND : 0.01 #0.4
-  NUM_LEAVES :  300 #9999
-  FEATURE_FRACTION : 0.8 #0.5
-  BAGGING_FRACTION : 0.8 #1
-  BAGGING_FREQ : 1 # 0
+  GRADIENT_BOUND : 0.4 #0.01
+  NUM_LEAVES :  9999 #300
+  FEATURE_FRACTION : 0.5 #0.8
+  BAGGING_FRACTION : 1 #0.8
+  BAGGING_FREQ : 0 # 1
   MAX_BIN : 31  
-  NUM_ITERATIONS :  1000 #64
+  NUM_ITERATIONS :  64 #1000
   EARLY_STOPPING_ROUNDS : 200
   FIRST_METRIC_ONLY : False 
   BOOST_FROM_AVERAGE : True
-  FEATURE_PRE_FILTER : True # False (True es el valor determinado)
+  FEATURE_PRE_FILTER : False # True (True es el valor determinado)
 
 
 
 configuracion_experimentos:
-  N_EXPERIMENTO :  ".c3_exp106" 
-  N_SEMILLAS_EXP : 5
+  N_EXPERIMENTO :  ".c3_exp6" 
+  N_SEMILLAS_EXP : 50
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"
 
@@ -66,7 +66,7 @@ configuracion_gcp:
 configuracion_paths:
   place_path:
     LOCAL_PATH: ""
-    GCP_PATH: "/home/carbonelldv/buckets/b1/"
+    GCP_PATH: "/home/christian_lombardo14/buckets/b1/"
   PATH_LOGS: "logs/"
   PATH_LOG_GLOBAL : "global_log/"
 
