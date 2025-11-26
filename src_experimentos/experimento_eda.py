@@ -14,8 +14,8 @@ def lanzar_eda(competencia:str|int):
     df=pl.read_parquet(FILE_INPUT_DATA_PARQUET)
     print(df.head(10))
     logger.info(df["foto_mes"].unique())
-    filtros_target=("BAJA+1","BAJA+2")
-    media_por_mes = mean_por_mes(df=df , name=name_eda, filtros_target=filtros_target)
+    # filtros_target=("BAJA+1","BAJA+2")
+    media_por_mes = mean_por_mes(df=df , name=name_eda, filtros_target=None)
 
     crear_reporte_pdf(media_por_mes, xcol='foto_mes', columnas_y=media_por_mes.columns,
                   name_eda=name_eda,
@@ -26,7 +26,7 @@ def lanzar_eda(competencia:str|int):
     #               name_eda=name_eda,
     #               motivo="std_por_mes")
     
-    num_uniques_por_mes = nunique_por_mes(df=df , name=name_eda, filtros_target=filtros_target)
+    num_uniques_por_mes = nunique_por_mes(df=df , name=name_eda, filtros_target=None)
     crear_reporte_pdf(num_uniques_por_mes, xcol='foto_mes', columnas_y=num_uniques_por_mes.columns,
                   name_eda=name_eda,
                   motivo="nunique_por_mes")
