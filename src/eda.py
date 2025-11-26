@@ -137,46 +137,89 @@ def std_por_mes(df:pd.DataFrame|pl.DataFrame , filtros_target:int|tuple=None) ->
     logger.info("Fin del eda de std por foto_mes")
     return variacion_por_mes
 
-def crear_reporte_pdf(df, xcol, columnas_y, name_eda, motivo:str):
+# def crear_reporte_pdf(df, xcol, columnas_y, name_eda, motivo:str):
+#     """
+#     Genera un PDF con una página por gráfico 
+#     """
+#     name_pdf=name_eda +"_reporte_"+motivo+".pdf"
+#     logger.info("Comienzo de la creacion del reporte")
+
+#     drop_cols = ["foto_mes" ]
+
+#     columnas_y = [ c for c in columnas_y if c not in drop_cols]
+
+#     n_months = len(df["foto_mes"].unique())
+
+#     salida_pdf = PATH_OUTPUT_EDA+name_pdf
+#     df["_fecha"] = pd.to_datetime(df[xcol].astype(str), format="%Y%m")
+#     with PdfPages(salida_pdf) as pdf:
+#         for col in columnas_y:
+#             fig, ax = plt.subplots(figsize=(11.69, 8.27))
+#             sns.lineplot(data=df , x = "_fecha" , y =col,ax=ax, marker='o')
+#             ax.set_title(f"{col} vs {xcol}")
+#             ax.set_xlabel(xcol)
+#             ax.set_ylabel(col)
+#             ax.grid(True, alpha=0.3)
+#             if n_months > 6:
+#                 ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
+#             else:
+#                 ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+#             ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
+#             plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
+
+#             fig.tight_layout()
+#             pdf.savefig(fig)
+#             plt.close(fig)
+
+#         # d = pdf.infodict()
+#         # d['Title'] = titulo
+#         # d['Author'] = "Tu nombre"
+#         # d['Subject'] = "Reporte automático de gráficos"
+#         # d['Keywords'] = "matplotlib, reporte, gráficos"
+#         # d['Creator'] = "Python + Matplotlib"
+#         logger.info("Fin de la creacion del reporte")
+
+
+def crear_reporte_pdf(df, xcol, columnas_y, name_eda, motivo: str):
     """
     Genera un PDF con una página por gráfico 
     """
-    name_pdf=name_eda +"_reporte_"+motivo+".pdf"
+    name_pdf = name_eda + "_reporte_" + motivo + ".pdf"
     logger.info("Comienzo de la creacion del reporte")
 
-    drop_cols = ["foto_mes" ]
+    drop_cols = ["foto_mes"]
+    columnas_y = [c for c in columnas_y if c not in drop_cols]
 
-    columnas_y = [ c for c in columnas_y if c not in drop_cols]
+    salida_pdf = PATH_OUTPUT_EDA + name_pdf
 
-    n_months = len(df["foto_mes"].unique())
-
-    salida_pdf = PATH_OUTPUT_EDA+name_pdf
+    # Paso foto_mes (o la que venga en xcol) a datetime
+    df = df.copy()
     df["_fecha"] = pd.to_datetime(df[xcol].astype(str), format="%Y%m")
+
+    # Ticks solo donde hay datos
+    fechas = df["_fecha"].sort_values().unique()
+
     with PdfPages(salida_pdf) as pdf:
         for col in columnas_y:
             fig, ax = plt.subplots(figsize=(11.69, 8.27))
-            sns.lineplot(data=df , x = "_fecha" , y =col,ax=ax, marker='o')
+
+            sns.lineplot(data=df, x="_fecha", y=col, ax=ax, marker='o')
+
             ax.set_title(f"{col} vs {xcol}")
             ax.set_xlabel(xcol)
             ax.set_ylabel(col)
             ax.grid(True, alpha=0.3)
-            if n_months > 6:
-                ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
-            else:
-                ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1))
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
-            plt.setp(ax.get_xticklabels(), rotation=45, ha="right")
+
+            # Usamos solo las fechas reales del dataset
+            ax.set_xticks(fechas)
+            ax.set_xticklabels(
+                [d.strftime("%Y-%m") for d in fechas],
+                rotation=45,
+                ha="right"
+            )
 
             fig.tight_layout()
             pdf.savefig(fig)
             plt.close(fig)
 
-        # d = pdf.infodict()
-        # d['Title'] = titulo
-        # d['Author'] = "Tu nombre"
-        # d['Subject'] = "Reporte automático de gráficos"
-        # d['Keywords'] = "matplotlib, reporte, gráficos"
-        # d['Creator'] = "Python + Matplotlib"
         logger.info("Fin de la creacion del reporte")
-
-
