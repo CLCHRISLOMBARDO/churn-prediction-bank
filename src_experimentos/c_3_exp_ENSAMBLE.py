@@ -53,7 +53,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     cantidad_boosts = N_BOOSTS
     #"""-----------------------------------------------------------------------------------------------"""
     names_exp_finals_preds=[".c3_exp2",".c3_exp3"]
-    n_semillas= "50"
+    n_semillas= ["50","50"]
 
     from functools import reduce
 
@@ -74,7 +74,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             for i, n_exp in enumerate(names_exp_finals_preds):
                 name_file = (
                     path_output_exp_prediction
-                    + f"experimento_{n_exp}_LGBM_{n_semillas}_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
+                    + f"experimento_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
                     "prediccion_test_proba.csv"
                 )
                 logger.info(f"name file : {name_file}")
@@ -146,11 +146,11 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
             name_file_bin = (
                 path_output_prediccion_final
-                + f"prediccion_final_{n_exp}_LGBM_{n_semillas}_SEMILLAS_pred_finales_binaria.csv"
+                + f"prediccion_final_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_pred_finales_binaria.csv"
             )
             name_file_proba = (
                 path_output_prediccion_final
-                + f"prediccion_final_{n_exp}_LGBM_{n_semillas}_SEMILLAS_pred_finales_proba.csv"
+                + f"prediccion_final_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_pred_finales_proba.csv"
             )
 
             logger.info(f"name file bin: {name_file_bin}")
