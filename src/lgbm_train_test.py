@@ -84,7 +84,8 @@ def entrenamiento_zlgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarr
         'force_row_wise': True, 
         'first_metric_only':FIRST_METRIC_ONLY,
         'boost_from_average':BOOST_FROM_AVERAGE,
-        'feature_pre_filter':FEATURE_PRE_FILTER
+        'feature_pre_filter':FEATURE_PRE_FILTER,
+        'force_row_wise': FORCE_ROW_WISE
     }
    
     if GRADIENT_BOUND is not None:

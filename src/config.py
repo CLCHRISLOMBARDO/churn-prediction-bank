@@ -83,6 +83,7 @@ try:
         FIRST_METRIC_ONLY       = canaritos.get("FIRST_METRIC_ONLY")
         BOOST_FROM_AVERAGE      = canaritos.get("BOOST_FROM_AVERAGE")
         FEATURE_PRE_FILTER      = canaritos.get("FEATURE_PRE_FILTER")
+        FORCE_ROW_WISE          = canaritos.get("FORCE_ROW_WISE")
         
 
 
