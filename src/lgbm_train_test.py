@@ -34,6 +34,7 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarra
         'first_metric_only': True,
         'boost_from_average': True,
         'feature_pre_filter': False,
+        'force_row_wise': True,
         'max_bin': 31,
         'num_leaves': best_parameters['num_leaves'],
         'learning_rate': best_parameters['learning_rate'],

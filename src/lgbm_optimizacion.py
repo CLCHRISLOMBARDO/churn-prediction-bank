@@ -4,15 +4,14 @@ import polars as pl
 import numpy as np
 import lightgbm as lgb
 import os
+import sqlite3
+import subprocess
 
-from joblib import Parallel, delayed
 import optuna
 from optuna.study import Study
-from time import time
-from datetime import datetime
+
 import json
 import logging
-from optuna.samplers import TPESampler # Para eliminar el componente estocastico de optuna
 from optuna.visualization import plot_param_importances, plot_contour,  plot_slice, plot_optimization_history
 
 from src.config import GANANCIA,ESTIMULO,SEMILLA ,N_BOOSTS ,N_FOLDS, MES_VAL_BAYESIANA, MES_TRAIN
@@ -20,6 +19,7 @@ from src.config import  path_output_bayesian_db,path_output_bayesian_bestparams 
 
 
 logger = logging.getLogger(__name__)
+
 
 
 def lgb_gan_eval_individual(y_pred, data):
@@ -79,8 +79,8 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
 
     def objective(trial):
         logger.info(f"COMIENZO DEL TRIAL NUMERO : {trial.number}  de {n_trials}------------------------")
-        num_leaves = trial.suggest_int('num_leaves', 8, 100)
-        learning_rate = trial.suggest_float('learning_rate', 0.003, 0.1) 
+        num_leaves = trial.suggest_int('num_leaves', 2, 100)
+        learning_rate = trial.suggest_float('learning_rate', 0.003, 0.5) 
         min_data_in_leaf = trial.suggest_int('min_data_in_leaf', 10, 1600)
         feature_fraction = trial.suggest_float('feature_fraction', 0.1, 1.0)
         bagging_fraction = trial.suggest_float('bagging_fraction', 0.1, 1.0)
@@ -91,18 +91,19 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
 
         params = {
             'objective': 'binary',
-            'metric': 'custom',
+            'metric': 'none',
             'boosting_type': 'gbdt',
             'first_metric_only': True,
             'boost_from_average': True,
             'feature_pre_filter': False,
+            'force_row_wise': True,
             'max_bin': 31,
             'num_leaves': num_leaves,
             'learning_rate': learning_rate,
             'min_data_in_leaf': min_data_in_leaf,
             'feature_fraction': feature_fraction,
             'bagging_fraction': bagging_fraction,
-            'bagging_freq': 1 , # 
+            'bagging_freq': 1 , 
             'lambda_l1':lambda_l1,
             'lambda_l2':lambda_l2,
             'extra_trees' : True,
@@ -137,7 +138,7 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
 
         guardar_iteracion(trial,ganancia_media_meseta,cliente_optimo,ganancia_max,best_iter_promedio,y_preds_matrix,best_iters,name,fecha,semillas)
 
-        return float(ganancia_media_meseta) * num_meses
+        return float(ganancia_media_meseta) 
         
     storage_name = "sqlite:///" + path_output_bayesian_db + "optimization_lgbm.db"
     study_name = f"study_{name}"    # VAria en numero de bayesiana y len(semillas)
@@ -200,6 +201,9 @@ def guardar_iteracion(trial,ganancia_media_meseta,cliente_optimo,ganancia_max,be
 
     logger.info(f"Iteración {trial.number} guardada en {archivo}")
     logger.info(f"Ganancia media meseta: {ganancia_media_meseta:,.0f}" + "---" + "Parámetros: {params}")
+
+
+
 
 
 def graficos_bayesiana(study:Study, fecha:str,name: str):
