@@ -18,7 +18,43 @@ from src.config import GANANCIA,ESTIMULO,SEMILLA ,N_BOOSTS ,N_FOLDS, MES_VAL_BAY
 from src.config import  path_output_bayesian_db,path_output_bayesian_bestparams ,path_output_bayesian_best_iter ,path_output_bayesian_graf
 
 
+import sqlite3
+import subprocess
+
 logger = logging.getLogger(__name__)
+
+# ---------- CONFIG DE BACKUP A GCS ----------
+DB_PATH = os.path.join(path_output_bayesian_db, "optimization_lgbm.db")
+# Cambiá esto al bucket/carpeta que quieras
+GCS_DEST = "gs://christian_lombardo14_bukito3/"+ path_output_bayesian_db + "optimization_lgbm.db"
+
+
+def backup_sqlite(src: str, dst: str):
+  
+    con = sqlite3.connect(src)
+    bck = sqlite3.connect(dst)
+    with bck:
+        con.backup(bck)
+    con.close()
+    bck.close()
+
+
+def backup_y_subir_overwrite(trial_number: int):
+    """
+    1) Crea un backup local temporal de DB_PATH
+    2) Lo sube a GCS siempre en la MISMA ruta (GCS_DEST), sobrescribiendo el anterior.
+    """
+    logger.info(f"[BACKUP] Creando backup local de la DB para el trial {trial_number}")
+    backup_local = os.path.join(path_output_bayesian_db, "optimization_lgbm_backup_tmp.db")
+
+    # Backup consistente src -> dst
+    backup_sqlite(DB_PATH, backup_local)
+
+    logger.info(f"[BACKUP] Subiendo backup a GCS: {GCS_DEST}")
+    cmd = ["gsutil", "cp", backup_local, GCS_DEST]
+    subprocess.run(cmd, check=True)
+    logger.info("[BACKUP] Backup subido correctamente a GCS")
+
 
 
 
@@ -139,8 +175,24 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
         guardar_iteracion(trial,ganancia_media_meseta,cliente_optimo,ganancia_max,best_iter_promedio,y_preds_matrix,best_iters,name,fecha,semillas)
 
         return float(ganancia_media_meseta) 
-        
-    storage_name = "sqlite:///" + path_output_bayesian_db + "optimization_lgbm.db"
+    # 🔹 Callback que se ejecuta después de cada trial
+    def backup_callback(study: optuna.Study, trial: optuna.trial.FrozenTrial):
+        """
+        Se llama automáticamente después de CADA trial.
+        Solo hace backup cuando el número de trial es múltiplo de 10.
+        """
+        current_trial = trial.number + 1  # trial.number arranca en 0
+        if current_trial % 10 != 0:
+            return
+
+        logger.info(f"[BACKUP] Lanzando backup en el trial {current_trial}")
+        try:
+            backup_y_subir_overwrite(current_trial)
+        except Exception as e:
+            # Si falla el backup, NO queremos que se caiga la optimización entera
+            logger.error(f"[BACKUP] Error al hacer backup en trial {current_trial}: {e}")
+
+    storage_name = f"sqlite:///{DB_PATH}" 
     study_name = f"study_{name}"    # VAria en numero de bayesiana y len(semillas)
 
     optuna.logging.set_verbosity(optuna.logging.INFO)
@@ -152,7 +204,7 @@ def optim_hiperp_binaria(X_train:pd.DataFrame | pl.DataFrame ,y_train_binaria:pd
         #sampler=TPESampler(seed=SEMILLA)
     )
 
-    study.optimize(objective, n_trials=n_trials)
+    study.optimize(objective, n_trials=n_trials, callbacks=[backup_callback])
 
     return study
 

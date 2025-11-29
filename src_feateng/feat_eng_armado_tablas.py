@@ -17,9 +17,9 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     name=f"FEAT_ENG_{numero}_{proceso_ppal}_VENTANA_{VENTANA}"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name}")
-    copia_tabla("df_inicial","df_completo") # BORRAR SI ES LA SEGUNDA CORRIDA !!!!!!!!!!!! ======
-    meses_a_dropear=[201910,202006] #+ [201900 + m for m in range(1,7)]
-    feature_engineering_drop_meses(meses_a_dropear,"df_completo","df_completo")
+    # copia_tabla("df_inicial","df_completo") # BORRAR SI ES LA SEGUNDA CORRIDA !!!!!!!!!!!! ======
+    # meses_a_dropear=[201910,202006] #+ [201900 + m for m in range(1,7)]
+    # feature_engineering_drop_meses(meses_a_dropear,"df_completo","df_completo")
     
     # =========================================
 
@@ -65,7 +65,7 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     feature_engineering_lag_orden_fijo(df_completo_chiquito,cols_lag_delta_max_min_regl,12)
     feature_engineering_delta_orden_fijo(df_completo_chiquito,cols_lag_delta_max_min_regl,6)
     feature_engineering_delta_orden_fijo(df_completo_chiquito,cols_lag_delta_max_min_regl,12)
-    feature_engineering_mean(df_completo_chiquito,cols_lag_delta_max_min_regl , VENTANA)
+    # feature_engineering_mean(df_completo_chiquito,cols_lag_delta_max_min_regl , VENTANA)
 
 
 
