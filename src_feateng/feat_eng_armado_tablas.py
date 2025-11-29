@@ -65,7 +65,7 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
     feature_engineering_lag_orden_fijo(df_completo_chiquito,cols_lag_delta_max_min_regl,12)
     feature_engineering_delta_orden_fijo(df_completo_chiquito,cols_lag_delta_max_min_regl,6)
     feature_engineering_delta_orden_fijo(df_completo_chiquito,cols_lag_delta_max_min_regl,12)
-    # feature_engineering_mean(df_completo_chiquito,cols_lag_delta_max_min_regl , VENTANA)
+    feature_engineering_mean(df_completo_chiquito,cols_lag_delta_max_min_regl , VENTANA)
 
 
 
