@@ -424,6 +424,90 @@ def feature_engineering_mpayroll_sobre_edad(df):
     return
 
 
+
+
+
+
+def feature_engineering_lag_orden_fijo(df:pd.DataFrame ,columnas:list[str],orden_lag:int=1 ):
+    
+    logger.info(f"Comienzo Feature de lag_orden_fijo {orden_lag}")
+
+    if any(c.endswith(f"_lag_{orden_lag}") for c in df.columns):
+        logger.info(f"Ya se hizo lag de orden : {orden_lag}")
+        return
+    logger.info(f"Todavia no se hizo lag de orden : {orden_lag}")
+    
+    sql = "CREATE or REPLACE table df_completo as "
+    sql +="(SELECT *"
+    for attr in columnas:
+        if attr in df.columns:
+            for i in range(orden_lag,orden_lag+1):
+                sql+= f",lag(try_cast({attr} as double),{i}) OVER (PARTITION BY numero_de_cliente ORDER BY foto_mes) AS {attr}_lag_{i}"
+        else:
+            logger.warning(f"No se encontro el atributo {attr} en df")
+    sql+=" FROM df_completo)"
+
+    # Ejecucion de la consulta SQL
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"ejecucion lag finalizada")
+    return
+
+def feature_engineering_delta_orden_fijo(df:pd.DataFrame , columnas:list[str],orden_delta:int=1 ) :
+    
+    logger.info(f"Comienzo feature de delta de orden fijo : {orden_delta}")
+
+    if any(c.endswith(f"_delta_{orden_delta}") for c in df.columns):
+        logger.info(f"Ya se hizo lag de orden : {orden_delta}")
+        return
+    logger.info(f"Todavia no se hizo lag de orden : {orden_delta}")
+    
+    sql = "CREATE or REPLACE table df_completo as "
+    sql+="(SELECT *"
+    for attr in columnas:
+        if attr in df.columns:
+            for i in range(orden_delta,orden_delta+1):
+                sql += (
+                f", TRY_CAST({attr} AS DOUBLE) "
+                f"- TRY_CAST({attr}_lag_{i} AS DOUBLE) AS {attr}_delta_{i}")
+                # sql+= f", {attr}-{attr}_lag_{i} as delta_{i}_{attr}"
+        else:
+            logger.warning(f"No se encontro el atributo {attr} en df")
+    sql+=" FROM df_completo)"
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"ejecucion delta finalizada")
+    return 
+
+
+def feature_engineering_mean(df : pd.DataFrame|np.ndarray , columnas:list[str],ventana:int=3) :
+    logger.info(f"Comienzo feature media")
+
+    if any(c.endswith("_mean") for c in df.columns):
+        logger.info("Ya se hizo mean")
+        return
+    logger.info("Todavia no se hizo mean")
+    sql = "Create or replace table df_completo as "
+    sql+="SELECT *"
+    try:
+        for attr in columnas:
+            if attr in df.columns:
+                sql+=f", avg(try_cast({attr} as double) ) over ventana_{ventana} as {attr}_mean"
+            else :
+                print(f"no se encontro el atributo {attr}")
+        sql+=f" FROM df_completo window ventana_{ventana} as (partition by numero_de_cliente order by foto_mes rows between {ventana} preceding and current row)"
+    except Exception as e:
+        logger.error(f"Error en la media : {e}")
+        raise
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    conn.close()
+    logger.info(f"ejecucion media finalizada")
+    return 
+
+
 # def feature_engineering_rank(df: pd.DataFrame, columnas: list[str]) -> pd.DataFrame:
 #     """
 #     Genera variables de ranking para los atributos especificados utilizando SQL.
