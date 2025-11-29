@@ -7,14 +7,12 @@ import polars as pl
 import duckdb 
 import logging
 
-from src.config import PATH_OUTPUT_EDA
+from src.config import *
 
 logger = logging.getLogger(__name__)
 def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str , filtros_target:int|tuple=None) ->pl.DataFrame|pd.DataFrame:
     logger.info("Comienzo del eda de nunique por foto_mes")
     name_file = name + "_nuniques_por_mes.csv"
-
-
 
     drop_cols = ["foto_mes" ]
 
@@ -25,17 +23,16 @@ def nunique_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str , filtros_target:int|
     for c in cols:
         sql+=f', count(distinct({c})) as {c}_nunique'
 
-    sql+=' from df'
+    sql+=' from df_completo'
 
-    if filtros_target is not None:
-        if isinstance(filtros_target , tuple):
-            sql+=f' where clase_ternaria in {filtros_target}'
-        elif isinstance(filtros_target , int):
-            sql+=f' where clase_ternaria = {filtros_target}'
+    # if filtros_target is not None:
+    #     if isinstance(filtros_target , tuple):
+    #         sql+=f' where clase_ternaria in {filtros_target}'
+    #     elif isinstance(filtros_target , int):
+    #         sql+=f' where clase_ternaria = {filtros_target}'
     sql+=' group by foto_mes'
 
-    con = duckdb.connect(database=":memory:")
-    con.register("df",df)
+    con = duckdb.connect(PATH_DATA_BASE_DB)
     nuniques_por_mes = con.execute(sql).df()
     con.close()
     logger.info("Intento de guardado")
@@ -64,32 +61,31 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str, filtros_target:int|tupl
     num_cols = [ c for c in num_cols if c not in drop_cols]
     
     # Veo primero cuales son los uniques de foto_mes
-    logger.info("Vemos los uniques de los meses")
-    sql = 'select distinct(foto_mes) from df order by foto_mes'
-    con = duckdb.connect(database=":memory:")
-    con.register("df",df)
-    mes_unique = con.execute(sql).df()
-    con.close()
-    logger.info(f"Los unicos meses: {mes_unique}")
+    # logger.info("Vemos los uniques de los meses")
+    # sql = 'select distinct(foto_mes) from df order by foto_mes'
+    # con = duckdb.connect(database=":memory:")
+    # con.register("df",df)
+    # mes_unique = con.execute(sql).df()
+    # con.close()
+    # logger.info(f"Los unicos meses: {mes_unique}")
 
-    logger.info("Seguimos con el eda de media por foto_mes")
+    # logger.info("Seguimos con el eda de media por foto_mes")
     
     sql='select foto_mes'
 
     for c in num_cols:
         sql+=f', AVG({c}) as {c}_mean'
-    sql+=' from df '
+    sql+=' from df_completo '
 
-    if filtros_target is not None:
-        if isinstance(filtros_target , tuple):
-            sql+=f' where clase_ternaria in {filtros_target}'
-        elif isinstance(filtros_target , int):
-            sql+=f' where clase_ternaria = {filtros_target}'
+    # if filtros_target is not None:
+    #     if isinstance(filtros_target , tuple):
+    #         sql+=f' where clase_ternaria in {filtros_target}'
+    #     elif isinstance(filtros_target , int):
+    #         sql+=f' where clase_ternaria = {filtros_target}'
 
     sql += ' group by foto_mes'
 
-    con = duckdb.connect(database=":memory:")
-    con.register("df",df)
+    con = duckdb.connect(PATH_DATA_BASE_DB)
     medias_por_mes = con.execute(sql).df()
     con.close()
 
@@ -103,39 +99,39 @@ def mean_por_mes(df:pd.DataFrame|pl.DataFrame ,name:str, filtros_target:int|tupl
     
     return medias_por_mes
 
-def std_por_mes(df:pd.DataFrame|pl.DataFrame , filtros_target:int|tuple=None) ->pl.DataFrame|pd.DataFrame:
-    logger.info("Comienzo del eda de std por foto_mes")
-    if isinstance(df , pl.DataFrame):
-        num_cols=df.select(pl.selectors.numeric()).columns
-    elif isinstance(df , pd.DataFrame):
-        num_cols = df.select_dtypes(include="number").columns
+# def std_por_mes(df:pd.DataFrame|pl.DataFrame , filtros_target:int|tuple=None) ->pl.DataFrame|pd.DataFrame:
+#     logger.info("Comienzo del eda de std por foto_mes")
+#     if isinstance(df , pl.DataFrame):
+#         num_cols=df.select(pl.selectors.numeric()).columns
+#     elif isinstance(df , pd.DataFrame):
+#         num_cols = df.select_dtypes(include="number").columns
 
-    drop_cols = ["foto_mes" ]
+#     drop_cols = ["foto_mes" ]
 
-    num_cols = [ c for c in num_cols if c not in drop_cols]
+#     num_cols = [ c for c in num_cols if c not in drop_cols]
     
-    # Veo primero cuales son los uniques de foto_mes
+#     # Veo primero cuales son los uniques de foto_mes
 
     
-    sql='select foto_mes'
+#     sql='select foto_mes'
 
-    for c in num_cols:
-        sql+=f', STDDEV_SAMP({c}) as {c}_STD'
-    sql+=' from df'
+#     for c in num_cols:
+#         sql+=f', STDDEV_SAMP({c}) as {c}_STD'
+#     sql+=' from df'
     
-    if filtros_target is not None:
-        if isinstance(filtros_target , tuple):
-            sql+=f' where clase_ternaria in {filtros_target}'
-        elif isinstance(filtros_target , int):
-            sql+=f' where clase_ternaria = {filtros_target}'
-    sql +=' group by foto_mes'
+#     if filtros_target is not None:
+#         if isinstance(filtros_target , tuple):
+#             sql+=f' where clase_ternaria in {filtros_target}'
+#         elif isinstance(filtros_target , int):
+#             sql+=f' where clase_ternaria = {filtros_target}'
+#     sql +=' group by foto_mes'
 
-    con = duckdb.connect(database=":memory:")
-    con.register("df",df)
-    variacion_por_mes = con.execute(sql).df()
-    con.close()
-    logger.info("Fin del eda de std por foto_mes")
-    return variacion_por_mes
+#     con = duckdb.connect(database=":memory:")
+#     con.register("df",df)
+#     variacion_por_mes = con.execute(sql).df()
+#     con.close()
+#     logger.info("Fin del eda de std por foto_mes")
+#     return variacion_por_mes
 
 # def crear_reporte_pdf(df, xcol, columnas_y, name_eda, motivo:str):
 #     """

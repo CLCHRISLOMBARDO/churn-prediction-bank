@@ -369,6 +369,60 @@ def feature_engineering_max_min(df : pd.DataFrame|np.ndarray , columnas:list[str
     logger.info(f"ejecucion max min finalizada. ")
     return 
 
+def feature_engineering_mes(df):
+    logger.info("Comienzo del feat eng del mes")
+    if "mes" in df.columns:
+        logger.info("Ya se realizo el faet mes")
+        return
+    logger.info("Todavia no se realiza el feat mes")
+    sql = """create or replace table df_completo as 
+            select * , foto_mes % 100 as mes
+            from df_completo"""
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    sql_logger = """select foto_mes,mes from df_completo limit 15"""
+    logger.info(f"Las columnas mes creada : {conn.execute(sql_logger)}")
+    conn.close()
+    logger.info("Fin del feat eng del mes")
+    return
+
+def feature_engineering_ctrx_norm(df):
+    logger.info("Comienzo del feat de ctrx normalizacion")
+    if "ctrx_quarter_normalizado" in df.columns:
+        logger.info("Ya se realizo el ctrx_quarter_normalizado")
+        return
+    logger.info("Todavia no se realizo ctrx_quarter_normalizado")
+    sql = """create or replace table df_completo as
+                select * , 
+                if(cliente_antiguedad= 1, ctrx_quarter * 5.0 ,
+                 if (cliente_antiguedad = 2 ,ctrx_quarter * 2.0,
+                   if (cliente_antiguedad = 3 , ctrx_quarter * 1.2 , ctrx_quarter ))) as ctrx_quarter_normalizado
+                   from df_completo"""
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    sql_logger = """select ctrx_quarter,ctrx_quarter_normalizado from df_completo limit 50"""
+    logger.info(f"Las columnas ctrx_quarter_normalizado creada : {conn.execute(sql_logger)}")
+    conn.close()
+    logger.info("Fin del feat eng del ctrx_quarter_normalizado")
+    return
+def feature_engineering_mpayroll_sobre_edad(df):
+    logger.info("Comienzo del feat de mpayroll_sobre_edad")
+    if "mpayroll_sobre_edad" in df.columns:
+        logger.info("Ya se realizo el mpayroll_sobre_edad")
+        return
+    logger.info("Todavia no se realizo mpayroll_sobre_edad")
+    sql = """create or replace table df_completo as
+                select * , 
+                mpay_roll / cliente_edad as mpayroll_sobre_edad
+                from df_completo"""
+    conn=duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(sql)
+    sql_logger = """select mpay_roll ,cliente_edad ,mpayroll_sobre_edad from df_completo limit 50"""
+    logger.info(f"Las columnas mpayroll_sobre_edad creada : {conn.execute(sql_logger)}")
+    conn.close()
+    logger.info("Fin del feat eng del mpayroll_sobre_edad")
+    return
+
 
 # def feature_engineering_rank(df: pd.DataFrame, columnas: list[str]) -> pd.DataFrame:
 #     """
