@@ -6,7 +6,7 @@ import seaborn as sns
 from src.config import *
 from src.configuracion_inicial import creacion_df_small
 from src.constr_lista_cols import contrs_cols_dropear_por_features_sufijos ,cols_a_dropear_variable_originales_o_percentiles
-from src.eda import mean_por_mes , crear_reporte_pdf,std_por_mes , nunique_por_mes
+from src.eda import mean_por_mes , crear_reporte_pdf , nunique_por_mes
 
 
 
