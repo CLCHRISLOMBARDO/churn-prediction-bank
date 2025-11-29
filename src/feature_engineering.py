@@ -413,7 +413,7 @@ def feature_engineering_mpayroll_sobre_edad(df):
     logger.info("Todavia no se realizo mpayroll_sobre_edad")
     sql = """create or replace table df_completo as
                 select * , 
-                mpay_roll / cliente_edad as mpayroll_sobre_edad
+                mpayroll / cliente_edad as mpayroll_sobre_edad
                 from df_completo"""
     conn=duckdb.connect(PATH_DATA_BASE_DB)
     conn.execute(sql)
