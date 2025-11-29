@@ -6,7 +6,7 @@ COMPETENCIA: 3
     # 3- bayesiana  | test_baye 
     # 4- experimento |  test_exp
     # 5- prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "feat_eng"
+PROCESO_PPAL: "experimento"
 # SUSBAMPLEO EN PORCENTAJE
 SUBSAMPLEO : 0.1 # solo para baye y exp y pred final
 
@@ -23,11 +23,11 @@ configuracion_feat_eng :
 
 configuracion_bayesiana:
   TIPO_BAYESIANA : "ZLGBM" # OB | ZS | ZLGBM
-  N_BAYESIANA: ""
-  N_SEMILLAS_BAY : 1
-  N_TRIALS: 1
-  N_BOOSTS: 1
-  MES_VAL_BAYESIANA: 202102
+  N_BAYESIANA: "1"
+  N_SEMILLAS_BAY : 50
+  N_TRIALS: 40
+  N_BOOSTS: 1000
+  MES_VAL_BAYESIANA: 202104
   UMBRAL: 0.025
   GANANCIA: 780000
   ESTIMULO: 20000
