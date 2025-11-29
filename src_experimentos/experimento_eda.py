@@ -35,7 +35,7 @@ def lanzar_eda(competencia:str|int):
     sql=f""" SELECT * {exclude} from df_completo """
     logger.info(f"Query con las columnas a eliminar : {sql}")
     conn=duckdb.connect(PATH_DATA_BASE_DB)
-    df = conn.execute(sql).df
+    df = conn.execute(sql).df()
     conn.close()
     logger.info(f"df shape despues del exclude : {df.shape}")
 
