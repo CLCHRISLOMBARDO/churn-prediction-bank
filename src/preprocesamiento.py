@@ -115,7 +115,9 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     logger.info("Comienzo de la ejecucion de numeros_unicos")
 
     conn = duckdb.connect(PATH_DATA_BASE_DB)
-    conn.execute(f"SELECT setseed({semilla});")
+    seed_duck = (semilla % 2_000_000) / 1_000_000.0 - 1.0
+    logger.info(f"Semilla entera: {semilla} -> semilla duckdb: {seed_duck}")
+    conn.execute("SELECT setseed(?);", [seed_duck])
     conn.execute(sql_continuas)
     logger.info("Fin de la ejecucion de numeros_unicos")
 
