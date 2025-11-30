@@ -183,7 +183,7 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
                                                                np.ndarray,np.ndarray,np.ndarray, 
                                                                np.ndarray,pd.DataFrame,
                                                                pd.DataFrame]:
-    logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
+    logger.info(f"Comienzo del slpiteo de TRAIN - TEST - APRED con subsampleo : {subsampleo}")
 
         
     sql_canaritos =''
@@ -209,15 +209,25 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     for m in mes_train[1:]:    
         mes_train_sql += f",{m}"
 
-    sql_train = f"""
-    with continuas_sample as
-    (SELECT DISTINCT numero_de_cliente
-    FROM df_completo
-    WHERE foto_mes IN ({mes_train_sql})
-    AND clase_ternaria = 'Continua'
-    AND RANDOM() < {subsampleo} )
 
+    sql_train = f"""
+        WITH continuas AS (
+            SELECT DISTINCT numero_de_cliente
+            FROM df_completo
+            WHERE foto_mes IN ({mes_train_sql})
+            AND clase_ternaria = 'Continua'
+        ),
+        continuas_sample AS (
+            SELECT numero_de_cliente
+            FROM continuas
+            ORDER BY RANDOM()
+            LIMIT (
+                SELECT CAST(COUNT(*) * {subsampleo} AS INTEGER)
+                FROM continuas
+            )
+        )
     """
+
 
     sql_train += f"""SELECT {sql_canaritos} * {exclude} 
                     FROM df_completo 
