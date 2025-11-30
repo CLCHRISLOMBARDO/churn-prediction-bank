@@ -97,21 +97,53 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
         mes_test_sql = f"{mes_test}"
         
     mes_apred_sql = f"{mes_apred}"
-    
-    sql_completo = f"""SELECT {sql_canaritos} * {exclude} ,
-                        CASE
-                            WHEN foto_mes IN ({mes_train_sql}) THEN 'train' 
-                            WHEN foto_mes IN ({mes_test_sql}) THEN 'test' 
-                            WHEN foto_mes = {mes_apred_sql} THEN 'apred'
-                        END AS spliteo
-                        FROM df_completo
-                        WHERE foto_mes IN ({mes_train_sql}, {mes_test_sql},{mes_apred_sql})"""
-    logger.info(f"sql apred query : {sql_completo}")
 
+
+
+
+    sql_continuas = f"""
+    CREATE TEMP TABLE continuas_sample AS
+    SELECT numeros_unicos AS numero_de_cliente
+    FROM (
+        SELECT DISTINCT numero_de_cliente AS numeros_unicos
+        FROM df_completo
+        WHERE foto_mes IN ({mes_train_sql})
+        AND clase_ternaria = 'Continua'
+    )
+    WHERE RANDOM() < {subsampleo}
+    """
+    logger.info("Comienzo de la ejecucion de numeros_unicos")
+
+    conn = duckdb.connect(PATH_DATA_BASE_DB)
+    conn.execute(f"SET seed = {semilla};")
+    conn.execute(sql_continuas)
+    logger.info("Fin de la ejecucion de numeros_unicos")
+
+
+
+    sql_completo = f"""
+    SELECT {sql_canaritos} * {exclude},
+        CASE
+            WHEN (
+                    foto_mes IN ({mes_train_sql})
+                    AND clase_ternaria != 'Continua'
+            )
+            OR (
+                    foto_mes IN ({mes_train_sql})
+                    AND clase_ternaria = 'Continua'
+                    AND numero_de_cliente IN (SELECT numero_de_cliente FROM continuas_sample)
+            )
+            THEN 'train'
+            WHEN foto_mes IN ({mes_test_sql}) THEN 'test'
+            WHEN foto_mes = {mes_apred_sql} THEN 'apred'
+        END AS spliteo
+    FROM df_completo
+    WHERE foto_mes IN ({mes_train_sql}, {mes_test_sql}, {mes_apred_sql})
+    """
+
+
+    logger.info(f"sql completo query : {sql_completo}")
     logger.info("Comienzo de la transfor a pds")
-    conn=duckdb.connect(PATH_DATA_BASE_DB)
-    seed_float = (semilla % 10000) / 10000.0
-    conn.execute("SELECT setseed(?)", [seed_float])
     data_completa = conn.execute(sql_completo).df()
     conn.close()
     logger.info("Fin de la transfor a pds")
@@ -120,9 +152,6 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     test_data = data_completa[data_completa['spliteo'] == 'test'].drop(columns=['spliteo'])
     apred_data = data_completa[data_completa['spliteo'] == 'apred'].drop(columns=['spliteo'])
     
-    if subsampleo is not None:
-        train_data=undersampling(train_data , subsampleo,semilla)
-    logger.info(f"Terminada la carga de df con columnas: {train_data.columns}")
     # TRAIN
     X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria','clase_binaria_2'], axis=1)
     y_train_binaria = train_data['clase_binaria'].to_numpy()
@@ -155,6 +184,215 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     X_test  = coerce_numeric_cols(X_test,  ERR_COLS, fillna_val=0.0)
     X_apred = coerce_numeric_cols(X_apred, ERR_COLS, fillna_val=0.0)
     return X_train, y_train_binaria,y_train_binaria_2,y_train_class, w_train, X_test, y_test_binaria,y_test_binaria_2, y_test_class, w_test ,X_apred , y_apred 
+
+
+# def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int]
+#                            ,mes_apred:int,semilla:int=SEMILLA,
+#                            subsampleo:float=SUBSAMPLEO , feature_subset= None,n_canaritos:int=None)->Tuple[pd.DataFrame,
+#                                                                np.ndarray,np.ndarray,np.ndarray, 
+#                                                                np.ndarray, pd.DataFrame, 
+#                                                                np.ndarray,np.ndarray,np.ndarray, 
+#                                                                np.ndarray,pd.DataFrame,
+#                                                                pd.DataFrame]:
+#     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
+
+        
+#     sql_canaritos =''
+#     if n_canaritos is not None and n_canaritos>0 :
+#         for c in range(1,n_canaritos+1):
+#             sql_canaritos += f'RANDOM() as canarito_{c}, '
+
+#     exclude=''
+#     if feature_subset is not None:
+#         for i,f in enumerate(feature_subset):
+#             if i ==0:
+#                 exclude+=f'EXCLUDE({f}'
+#             else:
+#                 exclude+=f',{f}'
+#         exclude+=')'
+
+#     mes_train_sql = f"{mes_train[0]}"
+#     for m in mes_train[1:]:    
+#         mes_train_sql += f",{m}"
+
+
+#     if isinstance(mes_test,list):
+#         mes_test_sql = f"{mes_test[0]}"
+#         for m in mes_test[1:]:    
+#             mes_test_sql += f",{m}"
+#     elif isinstance(mes_test,int):
+#         mes_test_sql = f"{mes_test}"
+        
+#     mes_apred_sql = f"{mes_apred}"
+
+        
+#     sql_completo = f"""with continuas_train as 
+#     (SELECT DISTINCT(numero_de_cliente) as numeros_unicos,
+#     CASE WHEN RANDOM() < {subsampleo} THEN 1 ELSE 0 END AS flag_subsampleo
+#     FROM df_completo 
+#     WHERE foto_mes in ({mes_train_sql}) AND clase_ternaria = 'Continua')
+#     """
+
+
+#     sql_completo += f"""SELECT {sql_canaritos} * {exclude} ,
+#                     CASE
+#                         WHEN( 
+#                             (foto_mes IN ({mes_train_sql}) AND clase_ternaria != 'Continua' )
+#                             OR
+#                             (foto_mes IN ({mes_train_sql}) AND clase_ternaria = 'Continua' AND numero_de_cliente IN
+#                                         (SELECT numeros_unicos 
+#                                             FROM continuas_train 
+#                                             WHERE flag_subsampleo =1)
+#                                         )
+#                             )THEN 'train' 
+#                         WHEN foto_mes IN ({mes_test_sql}) THEN 'test' 
+#                         WHEN foto_mes = {mes_apred_sql} THEN 'apred'
+#                     END AS spliteo
+#                     FROM df_completo 
+#                     WHERE foto_mes IN ({mes_train_sql}, {mes_test_sql},{mes_apred_sql})"""
+
+#     logger.info(f"sql completo query : {sql_completo}")
+#     logger.info("Comienzo de la transfor a pds")
+#     conn=duckdb.connect(PATH_DATA_BASE_DB)
+#     conn.execute(f"SET seed = {semilla};")
+#     data_completa = conn.execute(sql_completo).df()
+#     conn.close()
+#     logger.info("Fin de la transfor a pds")
+
+#     train_data = data_completa[data_completa['spliteo'] == 'train'].drop(columns=['spliteo'])
+#     test_data = data_completa[data_completa['spliteo'] == 'test'].drop(columns=['spliteo'])
+#     apred_data = data_completa[data_completa['spliteo'] == 'apred'].drop(columns=['spliteo'])
+    
+#     # TRAIN
+#     X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria','clase_binaria_2'], axis=1)
+#     y_train_binaria = train_data['clase_binaria'].to_numpy()
+#     y_train_binaria_2 = train_data['clase_binaria_2'].to_numpy()
+#     y_train_class=train_data["clase_ternaria"].to_numpy()
+#     w_train = train_data['clase_peso'].to_numpy()
+
+#     # TEST
+#     X_test = test_data.drop(['clase_ternaria', 'clase_peso','clase_binaria','clase_binaria_2'], axis=1)
+#     y_test_binaria = test_data['clase_binaria'].to_numpy()
+#     y_test_binaria_2 = test_data['clase_binaria_2'].to_numpy()
+#     y_test_class = test_data['clase_ternaria'].to_numpy()
+#     w_test = test_data['clase_peso'].to_numpy()
+
+
+#     # A PREDECIR
+#     X_apred = apred_data.drop(['clase_ternaria', 'clase_peso','clase_binaria','clase_binaria_2'], axis=1)
+#     y_apred=X_apred[["numero_de_cliente"]] # DF
+  
+
+#     logger.info(f"X_train shape : {X_train.shape} / y_train shape : {y_train_binaria.shape} de los meses : {X_train['foto_mes'].unique()}")
+#     logger.info(f"X_test shape : {X_test.shape} / y_test shape : {y_test_binaria.shape}  del mes : {X_test['foto_mes'].unique()}")
+#     logger.info(f"X_apred shape : {X_apred.shape} / y_apred shape : {y_apred.shape}  del mes : {X_apred['foto_mes'].unique()}")
+
+#     logger.info(f"cantidad de baja y continua en train:{np.unique(y_train_binaria,return_counts=True)}")
+#     logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
+#     logger.info("Finalizacion label binario")
+#     # ÚSALO justo antes de entrenar:
+#     X_train = coerce_numeric_cols(X_train, ERR_COLS, fillna_val=0.0)
+#     X_test  = coerce_numeric_cols(X_test,  ERR_COLS, fillna_val=0.0)
+#     X_apred = coerce_numeric_cols(X_apred, ERR_COLS, fillna_val=0.0)
+#     return X_train, y_train_binaria,y_train_binaria_2,y_train_class, w_train, X_test, y_test_binaria,y_test_binaria_2, y_test_class, w_test ,X_apred , y_apred 
+
+
+
+# def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int]
+#                            ,mes_apred:int,semilla:int=SEMILLA,
+#                            subsampleo:float=SUBSAMPLEO , feature_subset= None,n_canaritos:int=None)->Tuple[pd.DataFrame,
+#                                                                np.ndarray,np.ndarray,np.ndarray, 
+#                                                                np.ndarray, pd.DataFrame, 
+#                                                                np.ndarray,np.ndarray,np.ndarray, 
+#                                                                np.ndarray,pd.DataFrame,
+#                                                                pd.DataFrame]:
+#     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
+
+        
+#     sql_canaritos =''
+#     if n_canaritos is not None and n_canaritos>0 :
+#         for c in range(1,n_canaritos+1):
+#             sql_canaritos += f'RANDOM() as canarito_{c}, '
+
+#     exclude=''
+#     if feature_subset is not None:
+#         for i,f in enumerate(feature_subset):
+#             if i ==0:
+#                 exclude+=f'EXCLUDE({f}'
+#             else:
+#                 exclude+=f',{f}'
+#         exclude+=')'
+
+#     mes_train_sql = f"{mes_train[0]}"
+#     for m in mes_train[1:]:    
+#         mes_train_sql += f",{m}"
+
+
+#     if isinstance(mes_test,list):
+#         mes_test_sql = f"{mes_test[0]}"
+#         for m in mes_test[1:]:    
+#             mes_test_sql += f",{m}"
+#     elif isinstance(mes_test,int):
+#         mes_test_sql = f"{mes_test}"
+        
+#     mes_apred_sql = f"{mes_apred}"
+    
+#     sql_completo = f"""SELECT {sql_canaritos} * {exclude} ,
+#                         CASE
+#                             WHEN foto_mes IN ({mes_train_sql}) THEN 'train' 
+#                             WHEN foto_mes IN ({mes_test_sql}) THEN 'test' 
+#                             WHEN foto_mes = {mes_apred_sql} THEN 'apred'
+#                         END AS spliteo
+#                         FROM df_completo
+#                         WHERE foto_mes IN ({mes_train_sql}, {mes_test_sql},{mes_apred_sql})"""
+#     logger.info(f"sql apred query : {sql_completo}")
+
+#     logger.info("Comienzo de la transfor a pds")
+#     conn=duckdb.connect(PATH_DATA_BASE_DB)
+#     conn.execute(f"SET seed = {semilla};")
+#     data_completa = conn.execute(sql_completo).df()
+#     conn.close()
+#     logger.info("Fin de la transfor a pds")
+
+#     train_data = data_completa[data_completa['spliteo'] == 'train'].drop(columns=['spliteo'])
+#     test_data = data_completa[data_completa['spliteo'] == 'test'].drop(columns=['spliteo'])
+#     apred_data = data_completa[data_completa['spliteo'] == 'apred'].drop(columns=['spliteo'])
+    
+#     if subsampleo is not None:
+#         train_data=undersampling(train_data , subsampleo,semilla)
+#     logger.info(f"Terminada la carga de df con columnas: {train_data.columns}")
+#     # TRAIN
+#     X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria','clase_binaria_2'], axis=1)
+#     y_train_binaria = train_data['clase_binaria'].to_numpy()
+#     y_train_binaria_2 = train_data['clase_binaria_2'].to_numpy()
+#     y_train_class=train_data["clase_ternaria"].to_numpy()
+#     w_train = train_data['clase_peso'].to_numpy()
+
+#     # TEST
+#     X_test = test_data.drop(['clase_ternaria', 'clase_peso','clase_binaria','clase_binaria_2'], axis=1)
+#     y_test_binaria = test_data['clase_binaria'].to_numpy()
+#     y_test_binaria_2 = test_data['clase_binaria_2'].to_numpy()
+#     y_test_class = test_data['clase_ternaria'].to_numpy()
+#     w_test = test_data['clase_peso'].to_numpy()
+
+
+#     # A PREDECIR
+#     X_apred = apred_data.drop(['clase_ternaria', 'clase_peso','clase_binaria','clase_binaria_2'], axis=1)
+#     y_apred=X_apred[["numero_de_cliente"]] # DF
+  
+
+#     logger.info(f"X_train shape : {X_train.shape} / y_train shape : {y_train_binaria.shape} de los meses : {X_train['foto_mes'].unique()}")
+#     logger.info(f"X_test shape : {X_test.shape} / y_test shape : {y_test_binaria.shape}  del mes : {X_test['foto_mes'].unique()}")
+#     logger.info(f"X_apred shape : {X_apred.shape} / y_apred shape : {y_apred.shape}  del mes : {X_apred['foto_mes'].unique()}")
+
+#     logger.info(f"cantidad de baja y continua en train:{np.unique(y_train_binaria,return_counts=True)}")
+#     logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
+#     logger.info("Finalizacion label binario")
+#     # ÚSALO justo antes de entrenar:
+#     X_train = coerce_numeric_cols(X_train, ERR_COLS, fillna_val=0.0)
+#     X_test  = coerce_numeric_cols(X_test,  ERR_COLS, fillna_val=0.0)
+#     X_apred = coerce_numeric_cols(X_apred, ERR_COLS, fillna_val=0.0)
+#     return X_train, y_train_binaria,y_train_binaria_2,y_train_class, w_train, X_test, y_test_binaria,y_test_binaria_2, y_test_class, w_test ,X_apred , y_apred 
 
 
 
