@@ -6,9 +6,9 @@ COMPETENCIA: 3
     # 3- bayesiana  | test_baye 
     # 4- experimento |  test_exp
     # 5- prediccion_final | test_prediccion_final |
-PROCESO_PPAL: "feat_eng"
+PROCESO_PPAL: "experimento"
 # SUSBAMPLEO EN PORCENTAJE
-SUBSAMPLEO : 0.1 # solo para baye y exp y pred final
+SUBSAMPLEO : 0.2 # solo para baye y exp y pred final
 
 
 configuracion_semilla:
@@ -45,7 +45,7 @@ configuracion_canaritos:
   BAGGING_FREQ : 0 # 1
   MAX_BIN : 31  
   NUM_ITERATIONS : 33 #64 #1000
-  EARLY_STOPPING_ROUNDS : 200
+  EARLY_STOPPING_ROUNDS : 200 #No se esta usando
   FIRST_METRIC_ONLY : False 
   BOOST_FROM_AVERAGE : True
   FEATURE_PRE_FILTER : False # True (True es el valor determinado)
@@ -54,7 +54,7 @@ configuracion_canaritos:
 
 
 configuracion_experimentos:
-  N_EXPERIMENTO :  "..comp3_conf3_exp3" 
+  N_EXPERIMENTO :  "..comp3_conf3_exp301" 
   N_SEMILLAS_EXP : 50
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"
