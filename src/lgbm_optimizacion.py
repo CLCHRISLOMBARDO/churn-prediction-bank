@@ -59,7 +59,6 @@ def backup_y_subir_overwrite(trial_number: int):
 
 
 def lgb_gan_eval_individual(y_pred, data):
-    logger.info("Calculo ganancia INDIVIDUAL")
     weight = data.get_weight()
     ganancia = np.where(weight == 1.00002, GANANCIA, 0) - np.where(weight < 1.00002, ESTIMULO, 0)
     ganancia = ganancia[np.argsort(y_pred)[::-1]]
@@ -72,8 +71,6 @@ def lgb_gan_eval_individual(y_pred, data):
     # ganancia_maxima = df_sorted.select(pl.col('ganancia_acumulada').max()).item()
     # id_gan_max = df_sorted["ganancia_acumulada"].arg_max()
     # media_meseta = df_sorted.slice(id_gan_max-500, 1000)['ganancia_acumulada'].mean()
-    logger.info(f"ganancia max acumulada : {np.max(ganancia)}")
-    logger.info(f"cliente optimo : {np.argmax(ganancia)}")
     return 'gan_eval', np.max(ganancia) , True
 
 def lgb_gan_eval_ensamble(y_pred , data):
