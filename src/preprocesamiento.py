@@ -87,37 +87,35 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     mes_train_sql = f"{mes_train[0]}"
     for m in mes_train[1:]:    
         mes_train_sql += f",{m}"
-    sql_train=f"""select {sql_canaritos} * {exclude} 
-                from df_completo
-                where foto_mes IN ({mes_train_sql})"""
-    logger.info(f"sql train query : {sql_train}")
-    if isinstance(mes_test,list):
-        mes_test_sql = f"{mes_test[0]}"
-        for m in mes_test[1:]:    
-            mes_test_sql += f",{m}"
-        sql_test=f"""select {sql_canaritos} * {exclude}
-                    from df_completo
-                    where foto_mes IN ({mes_test_sql})"""
-    elif isinstance(mes_test,int):
-        mes_test_sql = f"{mes_test}"
-        sql_test=f"""select {sql_canaritos} * {exclude}
-                    from df_completo
-                    where foto_mes = {mes_test_sql}"""
-    logger.info(f"sql test query : {sql_test}")
+
+    mes_test_sql = f"{mes_test[0]}"
+    for m in mes_test[1:]:    
+        mes_test_sql += f",{m}"
         
     mes_apred_sql = f"{mes_apred}"
-    sql_apred=f"""select {sql_canaritos} * {exclude}
-                from df_completo
-                where foto_mes = {mes_apred_sql}"""
-    logger.info(f"sql apred query : {sql_apred}")
     
+    sql_completo = f"""SELECT {sql_canaritos} * {exclude} ,
+                        CASE
+                            WHEN foto_mes IN ({mes_train_sql}) THEN 'train' 
+                            WHEN foto_mes IN ({mes_test_sql}) THEN 'test' 
+                            WHEN foto_mes = {mes_apred_sql} THEN 'apred'
+                        END AS spliteo
+                        FROM df_completo
+                        WHERE foto_mes IN ({mes_train_sql}, {mes_test_sql},{mes_apred_sql})"""
+    logger.info(f"sql apred query : {sql_completo}")
+
+    logger.info("Comienzo de la transfor a pds")
     conn=duckdb.connect(PATH_DATA_BASE_DB)
     seed_float = (semilla % 10000) / 10000.0
     conn.execute("SELECT setseed(?)", [seed_float])
-    train_data = conn.execute(sql_train).df()
-    test_data = conn.execute(sql_test).df()
-    apred_data = conn.execute(sql_apred).df()
+    data_completa = conn.execute(sql_completo).df()
     conn.close()
+    logger.info("Fin de la transfor a pds")
+
+    train_data = data_completa[data_completa['spliteo'] == 'train'].drop(columns=['spliteo'])
+    test_data = data_completa[data_completa['spliteo'] == 'test'].drop(columns=['spliteo'])
+    apred_data = data_completa[data_completa['spliteo'] == 'apred'].drop(columns=['spliteo'])
+    
     if subsampleo is not None:
         train_data=undersampling(train_data , subsampleo,semilla)
     logger.info(f"Terminada la carga de df con columnas: {train_data.columns}")
@@ -153,6 +151,169 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     X_test  = coerce_numeric_cols(X_test,  ERR_COLS, fillna_val=0.0)
     X_apred = coerce_numeric_cols(X_apred, ERR_COLS, fillna_val=0.0)
     return X_train, y_train_binaria,y_train_binaria_2,y_train_class, w_train, X_test, y_test_binaria,y_test_binaria_2, y_test_class, w_test ,X_apred , y_apred 
+
+
+
+
+
+
+
+# def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int]
+#                            ,mes_apred:int,semilla:int=SEMILLA,
+#                            subsampleo:float=SUBSAMPLEO , feature_subset= None,n_canaritos:int=None)->Tuple[pd.DataFrame,
+#                                                                np.ndarray,np.ndarray,np.ndarray, 
+#                                                                np.ndarray, pd.DataFrame, 
+#                                                                np.ndarray,np.ndarray,np.ndarray, 
+#                                                                np.ndarray,pd.DataFrame,
+#                                                                pd.DataFrame]:
+#     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
+
+        
+#     sql_canaritos =''
+#     if n_canaritos is not None and n_canaritos>0 :
+#         for c in range(1,n_canaritos+1):
+#             sql_canaritos += f'RANDOM() as canarito_{c}, '
+
+#     exclude=''
+#     if feature_subset is not None:
+#         for i,f in enumerate(feature_subset):
+#             if i ==0:
+#                 exclude+=f'EXCLUDE({f}'
+#             else:
+#                 exclude+=f',{f}'
+#         exclude+=')'
+
+#     mes_train_sql = f"{mes_train[0]}"
+#     for m in mes_train[1:]:    
+#         mes_train_sql += f",{m}"
+#     sql_train=f"""select {sql_canaritos} * {exclude} 
+#                 from df_completo
+#                 where foto_mes IN ({mes_train_sql})"""
+#     logger.info(f"sql train query : {sql_train}")
+#     if isinstance(mes_test,list):
+#         mes_test_sql = f"{mes_test[0]}"
+#         for m in mes_test[1:]:    
+#             mes_test_sql += f",{m}"
+#         sql_test=f"""select {sql_canaritos} * {exclude}
+#                     from df_completo
+#                     where foto_mes IN ({mes_test_sql})"""
+#     elif isinstance(mes_test,int):
+#         mes_test_sql = f"{mes_test}"
+#         sql_test=f"""select {sql_canaritos} * {exclude}
+#                     from df_completo
+#                     where foto_mes = {mes_test_sql}"""
+#     logger.info(f"sql test query : {sql_test}")
+        
+#     mes_apred_sql = f"{mes_apred}"
+#     sql_apred=f"""select {sql_canaritos} * {exclude}
+#                 from df_completo
+#                 where foto_mes = {mes_apred_sql}"""
+#     logger.info(f"sql apred query : {sql_apred}")
+    
+#     conn=duckdb.connect(PATH_DATA_BASE_DB)
+#     seed_float = (semilla % 10000) / 10000.0
+#     conn.execute("SELECT setseed(?)", [seed_float])
+#     train_data = conn.execute(sql_train).df()
+#     test_data = conn.execute(sql_test).df()
+#     apred_data = conn.execute(sql_apred).df()
+#     conn.close()
+#     if subsampleo is not None:
+#         train_data=undersampling(train_data , subsampleo,semilla)
+#     logger.info(f"Terminada la carga de df con columnas: {train_data.columns}")
+#     # TRAIN
+#     X_train = train_data.drop(['clase_ternaria', 'clase_peso', 'clase_binaria','clase_binaria_2'], axis=1)
+#     y_train_binaria = train_data['clase_binaria'].to_numpy()
+#     y_train_binaria_2 = train_data['clase_binaria_2'].to_numpy()
+#     y_train_class=train_data["clase_ternaria"].to_numpy()
+#     w_train = train_data['clase_peso'].to_numpy()
+
+#     # TEST
+#     X_test = test_data.drop(['clase_ternaria', 'clase_peso','clase_binaria','clase_binaria_2'], axis=1)
+#     y_test_binaria = test_data['clase_binaria'].to_numpy()
+#     y_test_binaria_2 = test_data['clase_binaria_2'].to_numpy()
+#     y_test_class = test_data['clase_ternaria'].to_numpy()
+#     w_test = test_data['clase_peso'].to_numpy()
+
+
+#     # A PREDECIR
+#     X_apred = apred_data.drop(['clase_ternaria', 'clase_peso','clase_binaria','clase_binaria_2'], axis=1)
+#     y_apred=X_apred[["numero_de_cliente"]] # DF
+  
+
+#     logger.info(f"X_train shape : {X_train.shape} / y_train shape : {y_train_binaria.shape} de los meses : {X_train['foto_mes'].unique()}")
+#     logger.info(f"X_test shape : {X_test.shape} / y_test shape : {y_test_binaria.shape}  del mes : {X_test['foto_mes'].unique()}")
+#     logger.info(f"X_apred shape : {X_apred.shape} / y_apred shape : {y_apred.shape}  del mes : {X_apred['foto_mes'].unique()}")
+
+#     logger.info(f"cantidad de baja y continua en train:{np.unique(y_train_binaria,return_counts=True)}")
+#     logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
+#     logger.info("Finalizacion label binario")
+#     # ÚSALO justo antes de entrenar:
+#     X_train = coerce_numeric_cols(X_train, ERR_COLS, fillna_val=0.0)
+#     X_test  = coerce_numeric_cols(X_test,  ERR_COLS, fillna_val=0.0)
+#     X_apred = coerce_numeric_cols(X_apred, ERR_COLS, fillna_val=0.0)
+#     return X_train, y_train_binaria,y_train_binaria_2,y_train_class, w_train, X_test, y_test_binaria,y_test_binaria_2, y_test_class, w_test ,X_apred , y_apred 
+
+
+
+
+
+
+
+
+
+def undersampling(df:pd.DataFrame ,undersampling_rate:float , semilla:int) -> pd.DataFrame:
+    logger.info("Comienzo del subsampleo")
+    np.random.seed(semilla)
+    clientes_minoritaria = df.loc[df["clase_ternaria"] != "Continua", "numero_de_cliente"].unique()
+    clientes_mayoritaria = df.loc[df["clase_ternaria"] == "Continua", "numero_de_cliente"].unique()
+
+    logger.info(f"Clientes minoritarios: {len(clientes_minoritaria)}")
+    logger.info(f"Clientes mayoritarios: {len(clientes_mayoritaria)}")
+
+    n_sample = int(len(clientes_mayoritaria) * undersampling_rate)
+    clientes_mayoritaria_sample = np.random.choice(clientes_mayoritaria, n_sample, replace=False)
+
+    # Unimos los IDs seleccionados
+    clientes_finales = np.concatenate([clientes_minoritaria, clientes_mayoritaria_sample])
+
+    df_train_undersampled = df[df["numero_de_cliente"].isin(clientes_finales)].copy()
+
+    logger.info(f"Shape original: {df.shape}")
+    logger.info(f"Shape undersampled: {df_train_undersampled.shape}")
+
+    df_train_undersampled = df_train_undersampled.sample(frac=1, random_state=semilla).reset_index(drop=True)
+    return df_train_undersampled
+
+
+
+def coerce_numeric_cols(df: pd.DataFrame, cols: list[str], fillna_val: float = 0.0) -> pd.DataFrame:
+    df = df.copy()
+    # solo las que EXISTEN en el df (para evitar KeyError)
+    cols = [c for c in cols if c in df.columns]
+    if not cols:
+        return df
+    # normaliza espacios, coma->punto y fuerza numérico
+    for c in cols:
+        s = df[c].astype(str).str.strip().replace({"": np.nan})
+        s = s.str.replace(",", ".", regex=False)
+        df[c] = pd.to_numeric(s, errors="coerce").fillna(fillna_val)
+    return df
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[int],mes_apred:int,semilla:int=SEMILLA,subsampleo:float=SUBSAMPLEO)->Tuple[pd.DataFrame,pd.Series, pd.Series, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series,pd.DataFrame,pd.DataFrame]:
 #     logger.info("Comienzo del slpiteo de TRAIN - TEST - APRED")
@@ -312,44 +473,4 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
 #     logger.info(f"cantidad de baja y continua en test:{np.unique(y_test_binaria,return_counts=True)}")
 #     logger.info("Finalizacion label binario")
 #     return X_train, y_train_binaria,y_train_class, w_train, X_test, y_test_binaria, y_test_class, w_test ,X_apred , y_apred 
-
-
-def undersampling(df:pd.DataFrame ,undersampling_rate:float , semilla:int) -> pd.DataFrame:
-    logger.info("Comienzo del subsampleo")
-    np.random.seed(semilla)
-    clientes_minoritaria = df.loc[df["clase_ternaria"] != "Continua", "numero_de_cliente"].unique()
-    clientes_mayoritaria = df.loc[df["clase_ternaria"] == "Continua", "numero_de_cliente"].unique()
-
-    logger.info(f"Clientes minoritarios: {len(clientes_minoritaria)}")
-    logger.info(f"Clientes mayoritarios: {len(clientes_mayoritaria)}")
-
-    n_sample = int(len(clientes_mayoritaria) * undersampling_rate)
-    clientes_mayoritaria_sample = np.random.choice(clientes_mayoritaria, n_sample, replace=False)
-
-    # Unimos los IDs seleccionados
-    clientes_finales = np.concatenate([clientes_minoritaria, clientes_mayoritaria_sample])
-
-    df_train_undersampled = df[df["numero_de_cliente"].isin(clientes_finales)].copy()
-
-    logger.info(f"Shape original: {df.shape}")
-    logger.info(f"Shape undersampled: {df_train_undersampled.shape}")
-
-    df_train_undersampled = df_train_undersampled.sample(frac=1, random_state=semilla).reset_index(drop=True)
-    return df_train_undersampled
-
-
-
-def coerce_numeric_cols(df: pd.DataFrame, cols: list[str], fillna_val: float = 0.0) -> pd.DataFrame:
-    df = df.copy()
-    # solo las que EXISTEN en el df (para evitar KeyError)
-    cols = [c for c in cols if c in df.columns]
-    if not cols:
-        return df
-    # normaliza espacios, coma->punto y fuerza numérico
-    for c in cols:
-        s = df[c].astype(str).str.strip().replace({"": np.nan})
-        s = s.str.replace(",", ".", regex=False)
-        df[c] = pd.to_numeric(s, errors="coerce").fillna(fillna_val)
-    return df
-
 
