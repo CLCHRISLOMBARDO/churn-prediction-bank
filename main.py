@@ -100,6 +100,7 @@ def main():
             lanzar_experimento_lgbm(fecha,semillas , n_experimento , proceso_ppal)
         elif model_exp =="xgb":
             lanzar_experimento_xgb(fecha,semillas , n_experimento , proceso_ppal)
+    logger.info(f"Fin de la ejecucion del log: {nombre_log}")
 
     return
 
