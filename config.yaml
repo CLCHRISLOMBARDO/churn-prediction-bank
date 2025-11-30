@@ -8,7 +8,7 @@ COMPETENCIA: 3
     # 5- prediccion_final | test_prediccion_final |
 PROCESO_PPAL: "prediccion_final"
 # SUSBAMPLEO EN PORCENTAJE
-SUBSAMPLEO : 0.1 # solo para baye y exp y pred final
+SUBSAMPLEO : 0.01 # solo para baye y exp y pred final
 
 
 configuracion_semilla:
