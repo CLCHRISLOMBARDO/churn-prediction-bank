@@ -69,7 +69,7 @@ def lanzar_feat_eng(fecha:str ,n_fe:int , proceso_ppal:str):
 
 
 
-    conversion_parquet("df_completo")
+    # conversion_parquet("df_completo")
    
 
     # ------------- a partir de aca se trabaja con df------------------------#
