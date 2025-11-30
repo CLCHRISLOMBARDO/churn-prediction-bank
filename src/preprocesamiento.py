@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 ERR_COLS = (
     ["tmobile_app", "cmobile_app_trx",
      "cmobile_app_trx_max", "cmobile_app_trx_min",
-     "tmobile_app_max", "tmobile_app_min"]
+     "tmobile_app_max", "tmobile_app_min","ctrx_quarter_normalizado"]
     + [f"cmobile_app_trx_lag_{i}" for i in range(1, 5)]
     + [f"tmobile_app_lag_{i}" for i in range(1, 5)]
 )
