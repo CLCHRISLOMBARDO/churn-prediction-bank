@@ -88,9 +88,13 @@ def split_train_test_apred(n_exp:int|str,mes_train:list[int],mes_test:int|list[i
     for m in mes_train[1:]:    
         mes_train_sql += f",{m}"
 
-    mes_test_sql = f"{mes_test[0]}"
-    for m in mes_test[1:]:    
-        mes_test_sql += f",{m}"
+
+    if isinstance(mes_test,list):
+        mes_test_sql = f"{mes_test[0]}"
+        for m in mes_test[1:]:    
+            mes_test_sql += f",{m}"
+    elif isinstance(mes_test,int):
+        mes_test_sql = f"{mes_test}"
         
     mes_apred_sql = f"{mes_apred}"
     
