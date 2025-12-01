@@ -33,7 +33,6 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     df_completo_chiquito=creacion_df_small("df_completo")
     cols_drops_2=cols_a_dropear_variable_originales_o_percentiles(df_completo_chiquito,a_eliminar="originales")
     cols_drops_3 =  [
-    "foto_mes",
     "active_quarter",
     "cliente_vip",
     "internet",
@@ -272,6 +271,10 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             X_train, y_train_binaria,_,y_train_class, w_train, X_test, y_test_binaria,_, y_test_class, w_test,_, _ = split_train_test_apred(n_experimento,mes_train,
                                                                                                                                         mt,MES_A_PREDECIR,
                                                                                                                                         SEMILLA,SUBSAMPLEO,feature_subset=cols_drops,n_canaritos=5)
+            
+            X_train.drop(columns=['foto_mes'],inplace=True)
+            X_apred.drop(columns=['foto_mes'],inplace=True)
+
             y_predicciones_top_models=[]
             for orden_trial , trial in enumerate(top_bp):
                 if tipo_bayesiana!="ZLGBM":
