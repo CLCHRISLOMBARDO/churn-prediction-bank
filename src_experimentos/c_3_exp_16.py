@@ -403,7 +403,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 grafico_feature_importance(model_lgbm,X_train,name_semilla,output_path_feat_imp)
 
                 # Predicciones en test para cada modelo
-                logger.info(f"Comienzo de la predicciones de apred  : {X_apred['foto_mes'].unique()} para cada modelo")
+                logger.info(f"Comienzo de la predicciones de apred  : para cada modelo")
                 y_pred_lgbm=prediccion_test_lgbm(X_apred ,model_lgbm)
                 y_predicciones_lista.append(y_pred_lgbm)
             

@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarray,w_train:pd.Series|np.ndarray, best_iter:int, best_parameters:dict[str, object],name:str,output_path:str,semilla:int)->lgb.Booster:
     name=f"{name}_model_lgbm"
-    logger.info(f"Comienzo del entrenamiento del lgbm : {name} en el mes train : {X_train['foto_mes'].unique()}")    
+    # logger.info(f"Comienzo del entrenamiento del lgbm : {name} en el mes train : {X_train['foto_mes'].unique()}")    
     print(f"Mejor cantidad de árboles para el mejor model best iter : {best_iter}")
     params = {
         'objective': 'binary',
@@ -62,7 +62,7 @@ def entrenamiento_lgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarra
         filename=output_path+f'{name}.txt'
         model_lgbm.save_model(filename )                         
         logger.info(f"Modelo {name} guardado en {filename}")
-        logger.info(f"Fin del entrenamiento del LGBM en el mes train : {X_train['foto_mes'].unique()}")
+        # logger.info(f"Fin del entrenamiento del LGBM en el mes train : {X_train['foto_mes'].unique()}")
     except Exception as e:
         logger.error(f"Error al intentar guardar el modelo {name}, por el error {e}")
         return
@@ -102,7 +102,7 @@ def entrenamiento_zlgbm(X_train:pd.DataFrame ,y_train_binaria:pd.Series|np.ndarr
         filename=output_path+f'{name}.txt'
         model_lgbm.save_model(filename)                         
         logger.info(f"Modelo {name} guardado en {filename}")
-        logger.info(f"Fin del entrenamiento del ZLGBM en el mes train : {X_train['foto_mes'].unique()}")
+        # logger.info(f"Fin del entrenamiento del ZLGBM en el mes train : {X_train['foto_mes'].unique()}")
     except Exception as e:
         logger.error(f"Error al intentar guardar el modelo {name}, por el error {e}")
         return 
@@ -169,8 +169,8 @@ def grafico_feature_importance(model_lgbm:lgb.Booster,X_train:pd.DataFrame,name:
         logger.error(f"Error al intentar guardar los feat imp en excel por {e}")
 
 def prediccion_test_lgbm(X:pd.DataFrame ,  model_lgbm:lgb.Booster)-> pd.Series:
-    mes=X["foto_mes"].unique()
-    logger.info(f"comienzo prediccion del modelo en el mes {mes}")
+    # mes=X["foto_mes"].unique()
+    # logger.info(f"comienzo prediccion del modelo en el mes {mes}")
     y_pred_lgbm = model_lgbm.predict(X)
     logger.info("Fin de la prediccion del modelo")
     return y_pred_lgbm
