@@ -90,7 +90,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     "ccuenta_debitos_automaticos",
     "mcuenta_debitos_automaticos",
     "ctarjeta_visa_debitos_automaticos",
-    "mtarjeta_visa_debitos_automaticos",
+    #"mtarjeta_visa_debitos_automaticos",
     "ctarjeta_master_debitos_automaticos",
     "mttarjeta_master_debitos_automaticos",
     "cpagodeservicios",
