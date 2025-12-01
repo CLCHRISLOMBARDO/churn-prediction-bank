@@ -273,7 +273,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                                                                                                                                         SEMILLA,SUBSAMPLEO,feature_subset=cols_drops,n_canaritos=5)
             
             X_train.drop(columns=['foto_mes'],inplace=True)
-            X_apred.drop(columns=['foto_mes'],inplace=True)
+            X_test.drop(columns=['foto_mes'],inplace=True)
 
             y_predicciones_top_models=[]
             for orden_trial , trial in enumerate(top_bp):
@@ -375,6 +375,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
         X_train, y_train_binaria,_,y_train_class, w_train, _, _,_, _, _,X_apred, y_apred = split_train_test_apred(n_experimento,mes_train,
                                                                                                                                         MES_TEST,MES_A_PREDECIR,
                                                                                                                                         SEMILLA,SUBSAMPLEO,feature_subset=cols_drops,n_canaritos=5)
+        X_test.drop(columns=["foto_mes"],inplace=True)
+        X_apred.drop(columns=["foto_mes"],inplace=True)
         y_apred_top_models=[]
         for orden_trial , trial in enumerate(top_bp):
             if tipo_bayesiana!="ZLGBM":
