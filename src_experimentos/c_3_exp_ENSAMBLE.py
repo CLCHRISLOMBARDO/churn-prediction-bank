@@ -74,7 +74,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             for i, n_exp in enumerate(names_exp_finals_preds):
                 name_file = (
                     path_output_exp_prediction
-                    + f"experimento_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
+                    +"outputs_experimentos_outputs_prediction_" +f"experimento_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
                     "prediccion_test_proba.csv"
                 )
                 logger.info(f"name file : {name_file}")
