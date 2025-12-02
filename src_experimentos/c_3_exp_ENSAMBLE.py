@@ -52,8 +52,9 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     cantidad_trials= N_TRIALS
     cantidad_boosts = N_BOOSTS
     #"""-----------------------------------------------------------------------------------------------"""
-    names_exp_finals_preds=["..comp3_conf3_exp301b","..comp3_conf3_exp313","..comp3_conf3_exp311","..comp3_conf3_exp314_a","..comp3_conf3_exp314b","..comp3_conf3_exp314c"]
-    n_semillas= ["50","50","50","50","50","50"]
+    names_exp_finals_preds=["..comp3_conf3_exp301b","..comp3_conf3_exp313","..comp3_conf3_exp311","..comp3_conf3_exp316"]
+    n_semillas= ["50","50","50","50"]
+    numero_del_ensamble = "5_"
 
     from functools import reduce
 
@@ -115,7 +116,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             y_pred_ensamble = df_final["Predicted"].to_numpy()
 
             semilla = "ensamble"
-            name_final = f"ENSAMBLE_FINAL_MES_TEST_{mt}"
+            name_final = numero_del_ensamble+f"ENSAMBLE_FINAL_MES_TEST_{mt}"
             for n_exp in names_exp_finals_preds:
                 name_final = name_final + "_"+n_exp
 
