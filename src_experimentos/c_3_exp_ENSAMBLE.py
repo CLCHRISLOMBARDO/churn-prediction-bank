@@ -52,9 +52,9 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     cantidad_trials= N_TRIALS
     cantidad_boosts = N_BOOSTS
     #"""-----------------------------------------------------------------------------------------------"""
-    names_exp_finals_preds=["..comp3_conf3_exp301b","..comp3_conf3_exp313","..comp3_conf3_exp311","..comp3_conf3_exp316"]
-    n_semillas= ["50","50","50","50"]
-    numero_del_ensamble = "5_"
+    names_exp_finals_preds=["..comp3_conf3_exp304","..comp3_conf3_exp301b","..comp3_conf3_exp313","..comp3_conf3_exp311","..comp3_conf3_exp316"]
+    n_semillas= ["50","50","50","50","50"]
+    numero_del_ensamble = "6_"
 
     from functools import reduce
 
