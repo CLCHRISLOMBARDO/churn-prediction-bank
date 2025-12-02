@@ -152,18 +152,19 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                     guardar_umbral
                 )
 
-                grafico_curvas_ganancia(
-                    y_pred_sorted,
-                    ganancia_acumulada,
-                    estadisticas_ganancia,
-                    name_final,
-                    output_path_graf_curva_ganancia
-                )
+                # grafico_curvas_ganancia(
+                #     y_pred_sorted,
+                #     ganancia_acumulada,
+                #     estadisticas_ganancia,
+                #     name_final,
+                #     output_path_graf_curva_ganancia
+                # )
 
                 resultados_finales[orden]["umbral_optimo"]=estadisticas_ganancia["umbral_optimo"]
                 resultados_finales[orden]["cliente"]=estadisticas_ganancia["cliente"]
                 resultados_finales[orden]["ganancia_max"]=estadisticas_ganancia["ganancia_max"]
                 resultados_finales[orden]["ganancia_media_meseta"]=estadisticas_ganancia["ganancia_media_meseta"]
+                resultados_finales[orden]["lista_i"]=names_exp_finals_preds
 
         elif proceso_ppal in ("prediccion_final", "test_prediccion_final"):
             logger.info("======================== Comienzo de la prediccion final ==========================")
