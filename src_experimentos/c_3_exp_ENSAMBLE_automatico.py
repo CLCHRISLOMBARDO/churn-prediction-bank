@@ -1,6 +1,5 @@
 #experimento_i.py
-# EXPERIMENTO : Ensamble con lgb. Es el 8 pero pongo el subsampleo. Eliminaos cprestamos_personales y mprestamos_personales
-import numpy as np
+# EXPERIMENTO : Ensamble con lgb. 
 import pandas as pd
 import logging
 import json
@@ -18,7 +17,7 @@ from src.lgbm_train_test import preparacion_nclientesbajas_zulip,entrenamiento_z
 
 logger=logging.getLogger(__name__)
 
-def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int, lista_i:list , proceso_ppal:str ="experimento"): 
+def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proceso_ppal:str ="experimento"): 
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
@@ -53,12 +52,14 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int, lis
     cantidad_trials= N_TRIALS
     cantidad_boosts = N_BOOSTS
     #"""-----------------------------------------------------------------------------------------------"""
-    names_exp_finals_preds=["final_7","final_7.2","final_7.3","final_7.4"]
-    n_semillas= "5"
+    names_exp_finals_preds=["..comp3_conf3_exp301b","..comp3_conf3_exp302","..comp3_conf3_exp313",".c3_exp101",".c3_exp103"]
+    n_semillas= ["50","50","50","25","5"]
+    numero_del_ensamble = "13_"
 
     from functools import reduce
 
     if proceso_ppal in ("experimento", "test_exp"):
+        
         logger.info("Entro en el proceso experimento !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
         if isinstance(MES_TEST, int):
@@ -75,7 +76,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int, lis
             for i, n_exp in enumerate(names_exp_finals_preds):
                 name_file = (
                     path_output_exp_prediction
-                    + f"experimento_{n_exp}_LGBM_{n_semillas}_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
+                    +"outputs_experimentos_outputs_prediction_" +f"experimento_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
                     "prediccion_test_proba.csv"
                 )
                 logger.info(f"name file : {name_file}")
@@ -116,7 +117,9 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int, lis
             y_pred_ensamble = df_final["Predicted"].to_numpy()
 
             semilla = "ensamble"
-            name_final = f"ENSAMBLE_FINAL_MES_TEST_{mt}"
+            name_final = numero_del_ensamble+f"ENSAMBLE_FINAL_MES_TEST_{mt}"
+            for n_exp in names_exp_finals_preds:
+                name_final = name_final + "_"+n_exp
 
             guardar_umbral = True
             estadisticas_ganancia, y_pred_sorted, ganancia_acumulada = calc_estadisticas_ganancia(
@@ -147,11 +150,11 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int, lis
 
             name_file_bin = (
                 path_output_prediccion_final
-                + f"prediccion_final_{n_exp}_LGBM_{n_semillas}_SEMILLAS_pred_finales_binaria.csv"
+                + f"prediccion_final_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_pred_finales_binaria.csv"
             )
             name_file_proba = (
                 path_output_prediccion_final
-                + f"prediccion_final_{n_exp}_LGBM_{n_semillas}_SEMILLAS_pred_finales_proba.csv"
+                + f"prediccion_final_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_pred_finales_proba.csv"
             )
 
             logger.info(f"name file bin: {name_file_bin}")
