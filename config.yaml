@@ -54,7 +54,7 @@ configuracion_canaritos:
 
 
 configuracion_experimentos:
-  N_EXPERIMENTO :  "..comp3_conf3_exp316" 
+  N_EXPERIMENTO :  "..ensamble_final_" 
   N_SEMILLAS_EXP : 50
   TOP_MODELS : 1 # ZS =1
   MODEL_EXP : "lgbm" #| "lgbm"
@@ -67,7 +67,7 @@ configuracion_gcp:
 configuracion_paths:
   place_path:
     LOCAL_PATH: ""
-    GCP_PATH: "/home/carbonelldv/buckets/b1/"
+    GCP_PATH: "/home/macalombar2/buckets/b1/"
   PATH_LOGS: "logs/"
   PATH_LOG_GLOBAL : "global_log/"
 
