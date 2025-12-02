@@ -116,6 +116,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
             semilla = "ensamble"
             name_final = f"ENSAMBLE_FINAL_MES_TEST_{mt}"
+            for n_exp in names_exp_finals_preds:
+                name_final = name_final + "_"+n_exp
 
             guardar_umbral = True
             estadisticas_ganancia, y_pred_sorted, ganancia_acumulada = calc_estadisticas_ganancia(
