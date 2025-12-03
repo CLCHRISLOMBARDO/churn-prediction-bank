@@ -87,6 +87,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 raise ValueError(f"Tipo no soportado para MES_TEST: {type(MES_TEST)}")
 
             for mt in mes_test:
+                resultados_finales[orden][mt]={}
+
                 logger.info(f"======================== Comienzo del analisis en el mes test : {mt} ==============================")
 
                 lists_df = []
@@ -156,11 +158,11 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
                 #     output_path_graf_curva_ganancia
                 # )
 
-                resultados_finales[orden]["umbral_optimo"]=estadisticas_ganancia["umbral_optimo"]
-                resultados_finales[orden]["cliente"]=estadisticas_ganancia["cliente"]
-                resultados_finales[orden]["ganancia_max"]=estadisticas_ganancia["ganancia_max"]
-                resultados_finales[orden]["ganancia_media_meseta"]=estadisticas_ganancia["ganancia_media_meseta"]
-                resultados_finales[orden]["lista_i"]=names_exp_finals_preds
+                resultados_finales[orden][mt]["umbral_optimo"]=estadisticas_ganancia["umbral_optimo"]
+                resultados_finales[orden][mt]["cliente"]=estadisticas_ganancia["cliente"]
+                resultados_finales[orden][mt]["ganancia_max"]=estadisticas_ganancia["ganancia_max"]
+                resultados_finales[orden][mt]["ganancia_media_meseta"]=estadisticas_ganancia["ganancia_media_meseta"]
+                resultados_finales[orden][mt]["lista_i"]=names_exp_finals_preds
 
         elif proceso_ppal in ("prediccion_final", "test_prediccion_final"):
             logger.info("======================== Comienzo de la prediccion final ==========================")
@@ -273,7 +275,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             )
     
     resultados_finales
-    resultado_ordenado = dict( sorted(resultados_finales.items(), key=lambda x: x[1]["ganancia_media_meseta"], reverse=True))
+    resultado_ordenado = dict( sorted(resultados_finales.items(), key=lambda x: x[1][202107]["ganancia_media_meseta"], reverse=True))
     name_file = path_output_prediccion_final + "_ENSAMBLES_FINALES.json"
     with open(name_file, "w", encoding="utf-8") as f:
         json.dump(resultado_ordenado, f, indent=4)
