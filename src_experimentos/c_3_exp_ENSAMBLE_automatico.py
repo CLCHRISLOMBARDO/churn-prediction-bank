@@ -54,7 +54,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     #"""-----------------------------------------------------------------------------------------------"""
     names_exp_finals_preds=["..comp3_conf3_exp302","..comp3_conf3_exp303","..comp3_conf3_exp314c","..comp3_conf3_exp321"]
     # n_semillas= ["50","50","50","25","5"]
-    numero_del_ensamble = "YB_"
+    numero_del_ensamble = "_YB_492"
 
     from functools import reduce
 
@@ -236,7 +236,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             df_final_pred,
             y_pred_proba,
             umbral_cliente=UMBRAL_CLIENTE,
-            name="pred_final_proba",
+            name=f"pred_final_proba{numero_del_ensamble}",
             output_path=path_output_prediccion_final
         )
 
@@ -245,7 +245,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             df_final_pred,
             y_pred_bin,
             umbral_cliente=UMBRAL_CLIENTE,
-            name="pred_final_bin",
+            name=f"pred_final_bin{numero_del_ensamble}",
             output_path=path_output_prediccion_final
         )
 
