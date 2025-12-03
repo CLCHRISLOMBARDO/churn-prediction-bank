@@ -20,22 +20,19 @@ logger=logging.getLogger(__name__)
 
 
 def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proceso_ppal:str): 
+   
     lista_total = combinacion_listas_total([
     "..comp3_conf3_exp301b",
     "..comp3_conf3_exp302",
-    "..comp3_conf3_exp303"])
-    # lista_total = combinacion_listas_total([
-    # "..comp3_conf3_exp301b",
-    # "..comp3_conf3_exp302",
-    # "..comp3_conf3_exp303",
-    # "..comp3_conf3_exp311",
-    # "..comp3_conf3_exp313",
-    # "..comp3_conf3_exp314_a",
-    # "..comp3_conf3_exp314b",
-    # "..comp3_conf3_exp314c",
-    # "..comp3_conf3_exp315a",
-    # "..comp3_conf3_exp316",
-    # "..comp3_conf3_exp321","..comp3_conf3_exp321"])
+    "..comp3_conf3_exp303",
+    "..comp3_conf3_exp311",
+    "..comp3_conf3_exp313",
+    "..comp3_conf3_exp314_a",
+    "..comp3_conf3_exp314b",
+    "..comp3_conf3_exp314c",
+    "..comp3_conf3_exp315a",
+    "..comp3_conf3_exp316",
+    "..comp3_conf3_exp321","..comp3_conf3_exp321"])
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
