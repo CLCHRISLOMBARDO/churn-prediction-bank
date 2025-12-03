@@ -264,16 +264,17 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
             file = path_output_exp_umbral+estadisticas_ganancia_file 
             logger.info(f"Comienzo de la carga de las estadisticas de ganancias {file}")            
-            try :
-                with open(file, "r") as f:
-                    estadisticas_ganancia = json.load(f)
-                logger.info(f"Carga de los datos umbrales {estadisticas_ganancia_file} exitosa")
+            # try :
+            #     with open(file, "r") as f:
+            #         estadisticas_ganancia = json.load(f)
+            #     logger.info(f"Carga de los datos umbrales {estadisticas_ganancia_file} exitosa")
 
-            except Exception as e:
-                logger.error(f"Error al tratar de cargar umbrales {estadisticas_ganancia_file} por {e}")
-                raise
-            logger.info("Calculo del cliente optimo mean")
-            cliente_optimo = estadisticas_ganancia["ensamble_semillas"]["cliente"]
+            # except Exception as e:
+            #     logger.error(f"Error al tratar de cargar umbrales {estadisticas_ganancia_file} por {e}")
+            #     raise
+            # logger.info("Calculo del cliente optimo mean")
+            # cliente_optimo = estadisticas_ganancia["ensamble_semillas"]["cliente"]
+            cliente_optimo = 10000
             logger.info(f"Cliente optimo del semillero del trial {trial} = {cliente_optimo}")
             logger.info(f"Comienzo del ensamble del semillero")
             y_pred_matrix = np.vstack(y_predicciones_lista)
