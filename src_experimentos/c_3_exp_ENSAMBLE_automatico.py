@@ -21,7 +21,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
-    n_semillas = len(semillas)
+    n_semillas =50
     name=f"{proceso_ppal}_{numero}_LGBM_{len(semillas)}_SEMILLAS"
     logger.info(f"PROCESO PRINCIPAL ---> {proceso_ppal}")
     logger.info(f"Comienzo del experimento : {name} con {n_semillas} semillas")
@@ -53,7 +53,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     cantidad_boosts = N_BOOSTS
     #"""-----------------------------------------------------------------------------------------------"""
     names_exp_finals_preds=["..comp3_conf3_exp301b","..comp3_conf3_exp302","..comp3_conf3_exp313",".c3_exp101",".c3_exp103"]
-    n_semillas= ["50","50","50","25","5"]
+    # n_semillas= ["50","50","50","25","5"]
     numero_del_ensamble = "13_"
 
     from functools import reduce
@@ -76,7 +76,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             for i, n_exp in enumerate(names_exp_finals_preds):
                 name_file = (
                     path_output_exp_prediction
-                    +"outputs_experimentos_outputs_prediction_" +f"experimento_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
+                    +"outputs_experimentos_outputs_prediction_" +f"experimento_{n_exp}_LGBM_{n_semillas}_SEMILLAS_MES_TEST_{mt}_SEMILLA_ensamble_semillas_fase_testeo"
                     "prediccion_test_proba.csv"
                 )
                 logger.info(f"name file : {name_file}")
@@ -147,14 +147,13 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
 
         # Levanto los CSVs por modelo
         for i, n_exp in enumerate(names_exp_finals_preds):
-
             name_file_bin = (
                 path_output_prediccion_final
-                + f"prediccion_final_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_pred_finales_binaria.csv"
+                + "outputs_finales_outputs_final_prediction_" + f"prediccion_final_{n_exp}_LGBM_{n_semillas}_SEMILLAS_pred_finales_binaria.csv"
             )
             name_file_proba = (
                 path_output_prediccion_final
-                + f"prediccion_final_{n_exp}_LGBM_{n_semillas[i]}_SEMILLAS_pred_finales_proba.csv"
+                +"outputs_finales_outputs_final_prediction_"+ f"prediccion_final_{n_exp}_LGBM_{n_semillas}_SEMILLAS_pred_finales_proba.csv"
             )
 
             logger.info(f"name file bin: {name_file_bin}")
