@@ -136,18 +136,18 @@ try:
         path_output_exp_umbral                 = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_UMBRAL"]
         path_output_exp_prediction             = PLACE_PATHS + out_exp["PATH_OUTPUT_EXP_PREDICTION"]
         # ================= MESES ==============
-        MES_TRAIN      = comp.get("MES_TRAIN", [202101, 202102, 202103])
-        MES_TRAIN_04      = comp.get("MES_TRAIN_04", [202101, 202102, 202103])
-        MES_TRAIN_06      = comp.get("MES_TRAIN_06", [202101, 202102, 202103])
+        MES_TRAIN      = comp.get("MES_TRAIN")
+        MES_TRAIN_04      = comp.get("MES_TRAIN_04")
+        MES_TRAIN_06      = comp.get("MES_TRAIN_06")
         if COMPETENCIA ==2 :
-            MES_TRAIN_PRED      = comp.get("MES_TRAIN_08", [202101, 202102, 202103])
+            MES_TRAIN_PRED      = comp.get("MES_TRAIN_08")
         if COMPETENCIA ==3:
-            MES_TRAIN_05  = comp.get("MES_TRAIN_05", [202101, 202102, 202103])
-            MES_TRAIN_07  = comp.get("MES_TRAIN_07", [202101, 202102, 202103])
-            MES_TRAIN_PRED  = comp.get("MES_TRAIN_09", [202101, 202102, 202103])
+            MES_TRAIN_05  = comp.get("MES_TRAIN_05")
+            MES_TRAIN_07  = comp.get("MES_TRAIN_07")
+            MES_TRAIN_PRED  = comp.get("MES_TRAIN_09")
         
-        MES_TEST       = comp.get("MES_TEST", [202104])
-        MES_A_PREDECIR = comp.get("MES_A_PREDECIR", 202106)
+        MES_TEST       = comp.get("MES_TEST")
+        MES_A_PREDECIR = comp.get("MES_A_PREDECIR")
         UMBRAL_CLIENTE = comp.get("UMBRAL_CLIENTE",11500)
         MES_01         = comp.get("MES_01", 202101)
         MES_02         = comp.get("MES_02", 202102)
