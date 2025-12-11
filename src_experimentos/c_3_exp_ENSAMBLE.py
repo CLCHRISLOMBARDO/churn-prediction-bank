@@ -31,7 +31,7 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
     "..comp3_conf3_exp314b",
     "..comp3_conf3_exp314c",
     "..comp3_conf3_exp316",
-    "..comp3_conf3_exp320","comp3_conf3_exp321"])
+   "comp3_conf3_exp321"])
     #"""---------------------- CAMBIAR INPUTS --------------------------------------------------------"""
     numero=n_experimento
     #"""----------------------------------------------------------------------------------------------"""
