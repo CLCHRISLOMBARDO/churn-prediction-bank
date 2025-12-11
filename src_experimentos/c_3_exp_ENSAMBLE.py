@@ -277,8 +277,8 @@ def lanzar_experimento_lgbm(fecha:str ,semillas:list[int],n_experimento:int,proc
             )
     
     resultados_finales
-    resultado_ordenado = dict( sorted(resultados_finales.items(), key=lambda x: x[1][202107]["ganancia_media_meseta"], reverse=True))
-    name_file = path_output_exp_prediction + "_ENSAMBLES_FINALES.json"
+    resultado_ordenado = dict( sorted(resultados_finales.items(), key=lambda x: x[1][202106]["ganancia_media_meseta"], reverse=True))
+    name_file = path_output_exp_prediction + "_ENSAMBLES_FINALES_PRESENTACION.json"
     with open(name_file, "w", encoding="utf-8") as f:
         json.dump(resultado_ordenado, f, indent=4)
             
